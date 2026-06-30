@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, CheckCircle2, ShieldCheck, Globe, Users } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle2, Compass, Building2 } from "lucide-react";
+import Image from "next/image";
+import heroBg from "@/app/images/hero-bg.png";
 
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -12,89 +14,105 @@ export default function Hero() {
   };
 
   const quickLinks = [
-    { text: "Free supplier search", icon: CheckCircle2 },
-    { text: "Verified supplier directory", icon: ShieldCheck },
-    { text: "Suppliers from U.S. and other countries", icon: Globe },
-    { text: "Business Matchmaking", icon: Users },
+    { text: "Free supplier search" },
+    { text: "Request quotes directly" },
+    { text: "Suppliers from U.S. and other countries" },
+    { text: "Business matchmaking" },
   ];
 
   return (
-    <section className="relative bg-[#162235] text-white py-20 lg:py-28 overflow-hidden">
-      {/* Decorative background grid pattern */}
-      <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-      
-      {/* Glow highlight */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-yellow-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <section className="relative h-[699px] flex items-center bg-[#101c2a] text-white overflow-hidden">
+      {/* Background Image with Dark Overlay */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={heroBg}
+          alt="Warehouse Interior Background"
+          fill
+          className="object-cover opacity-25"
+          priority
+        />
+        {/* Navy/slate dark overlay tint */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#101c2a]/95 via-[#101c2a]/85 to-[#101c2a]/95"></div>
+      </div>
 
-      <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
         {/* Main Title */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 max-w-4xl mx-auto leading-tight">
-          Find Suppliers, Logistics, <br className="hidden sm:inline" />
+        <h1
+          style={{ fontFamily: "'Inter', sans-serif" }}
+          className="text-4xl sm:text-6xl md:text-[72px] font-extrabold tracking-[-1.8px] text-white mb-6 leading-tight md:leading-[72px] text-center max-w-4xl mx-auto"
+        >
+          Find Suppliers, Logistics, <br />
           and Manufacturing Partners
         </h1>
 
         {/* Subtitle */}
-        <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-          WULFARIA is an online marketplace directory that connects suppliers and
+        <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+          WULFARA is an online marketplace directory that connects suppliers and
           customers together.
         </p>
 
-        {/* Search Bar */}
+        {/* Search Bar Container */}
         <form
           onSubmit={handleSearch}
-          className="mx-auto max-w-3xl mb-8 flex flex-col sm:flex-row gap-2 bg-[#1e2d44]/90 p-2 rounded-xl border border-slate-700 shadow-2xl backdrop-blur-md"
+          className="w-full max-w-4xl mb-8 flex items-center bg-white p-2 rounded shadow-2xl border border-slate-200/80"
         >
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <div className="relative flex-grow flex items-center">
+            <Search className="h-5 w-5 text-slate-400 ml-3 mr-3 flex-shrink-0" />
             <input
               type="text"
               placeholder="Find suppliers, logistics, manufacturing..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent pl-12 pr-4 py-3 text-sm text-white placeholder-slate-400 outline-none"
+              className="w-full bg-transparent pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none"
             />
+            {/* Filter Slider Settings Icon */}
+            <SlidersHorizontal className="h-5 w-5 text-slate-400 mx-3 cursor-pointer hover:text-slate-600 flex-shrink-0" />
           </div>
           <button
             type="submit"
-            className="w-full sm:w-auto rounded-lg bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-8 py-3 text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
+            className="rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md transition-all cursor-pointer flex-shrink-0"
           >
             Search
           </button>
         </form>
 
-        {/* Quick Link Badges */}
-        <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto mb-12">
-          {quickLinks.map((link, idx) => {
-            const Icon = link.icon;
-            return (
-              <div
-                key={idx}
-                className="flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/40 px-4 py-1.5 text-xs text-slate-300 hover:border-yellow-500/50 hover:bg-slate-800/60 transition-all cursor-default"
-              >
-                <Icon className="h-3.5 w-3.5 text-yellow-500" />
-                <span>{link.text}</span>
-              </div>
-            );
-          })}
+        {/* Quick Link White Cards */}
+        <div className="flex flex-wrap justify-center gap-3 w-full max-w-5xl mx-auto mb-12">
+          {quickLinks.map((link, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-2 rounded bg-white px-4 py-2.5 text-xs sm:text-[13px] font-semibold text-slate-700 shadow-sm border border-slate-200/80 cursor-default hover:bg-slate-50 transition-colors"
+            >
+              <CheckCircle2 className="h-4 w-4 text-[#dca12f] flex-shrink-0" />
+              <span>{link.text}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* Action Buttons Row */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+          {/* Browse Suppliers Button */}
           <a
             href="#features"
-            className="w-full sm:w-auto rounded-lg bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-8 py-3.5 text-sm font-extrabold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-center"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all"
           >
-            Browse Suppliers
+            <Compass className="h-4 w-4 text-slate-950" />
+            <span>Browse Suppliers</span>
           </a>
+
+          {/* List Your Company Button */}
           <a
             href="#list-company"
-            className="w-full sm:w-auto rounded-lg border border-slate-600 text-slate-200 hover:text-white hover:border-yellow-500/80 hover:bg-slate-800/40 px-8 py-3.5 text-sm font-extrabold transition-all text-center"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all"
           >
-            List Your Company
+            <Building2 className="h-4 w-4 text-[#dca12f]" />
+            <span>List Your Company</span>
           </a>
+
+          {/* Login Button */}
           <a
             href="#login"
-            className="w-full sm:w-auto text-slate-400 hover:text-yellow-500 px-6 py-2.5 text-sm font-bold transition-all text-center"
+            className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center"
           >
             Login
           </a>
