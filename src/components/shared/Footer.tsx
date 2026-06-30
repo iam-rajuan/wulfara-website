@@ -12,15 +12,15 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#111a28] text-slate-400 border-t border-slate-800">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand Column */}
           <div className="md:col-span-2 space-y-6">
             <span className="text-2xl font-black tracking-wider text-yellow-500 font-sans block">
-              WULFARIA
+              WULFARA
             </span>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
-              WULFARIA is a leading B2B marketplace directory connecting businesses
+              WULFARA is a leading B2B marketplace directory connecting businesses
               with reliable supplier, logistics, and manufacturing partners globally.
             </p>
             
@@ -112,7 +112,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
           <p className="text-slate-500">
-            &copy; 2026 Wulfaria.com. All rights reserved.
+            &copy; 2026 Wulfara.com. All rights reserved.
           </p>
           <div className="flex gap-6 text-slate-500">
             <Link href="#privacy" className="hover:text-yellow-500 transition-colors">

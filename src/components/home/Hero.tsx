@@ -21,7 +21,7 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative h-[699px] flex items-center bg-[#101c2a] text-white overflow-hidden">
+    <section className="relative min-h-[699px] lg:h-[699px] flex items-center bg-[#1b2b3a] text-white py-16 lg:py-0 overflow-hidden">
       {/* Background Image with Dark Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -32,7 +32,7 @@ export default function Hero() {
           priority
         />
         {/* Navy/slate dark overlay tint */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#101c2a]/95 via-[#101c2a]/85 to-[#101c2a]/95"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1b2b3a]/95 via-[#1b2b3a]/85 to-[#1b2b3a]/95"></div>
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
@@ -54,23 +54,23 @@ export default function Hero() {
         {/* Search Bar Container */}
         <form
           onSubmit={handleSearch}
-          className="w-full max-w-4xl mb-8 flex items-center bg-white p-2 rounded shadow-2xl border border-slate-200/80"
+          className="w-full max-w-4xl mb-8 flex items-center bg-white p-1.5 sm:p-2 rounded shadow-2xl border border-slate-200/80"
         >
-          <div className="relative flex-grow flex items-center">
-            <Search className="h-5 w-5 text-slate-400 ml-3 mr-3 flex-shrink-0" />
+          <div className="relative flex-grow flex items-center min-w-0">
+            <Search className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 ml-2 sm:ml-3 mr-2 sm:mr-3 flex-shrink-0" />
             <input
               type="text"
               placeholder="Find suppliers, logistics, manufacturing..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent pr-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none"
+              className="w-full bg-transparent pr-2 py-2 sm:py-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none min-w-0"
             />
             {/* Filter Slider Settings Icon */}
-            <SlidersHorizontal className="h-5 w-5 text-slate-400 mx-3 cursor-pointer hover:text-slate-600 flex-shrink-0" />
+            <SlidersHorizontal className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 mx-2 sm:mx-3 cursor-pointer hover:text-slate-600 flex-shrink-0" />
           </div>
           <button
             type="submit"
-            className="rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md transition-all cursor-pointer flex-shrink-0"
+            className="rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer flex-shrink-0"
           >
             Search
           </button>

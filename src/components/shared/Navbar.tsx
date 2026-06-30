@@ -15,7 +15,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#1b2b3a] border-b border-[#dca12f]/80 shadow-lg">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
@@ -130,44 +130,78 @@ export default function Header() {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="md:hidden px-4 pt-2 pb-4 space-y-3 bg-[#162235] border-t border-slate-700/50">
-          <Link
-            href="/"
-            onClick={() => setIsOpen(false)}
-            className="block text-base font-medium text-slate-300 hover:text-white py-1"
-          >
-            Home
-          </Link>
-          <Link
-            href="#faq"
-            onClick={() => setIsOpen(false)}
-            className="block text-base font-medium text-slate-300 hover:text-white py-1"
-          >
-            FAQ
-          </Link>
-          <Link
-            href="#rfq"
-            onClick={() => setIsOpen(false)}
-            className="block text-base font-medium text-slate-300 hover:text-white py-1"
-          >
-            RFQ
-          </Link>
-          <Link
-            href="#help"
-            onClick={() => setIsOpen(false)}
-            className="block text-base font-medium text-slate-300 hover:text-white py-1"
-          >
-            Help Center
-          </Link>
-          <Link
-            href="#policies"
-            onClick={() => setIsOpen(false)}
-            className="block text-base font-medium text-slate-300 hover:text-white py-1"
-          >
-            Policies
-          </Link>
+        <div className="md:hidden px-4 pt-2 pb-6 space-y-4 bg-[#162235] border-t border-slate-700/50">
+          <div className="space-y-1">
+            <Link
+              href="/"
+              onClick={() => setIsOpen(false)}
+              className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
+            >
+              Home
+            </Link>
+            <Link
+              href="#faq"
+              onClick={() => setIsOpen(false)}
+              className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
+            >
+              FAQ
+            </Link>
+            <Link
+              href="#rfq"
+              onClick={() => setIsOpen(false)}
+              className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
+            >
+              RFQ
+            </Link>
+            <Link
+              href="#help"
+              onClick={() => setIsOpen(false)}
+              className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
+            >
+              Help Center
+            </Link>
+            <Link
+              href="#policies"
+              onClick={() => setIsOpen(false)}
+              className="block text-base font-medium text-slate-300 hover:text-white py-2"
+            >
+              Policies
+            </Link>
+          </div>
+
           <div className="h-px bg-slate-700 my-2"></div>
-          <div className="flex items-center justify-between pt-2">
+
+          <div className="flex items-center justify-between">
+            {/* Mobile Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-1.5 rounded border border-[#dca12f] bg-transparent px-3 py-1.5 text-xs font-semibold text-white cursor-pointer"
+              >
+                <Globe className="h-3.5 w-3.5 text-[#4ba3e3]" />
+                <span>{currentLang}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-300 ml-0.5" />
+              </button>
+
+              {langOpen && (
+                <div className="absolute left-0 mt-2 w-32 rounded bg-[#162235] border border-slate-700 shadow-lg py-1 z-50">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => {
+                        setCurrentLang(lang);
+                        setLangOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#dca12f] hover:text-slate-900 transition-colors cursor-pointer"
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Login Link */}
             <Link
               href="#login"
               onClick={() => setIsOpen(false)}
@@ -175,10 +209,14 @@ export default function Header() {
             >
               Login
             </Link>
+          </div>
+
+          {/* Mobile CTA Full Width */}
+          <div className="pt-2">
             <Link
               href="#list-company"
               onClick={() => setIsOpen(false)}
-              className="rounded bg-[#dca12f] px-4 py-2 text-xs font-bold text-slate-950 shadow-md transition-all"
+              className="block w-full text-center rounded bg-[#dca12f] hover:bg-[#c99126] px-4 py-3 text-sm font-bold text-slate-950 shadow-md transition-all"
             >
               List Your Company
             </Link>
