@@ -64,7 +64,7 @@ export default function Faq() {
   return (
     <section id="faq" className="bg-[#f8fafc] overflow-hidden">
       {/* Top Banner Header */}
-      <FaqHeader 
+      <FaqHeader
         searchInput={searchInput}
         setSearchInput={setSearchInput}
         handleSearch={handleSearch}
@@ -73,9 +73,9 @@ export default function Faq() {
       {/* Grid Content Body */}
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Left Navigation Column */}
-          <FaqSidebar 
+          <FaqSidebar
             topics={topics}
             activeTopic={activeTopic}
             searchQuery={searchQuery}
@@ -84,7 +84,7 @@ export default function Faq() {
 
           {/* Right Accordion Column */}
           <div className="lg:col-span-8 space-y-6">
-            <FaqAccordions 
+            <FaqAccordions
               searchQuery={searchQuery}
               activeTopic={activeTopic}
               filteredFaqs={filteredFaqs}

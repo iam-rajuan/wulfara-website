@@ -30,35 +30,35 @@ export default function FaqAccordions({
   return (
     <div className="space-y-6">
       {/* Header intro */}
-      <div className="border-l-2 border-[#dca12f] pl-4 py-1 space-y-1">
-        <h3 className="text-xl font-bold text-slate-900">
+      <div className="py-1 space-y-1.5">
+        <h3 className="text-2xl font-extrabold text-slate-900">
           {searchQuery ? `Search Results for "${searchQuery}"` : activeTopic}
         </h3>
         <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
           {searchQuery 
             ? `Showing search matches found for "${searchQuery}" in the knowledge base.`
-            : `Comprehensive operational framework and core platform methodologies for the WULFARIA network.`}
+            : `Comprehensive operational framework and core platform methodologies for the Wulfara network.`}
         </p>
       </div>
 
       {/* Accordion Questions */}
-      <div className="space-y-3.5">
+      <div className="space-y-0">
         {filteredFaqs.length > 0 ? (
           filteredFaqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div
                 key={idx}
-                className="overflow-hidden rounded border border-slate-200 bg-white shadow-sm transition-all duration-200"
+                className="border-b border-[#dca12f]/30 bg-white transition-all duration-200"
               >
                 <button
                   onClick={() => toggleFaq(idx)}
-                  className="flex w-full items-center justify-between px-6 py-4.5 text-left rtl:text-right font-bold text-slate-900 outline-none cursor-pointer hover:bg-slate-50/50"
+                  className="flex w-full items-center justify-between px-5 py-5 text-left rtl:text-right font-semibold text-slate-900 outline-none cursor-pointer hover:bg-slate-50/40"
                 >
-                  <span className="text-xs sm:text-sm">{t(faq.qKey)}</span>
+                  <span className="text-sm">{t(faq.qKey)}</span>
                   <ChevronDown
-                    className={`h-4 w-4 text-slate-400 transition-transform duration-300 ${
-                      isOpen ? "rotate-180 text-[#dca12f]" : ""
+                    className={`h-4 w-4 text-[#dca12f] transition-transform duration-300 flex-shrink-0 ml-4 ${
+                      isOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
@@ -66,10 +66,10 @@ export default function FaqAccordions({
                 {/* Expandable answer */}
                 <div
                   className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    isOpen ? "max-h-[500px] border-t border-slate-100" : "max-h-0"
+                    isOpen ? "max-h-[500px]" : "max-h-0"
                   }`}
                 >
-                  <div className="px-6 py-4.5 text-xs sm:text-sm text-slate-600 leading-relaxed bg-[#fbfcfd]">
+                  <div className="px-5 pb-5 pt-1 text-sm text-slate-600 leading-relaxed">
                     {t(faq.aKey)}
                   </div>
                 </div>
