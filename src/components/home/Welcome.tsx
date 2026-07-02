@@ -31,8 +31,10 @@ export default function Welcome() {
 
           {/* Right Image Column */}
           <div className="lg:col-span-7 flex justify-center lg:justify-end w-full">
-            <div className="relative w-full max-w-2xl aspect-[1.8/1] overflow-hidden rounded border border-[#D4AF3780] shadow-xl bg-[#0b1322]">
-              <DemoMap />
+            <div className="w-full max-w-2xl p-3 bg-white border border-[#dca12f] rounded shadow-xl">
+              <div className="relative w-full aspect-[1.8/1] overflow-hidden rounded bg-[#222325]">
+                <DemoMap />
+              </div>
             </div>
           </div>
         </div>

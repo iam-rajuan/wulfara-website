@@ -13,7 +13,7 @@ const nodes = [
   { id: "cr", name: "Cairo", x: 58, y: 48, role: "Supplier Hub" },
   { id: "db", name: "Dubai", x: 62, y: 50, role: "Logistics Node" },
   { id: "sh", name: "Shanghai", x: 78, y: 40, role: "Manufacturing Partner" },
-  { id: "tk", name: "Tokyo", x: 82, y: 38, role: "Technology Partner" },
+  { id: "tk", name: "Tokyo", x: 82, y: 38, role: "Technology Partner", highlighted: true },
   { id: "sd", name: "Sydney", x: 88, y: 80, role: "Supplier Hub" }
 ];
 
@@ -40,20 +40,45 @@ const connections = [
 
 export default function DemoMap() {
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [activeCircle, setActiveCircle] = useState(2); // The 3rd circle active by default
 
   return (
-    <div className="relative w-full h-full min-h-[300px] bg-[#0b1322] select-none group/map overflow-hidden">
+    <div className="relative w-full h-full min-h-[300px] bg-[#222325] select-none group/map overflow-hidden">
       {/* Base map image */}
       <Image
         src="/world-map.png"
         alt="Wulfara Global Network Map"
         fill
-        className="object-cover opacity-90 transition-transform duration-700 group-hover/map:scale-[1.01]"
+        className="object-cover opacity-85 transition-transform duration-700 group-hover/map:scale-[1.01] filter grayscale brightness-95"
         priority
       />
 
       {/* Grid Overlay to match screenshot design style */}
-      <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#1f344d_1px,transparent_1px),linear-gradient(to_bottom,#1f344d_1px,transparent_1px)] bg-[size:4%_6%] pointer-events-none"></div>
+      <div className="absolute inset-0 opacity-[0.07] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:4%_6%] pointer-events-none"></div>
+
+      {/* High-tech parameter readouts at the top */}
+      <div className="absolute top-3 left-4 right-14 flex justify-between text-[8px] sm:text-[9px] text-slate-400 font-mono tracking-widest pointer-events-none opacity-80 uppercase">
+        <span>sys.loc // active</span>
+        <span>net.flow // 98.4%</span>
+        <span>node.count // 10</span>
+        <span className="hidden sm:inline">sync // 2026.07</span>
+      </div>
+
+      {/* Stacked map controls on the top-right */}
+      <div className="absolute top-3 right-4 flex flex-col gap-1.5 z-20">
+        {[0, 1, 2].map((idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveCircle(idx)}
+            className={`w-2.5 h-2.5 rounded-full border transition-all cursor-pointer ${
+              activeCircle === idx
+                ? "bg-[#dca12f] border-[#dca12f] shadow-[0_0_8px_#dca12f]"
+                : "border-slate-500 hover:border-slate-300 bg-transparent"
+            }`}
+            aria-label={`Map style option ${idx + 1}`}
+          />
+        ))}
+      </div>
 
       {/* Interactive SVG Overlay */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -67,29 +92,29 @@ export default function DemoMap() {
 
           return (
             <g key={idx}>
-              {/* Glow background curve */}
+              {/* Curve background */}
               <path
                 d={pathD}
                 fill="none"
-                stroke="#00f0ff"
-                strokeWidth="0.4"
-                strokeOpacity="0.15"
-              />
-              {/* Dotted curve representing logistics paths */}
-              <path
-                d={pathD}
-                fill="none"
-                stroke="#00f0ff"
+                stroke="#ffffff"
                 strokeWidth="0.3"
-                strokeDasharray="1.5, 1.5"
-                strokeOpacity="0.75"
+                strokeOpacity="0.1"
+              />
+              {/* Dotted curves representing connection paths */}
+              <path
+                d={pathD}
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="0.25"
+                strokeDasharray="1.5, 2.5"
+                strokeOpacity="0.4"
                 className="animate-flow-dash"
               />
             </g>
           );
         })}
 
-        {/* Node Circles (Visual only) */}
+        {/* Node Circles */}
         {nodes.map((node) => {
           const isHovered = hoveredNode?.id === node.id;
           return (
@@ -100,8 +125,8 @@ export default function DemoMap() {
                 cy={node.y}
                 r={isHovered ? 4.5 : 3.5}
                 fill="none"
-                stroke="#00f0ff"
-                strokeWidth="0.5"
+                stroke={node.highlighted ? "#dca12f" : "#ffffff"}
+                strokeWidth="0.4"
                 className="animate-pulse origin-center"
                 style={{
                   transformOrigin: `${node.x}% ${node.y}%`
@@ -113,9 +138,9 @@ export default function DemoMap() {
                 cx={node.x}
                 cy={node.y}
                 r="0.8"
-                fill="#ffffff"
-                stroke="#00f0ff"
-                strokeWidth="0.3"
+                fill={node.highlighted ? "#dca12f" : "#ffffff"}
+                stroke={node.highlighted ? "#dca12f" : "#ffffff"}
+                strokeWidth="0.2"
               />
             </g>
           );
@@ -150,7 +175,7 @@ export default function DemoMap() {
       {/* CSS Animation defined locally for dash offset flow */}
       <style jsx>{`
         .animate-flow-dash {
-          animation: flow 20s linear infinite;
+          animation: flow 24s linear infinite;
         }
         @keyframes flow {
           to {
