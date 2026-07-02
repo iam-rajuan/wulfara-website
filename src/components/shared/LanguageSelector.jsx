@@ -2,8 +2,8 @@
 
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Globe, ChevronDown } from "lucide-react";
 import "@/i18n";
-
 
 export default function LanguageSelector() {
   const { i18n } = useTranslation();
@@ -21,31 +21,35 @@ export default function LanguageSelector() {
     }
   }, [i18n.language]);
 
+  const getLanguageLabel = (lng) => {
+    switch (lng) {
+      case "nl":
+        return "Nederlands";
+      case "ar":
+        return "العربية";
+      case "en":
+      default:
+        return "English";
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      <label 
-        htmlFor="language-select" 
-        className="text-xs font-semibold uppercase tracking-wider text-slate-400"
+    <div className="relative flex items-center gap-2 rounded border border-slate-700 bg-slate-800/40 hover:bg-slate-800/60 px-3 py-2 text-xs font-semibold text-slate-300 transition-all cursor-pointer">
+      <Globe className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+      <span>{getLanguageLabel(i18n.language)}</span>
+      <ChevronDown className="h-3 w-3 text-slate-400 ml-0.5 flex-shrink-0" />
+
+      {/* Hidden Native Select Overlay */}
+      <select
+        id="language-select"
+        value={i18n.language || "en"}
+        onChange={handleLanguageChange}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       >
-        Language:
-      </label>
-      <div className="relative inline-block">
-        <select
-          id="language-select"
-          value={i18n.language || "en"}
-          onChange={handleLanguageChange}
-          className="appearance-none rounded-lg border border-[#dca12f]/80 bg-[#162235] hover:bg-slate-800/40 text-white px-3 py-1.5 pr-8 text-xs font-bold transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 cursor-pointer"
-        >
-          <option value="en" className="bg-[#162235] text-white">English</option>
-          <option value="nl" className="bg-[#162235] text-white">Nederlands</option>
-          <option value="ar" className="bg-[#162235] text-white">العربية (Arabic)</option>
-        </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#dca12f]">
-          <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-          </svg>
-        </div>
-      </div>
+        <option value="en">English</option>
+        <option value="nl">Nederlands</option>
+        <option value="ar">العربية (Arabic)</option>
+      </select>
     </div>
   );
 }

@@ -60,7 +60,7 @@ const resources = {
       ctaTitle: "Ready to find the right supplier?",
 
       // Footer
-      footerDesc: "WULFARA is a leading B2B marketplace directory connecting businesses with reliable supplier, logistics, and manufacturing partners globally.",
+      footerDesc: "WULFARA is a leading B2B marketplace directory connecting businesses with reliable suppliers, logistics, and manufacturing partners globally.",
       platform: "Platform",
       support: "Support",
       rightsReserved: "All rights reserved.",
