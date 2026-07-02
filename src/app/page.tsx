@@ -2,7 +2,6 @@ import Navbar from "@/components/shared/Navbar";
 import Hero from "@/components/home/Hero";
 import Features from "@/components/home/Features";
 import Welcome from "@/components/home/Welcome";
-import Faq from "@/components/home/Faq";
 import Cta from "@/components/home/Cta";
 import Footer from "@/components/shared/Footer";
 
@@ -14,7 +13,6 @@ export default function Home() {
         <Hero />
         <Features />
         <Welcome />
-        <Faq />
         <Cta />
       </main>
       <Footer />

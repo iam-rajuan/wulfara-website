@@ -42,7 +42,7 @@ export default function Header() {
               {t('home')}
             </Link>
             <Link
-              href="#faq"
+              href="/faq"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
               {t('faq')}
@@ -113,7 +113,7 @@ export default function Header() {
               {t('home')}
             </Link>
             <Link
-              href="#faq"
+              href="/faq"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >

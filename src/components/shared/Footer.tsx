@@ -69,7 +69,7 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="#faq" className="hover:text-[#dca12f] transition-colors">
+                <Link href="/faq" className="hover:text-[#dca12f] transition-colors">
                   {t('faq')}
                 </Link>
               </li>
