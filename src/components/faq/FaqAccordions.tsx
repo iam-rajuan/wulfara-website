@@ -49,7 +49,7 @@ export default function FaqAccordions({
             return (
               <div
                 key={idx}
-                className="border border-[#e5e5e8] rounded-sm bg-white transition-all duration-200"
+                className="border border-[#eee3c3] rounded-sm bg-white transition-all duration-200"
               >
                 <button
                   onClick={() => toggleFaq(idx)}
@@ -57,17 +57,15 @@ export default function FaqAccordions({
                 >
                   <span className="text-sm">{t(faq.qKey)}</span>
                   <ChevronDown
-                    className={`h-4 w-4 text-[#dca12f] transition-transform duration-300 flex-shrink-0 ml-4 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 text-[#dca12f] transition-transform duration-300 flex-shrink-0 ml-4 ${isOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
                 {/* Expandable answer */}
                 <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    isOpen ? "max-h-[500px]" : "max-h-0"
-                  }`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? "max-h-[500px]" : "max-h-0"
+                    }`}
                 >
                   <div className="px-5 pb-5 pt-1 text-sm text-slate-600 leading-relaxed">
                     {t(faq.aKey)}
