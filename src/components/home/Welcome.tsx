@@ -2,8 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 export default function Welcome() {
+  const { t } = useTranslation();
   return (
     <section className="bg-white py-16 sm:py-24 overflow-hidden border-y border-[#D4AF3780]">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
@@ -11,19 +13,18 @@ export default function Welcome() {
           {/* Left Text Column */}
           <div className="lg:col-span-5 space-y-6">
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 leading-[1.1] uppercase">
-              WELCOME TO <br />
-              WULFARA!!!!
+              {t('welcomeTo')} <br />
+              {t('wulfaraBrand')}
             </h2>
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-              WULFARA is an online marketplace website directory that connects
-              suppliers and customers together through a smart business network.
+              {t('wulfaraDesc')}
             </p>
             <div className="pt-2">
               <a
                 href="#about"
                 className="inline-flex items-center justify-center rounded border border-slate-800 bg-transparent hover:bg-slate-100/50 px-8 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all cursor-pointer"
               >
-                Learn More
+                {t('learnMore')}
               </a>
             </div>
           </div>

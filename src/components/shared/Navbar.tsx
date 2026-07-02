@@ -1,17 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Globe, Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import logoImg from "@/app/images/logo.png";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "./LanguageSelector";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("English");
-
-  const languages = ["English", "Español", "Deutsch", "Français"];
+  const { t } = useTranslation();
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#1b2b3a] border-b border-[#dca12f]/80 shadow-lg">
@@ -40,71 +39,45 @@ export default function Header() {
               href="/"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              Home
+              {t('home')}
             </Link>
             <Link
               href="#faq"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              FAQ
+              {t('faq')}
             </Link>
             <Link
               href="#rfq"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              RFQ
+              {t('rfq')}
             </Link>
             <Link
               href="#help"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              Help Center
+              {t('helpCenter')}
             </Link>
             <Link
               href="#policies"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              Policies
+              {t('policies')}
             </Link>
           </nav>
 
           {/* Right Action Controls */}
           <div className="hidden md:flex items-center space-x-5">
             {/* Language Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 rounded border border-[#dca12f] bg-transparent px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800/30 transition-all cursor-pointer"
-              >
-                <Globe className="h-3.5 w-3.5 text-[#4ba3e3]" />
-                <span>{currentLang}</span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-300 ml-0.5" />
-              </button>
-
-              {langOpen && (
-                <div className="absolute right-0 mt-2 w-32 rounded-md bg-[#162235] border border-slate-700 shadow-lg py-1 z-50">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => {
-                        setCurrentLang(lang);
-                        setLangOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#dca12f] hover:text-slate-900 transition-colors cursor-pointer"
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <LanguageSelector />
 
             {/* Login Link */}
             <Link
               href="#login"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              Login
+              {t('login')}
             </Link>
 
             {/* CTA Button */}
@@ -112,7 +85,7 @@ export default function Header() {
               href="#list-company"
               className="rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-2 text-xs font-bold text-slate-950 transition-all shadow-sm"
             >
-              List Your Company
+              {t('listCompany')}
             </Link>
           </div>
 
@@ -137,69 +110,43 @@ export default function Header() {
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >
-              Home
+              {t('home')}
             </Link>
             <Link
               href="#faq"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >
-              FAQ
+              {t('faq')}
             </Link>
             <Link
               href="#rfq"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >
-              RFQ
+              {t('rfq')}
             </Link>
             <Link
               href="#help"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >
-              Help Center
+              {t('helpCenter')}
             </Link>
             <Link
               href="#policies"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2"
             >
-              Policies
+              {t('policies')}
             </Link>
           </div>
 
           <div className="h-px bg-slate-700 my-2"></div>
 
-          <div className="flex items-center justify-between">
-            {/* Mobile Language Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 rounded border border-[#dca12f] bg-transparent px-3 py-1.5 text-xs font-semibold text-white cursor-pointer"
-              >
-                <Globe className="h-3.5 w-3.5 text-[#4ba3e3]" />
-                <span>{currentLang}</span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-300 ml-0.5" />
-              </button>
-
-              {langOpen && (
-                <div className="absolute left-0 mt-2 w-32 rounded bg-[#162235] border border-slate-700 shadow-lg py-1 z-50">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => {
-                        setCurrentLang(lang);
-                        setLangOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-[#dca12f] hover:text-slate-900 transition-colors cursor-pointer"
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="flex items-center justify-between gap-4">
+            {/* Mobile Language Selector */}
+            <LanguageSelector />
 
             {/* Mobile Login Link */}
             <Link
@@ -207,7 +154,7 @@ export default function Header() {
               onClick={() => setIsOpen(false)}
               className="text-base font-medium text-slate-300 hover:text-white"
             >
-              Login
+              {t('login')}
             </Link>
           </div>
 
@@ -218,7 +165,7 @@ export default function Header() {
               onClick={() => setIsOpen(false)}
               className="block w-full text-center rounded bg-[#dca12f] hover:bg-[#c99126] px-4 py-3 text-sm font-bold text-slate-950 shadow-md transition-all"
             >
-              List Your Company
+              {t('listCompany')}
             </Link>
           </div>
         </div>

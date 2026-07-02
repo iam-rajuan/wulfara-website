@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { Mail, Globe, ChevronDown } from "lucide-react";
+import { Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "./LanguageSelector";
 
 export default function Footer() {
-  const [langOpen, setLangOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("English");
-  
-  const languages = ["English", "Español", "Deutsch", "Français"];
+  const { t } = useTranslation();
 
   return (
     <footer className="bg-[#111a28] text-slate-400 border-t border-slate-800">
@@ -20,8 +19,7 @@ export default function Footer() {
               WULFARA
             </span>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
-              WULFARA is a leading B2B marketplace directory connecting businesses
-              with reliable supplier, logistics, and manufacturing partners globally.
+              {t('footerDesc')}
             </p>
             
             {/* Contact Email */}
@@ -31,54 +29,30 @@ export default function Footer() {
             </div>
 
             {/* Language Selector */}
-            <div className="relative inline-block">
-              <button
-                onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800/40 px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"
-              >
-                <Globe className="h-3.5 w-3.5 text-slate-400" />
-                <span>{currentLang}</span>
-                <ChevronDown className="h-3 w-3 text-slate-400" />
-              </button>
-
-              {langOpen && (
-                <div className="absolute left-0 bottom-full mb-2 w-32 rounded-md bg-[#1e2d44] border border-slate-700 shadow-lg py-1 z-50">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => {
-                        setCurrentLang(lang);
-                        setLangOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-yellow-500 hover:text-slate-900 transition-colors cursor-pointer"
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
-              )}
+            <div className="inline-block">
+              <LanguageSelector />
             </div>
           </div>
 
           {/* Platform Column */}
           <div>
             <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
-              Platform
+              {t('platform')}
             </h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="#rfq" className="hover:text-yellow-500 transition-colors">
-                  RFQ
+                  {t('rfq')}
                 </Link>
               </li>
               <li>
                 <Link href="#list-company" className="hover:text-yellow-500 transition-colors">
-                  List Your Company
+                  {t('listCompany')}
                 </Link>
               </li>
               <li>
                 <Link href="#login" className="hover:text-yellow-500 transition-colors">
-                  Login
+                  {t('login')}
                 </Link>
               </li>
             </ul>
@@ -87,22 +61,22 @@ export default function Footer() {
           {/* Support Column */}
           <div>
             <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
-              Support
+              {t('support')}
             </h3>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="#faq" className="hover:text-yellow-500 transition-colors">
-                  FAQ
+                  {t('faq')}
                 </Link>
               </li>
               <li>
                 <Link href="#help" className="hover:text-yellow-500 transition-colors">
-                  Help Center
+                  {t('helpCenter')}
                 </Link>
               </li>
               <li>
                 <Link href="#policies" className="hover:text-yellow-500 transition-colors">
-                  Policies
+                  {t('policies')}
                 </Link>
               </li>
             </ul>
@@ -112,14 +86,14 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
           <p className="text-slate-500">
-            &copy; 2026 Wulfara.com. All rights reserved.
+            &copy; 2026 Wulfara.com. {t('rightsReserved')}
           </p>
           <div className="flex gap-6 text-slate-500">
             <Link href="#privacy" className="hover:text-yellow-500 transition-colors">
-              Privacy Policy
+              {t('privacyPolicy')}
             </Link>
             <Link href="#terms" className="hover:text-yellow-500 transition-colors">
-              Terms of Service
+              {t('termsOfService')}
             </Link>
           </div>
         </div>

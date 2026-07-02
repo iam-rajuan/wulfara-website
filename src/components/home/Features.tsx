@@ -10,42 +10,45 @@ import {
   LogIn,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export default function Features() {
+  const { t } = useTranslation();
+
   const cards = [
     {
-      title: "RFQ",
-      description: "Request a quote from suppliers.",
+      titleKey: "rfq",
+      descKey: "rfqDesc",
       icon: FileText,
       link: "#rfq",
     },
     {
-      title: "Help Center",
-      description: "Get support and find answers.",
+      titleKey: "helpCenter",
+      descKey: "helpCenterDesc",
       icon: HelpCircle,
       link: "#help",
     },
     {
-      title: "Policies",
-      description: "Read our platform guidelines.",
+      titleKey: "policies",
+      descKey: "policiesDesc",
       icon: ShieldCheck,
       link: "#policies",
     },
     {
-      title: "List Company",
-      description: "Get listed and boost visibility.",
+      titleKey: "listCompany",
+      descKey: "listCompanyDesc",
       icon: PlusCircle,
       link: "#list-company",
     },
     {
-      title: "FAQ",
-      description: "Common questions answered.",
+      titleKey: "faq",
+      descKey: "faqDesc",
       icon: MessageSquare,
       link: "#faq",
     },
     {
-      title: "Login",
-      description: "Access your account dashboard.",
+      titleKey: "login",
+      descKey: "loginDesc",
       icon: LogIn,
       link: "#login",
     },
@@ -71,10 +74,10 @@ export default function Features() {
 
                   {/* Text Details */}
                   <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-yellow-600 transition-colors duration-300">
-                    {card.title}
+                    {t(card.titleKey)}
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    {card.description}
+                    {t(card.descKey)}
                   </p>
                 </div>
 

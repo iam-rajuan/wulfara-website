@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import { Search, SlidersHorizontal, CheckCircle2, Compass, Building2 } from "lucide-react";
 import Image from "next/image";
 import heroBg from "@/app/images/hero-bg.png";
+import { useTranslation } from "react-i18next";
 
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,10 +16,10 @@ export default function Hero() {
   };
 
   const quickLinks = [
-    { text: "Free supplier search" },
-    { text: "Request quotes directly" },
-    { text: "Suppliers from U.S. and other countries" },
-    { text: "Business matchmaking" },
+    { key: "freeSearch" },
+    { key: "requestQuotes" },
+    { key: "globalSuppliers" },
+    { key: "matchmaking" },
   ];
 
   return (
@@ -41,14 +43,12 @@ export default function Hero() {
           style={{ fontFamily: "'Inter', sans-serif" }}
           className="text-4xl sm:text-6xl md:text-[72px] font-extrabold tracking-[-1.8px] text-white mb-6 leading-tight md:leading-[72px] text-center max-w-4xl mx-auto"
         >
-          Find Suppliers, Logistics, <br />
-          and Manufacturing Partners
+          {t('findSuppliersTitle')}
         </h1>
 
         {/* Subtitle */}
         <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-          WULFARA is an online marketplace directory that connects suppliers and
-          customers together.
+          {t('heroSubtitle')}
         </p>
 
         {/* Search Bar Container */}
@@ -60,7 +60,7 @@ export default function Hero() {
             <Search className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 ml-2 sm:ml-3 mr-2 sm:mr-3 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Find suppliers, logistics, manufacturing..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent pr-2 py-2 sm:py-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none min-w-0"
@@ -72,7 +72,7 @@ export default function Hero() {
             type="submit"
             className="rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer flex-shrink-0"
           >
-            Search
+            {t('searchBtn')}
           </button>
         </form>
 
@@ -84,7 +84,7 @@ export default function Hero() {
               className="flex items-center gap-2 rounded bg-white px-4 py-2.5 text-xs sm:text-[13px] font-semibold text-slate-700 shadow-sm border border-slate-200/80 cursor-default hover:bg-slate-50 transition-colors"
             >
               <CheckCircle2 className="h-4 w-4 text-[#dca12f] flex-shrink-0" />
-              <span>{link.text}</span>
+              <span>{t(link.key)}</span>
             </div>
           ))}
         </div>
@@ -97,7 +97,7 @@ export default function Hero() {
             className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all"
           >
             <Compass className="h-4 w-4 text-slate-950" />
-            <span>Browse Suppliers</span>
+            <span>{t('browseSuppliers')}</span>
           </a>
 
           {/* List Your Company Button */}
@@ -106,7 +106,7 @@ export default function Hero() {
             className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all"
           >
             <Building2 className="h-4 w-4 text-[#dca12f]" />
-            <span>List Your Company</span>
+            <span>{t('listCompany')}</span>
           </a>
 
           {/* Login Button */}
@@ -114,7 +114,7 @@ export default function Hero() {
             href="#login"
             className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center"
           >
-            Login
+            {t('login')}
           </a>
         </div>
       </div>
