@@ -31,12 +31,12 @@ const resources = {
       browseSuppliers: "Browse Suppliers",
 
       // Features
-      rfqDesc: "Request a quote from suppliers.",
-      helpCenterDesc: "Get support and find answers.",
-      policiesDesc: "Read our platform guidelines.",
-      listCompanyDesc: "Get listed and boost visibility.",
-      faqDesc: "Common questions answered.",
-      loginDesc: "Access your account dashboard.",
+      rfqDesc: "Request a quote from suppliers",
+      helpCenterDesc: "Get support and find answers",
+      policiesDesc: "Read our platform guidelines",
+      listCompanyDesc: "Add your business to directory",
+      faqDesc: "Common questions answered",
+      loginDesc: "Access your account dashboard",
 
       // FAQ
       faqSubtitle: "Common questions about how WULFARIA connects customers and suppliers.",
@@ -97,12 +97,12 @@ const resources = {
       browseSuppliers: "Blader door leveranciers",
 
       // Features
-      rfqDesc: "Vraag een offerte aan bij leveranciers.",
-      helpCenterDesc: "Krijg ondersteuning en vind antwoorden.",
-      policiesDesc: "Lees onze platformrichtlijnen.",
-      listCompanyDesc: "Word vermeld en vergroot uw zichtbaarheid.",
-      faqDesc: "Veelgestelde vragen beantwoord.",
-      loginDesc: "Krijg toegang tot uw accountdashboard.",
+      rfqDesc: "Vraag een offerte aan bij leveranciers",
+      helpCenterDesc: "Krijg ondersteuning en vind antwoorden",
+      policiesDesc: "Lees onze platformrichtlijnen",
+      listCompanyDesc: "Voeg uw bedrijf toe aan de gids",
+      faqDesc: "Veelgestelde vragen beantwoord",
+      loginDesc: "Krijg toegang tot uw accountdashboard",
 
       // FAQ
       faqSubtitle: "Veelgestelde vragen over hoe WULFARIA klanten en leveranciers verbindt.",
@@ -163,12 +163,12 @@ const resources = {
       browseSuppliers: "تصفح الموردين",
 
       // Features
-      rfqDesc: "اطلب عرض سعر من الموردين.",
-      helpCenterDesc: "احصل على الدعم واعثر على الإجابات.",
-      policiesDesc: "اقرأ إرشادات منصتنا.",
-      listCompanyDesc: "أضف شركتك وعزز ظهورك.",
-      faqDesc: "إجابات على الأسئلة الشائعة.",
-      loginDesc: "الوصول إلى لوحة التحكم الخاصة بك.",
+      rfqDesc: "اطلب عرض سعر من الموردين",
+      helpCenterDesc: "احصل على الدعم واعثر على الإجابات",
+      policiesDesc: "اقرأ إرشادات منصتنا",
+      listCompanyDesc: "أضف عملك إلى الدليل",
+      faqDesc: "إجابات على الأسئلة الشائعة",
+      loginDesc: "الوصول إلى لوحة التحكم الخاصة بك",
 
       // FAQ
       faqSubtitle: "أسئلة شائعة حول كيفية ربط وولفارا للعملاء والموردين.",
