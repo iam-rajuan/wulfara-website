@@ -29,8 +29,8 @@ export default function FaqAccordions({
 
   return (
     <div className="space-y-6">
-      {/* Header intro */}
-      <div className="py-1 space-y-2">
+      {/* Header intro — gold left border accent */}
+      <div className="border-l-[3px] border-l-[#dca12f] pl-4 py-1 space-y-2">
         <h3 className="text-2xl font-extrabold text-slate-900">
           {searchQuery ? `Search Results for "${searchQuery}"` : activeTopic}
         </h3>
@@ -41,7 +41,7 @@ export default function FaqAccordions({
         </p>
       </div>
 
-      {/* Accordion Questions */}
+      {/* Accordion Questions — thin gray border cards */}
       <div className="space-y-3">
         {filteredFaqs.length > 0 ? (
           filteredFaqs.map((faq, idx) => {
@@ -49,7 +49,7 @@ export default function FaqAccordions({
             return (
               <div
                 key={idx}
-                className="border border-[#e5e5e8] border-l-[3px] border-l-[#dca12f] bg-white transition-all duration-200"
+                className="border border-[#e5e5e8] rounded-sm bg-white transition-all duration-200"
               >
                 <button
                   onClick={() => toggleFaq(idx)}
@@ -77,7 +77,7 @@ export default function FaqAccordions({
             );
           })
         ) : (
-          <div className="bg-white border border-[#e5e5e8] border-l-[3px] border-l-[#dca12f] p-12 text-center text-slate-500 text-sm">
+          <div className="bg-white border border-[#e5e5e8] rounded-sm p-12 text-center text-slate-500 text-sm">
             No questions found. Try choosing another topic or adjusting your search keywords.
           </div>
         )}
