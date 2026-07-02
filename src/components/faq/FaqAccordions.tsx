@@ -30,30 +30,30 @@ export default function FaqAccordions({
   return (
     <div className="space-y-6">
       {/* Header intro */}
-      <div className="py-1 space-y-1.5">
+      <div className="py-1 space-y-2">
         <h3 className="text-2xl font-extrabold text-slate-900">
           {searchQuery ? `Search Results for "${searchQuery}"` : activeTopic}
         </h3>
         <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-          {searchQuery 
+          {searchQuery
             ? `Showing search matches found for "${searchQuery}" in the knowledge base.`
             : `Comprehensive operational framework and core platform methodologies for the Wulfara network.`}
         </p>
       </div>
 
       {/* Accordion Questions */}
-      <div className="space-y-0">
+      <div className="space-y-3">
         {filteredFaqs.length > 0 ? (
           filteredFaqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div
                 key={idx}
-                className="border-b border-[#dca12f]/30 bg-white transition-all duration-200"
+                className="border border-[#e5e5e8] border-l-[3px] border-l-[#dca12f] bg-white transition-all duration-200"
               >
                 <button
                   onClick={() => toggleFaq(idx)}
-                  className="flex w-full items-center justify-between px-5 py-5 text-left rtl:text-right font-semibold text-slate-900 outline-none cursor-pointer hover:bg-slate-50/40"
+                  className="flex w-full items-center justify-between px-5 py-4 text-left rtl:text-right font-semibold text-slate-900 outline-none cursor-pointer hover:bg-slate-50/40"
                 >
                   <span className="text-sm">{t(faq.qKey)}</span>
                   <ChevronDown
@@ -77,7 +77,7 @@ export default function FaqAccordions({
             );
           })
         ) : (
-          <div className="bg-white border border-slate-200 rounded p-12 text-center text-slate-500 text-sm shadow-sm">
+          <div className="bg-white border border-[#e5e5e8] border-l-[3px] border-l-[#dca12f] p-12 text-center text-slate-500 text-sm">
             No questions found. Try choosing another topic or adjusting your search keywords.
           </div>
         )}
