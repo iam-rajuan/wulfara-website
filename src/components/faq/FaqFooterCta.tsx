@@ -4,7 +4,7 @@ import React from "react";
 
 export default function FaqFooterCta() {
   return (
-    <div className="bg-[#f8f8fa] border border-[#e5e5e8] rounded-sm p-10 sm:p-16 text-center space-y-8 mt-8">
+    <div className="border border-[#eee3c3] rounded-sm p-10 sm:p-16 text-center space-y-8 mt-8">
       <h4 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-wider uppercase">
         INITIATE GLOBAL PROCUREMENT
       </h4>
