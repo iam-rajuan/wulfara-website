@@ -21,8 +21,6 @@ export default function FaqSidebar({
         <h3 className="text-sm font-semibold text-slate-800 uppercase mb-5 flex items-center gap-2.5">
           <span className="w-2 h-2 bg-[#dca12f]"></span> Topics
         </h3>
-
-
         <div className="flex flex-col">
           {topics.map((topic, index) => {
             const isActive = !searchQuery && activeTopic === topic;
@@ -47,7 +45,6 @@ export default function FaqSidebar({
           })}
         </div>
       </div>
-
       {/* Direct Inquiry Card */}
       <div className="bg-white border border-[#e5e5e8] rounded-sm p-6 space-y-4">
         <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
