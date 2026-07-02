@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Search, SlidersHorizontal, CheckCircle2, Compass, Building2 } from "lucide-react";
 import Image from "next/image";
-import heroBg from "@/app/images/hero-bg.png";
+import heroBg from "../../../public/assets/hero-bg.png";
 import { useTranslation } from "react-i18next";
 
 export default function Hero() {

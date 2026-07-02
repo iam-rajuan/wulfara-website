@@ -3,12 +3,12 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Globe, ChevronDown } from "lucide-react";
-import "@/i18n";
+import "@/config/i18n";
 
 export default function LanguageSelector() {
   const { i18n } = useTranslation();
 
-  const handleLanguageChange = (e) => {
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedLanguage = e.target.value;
     i18n.changeLanguage(selectedLanguage);
   };
@@ -21,7 +21,7 @@ export default function LanguageSelector() {
     }
   }, [i18n.language]);
 
-  const getLanguageLabel = (lng) => {
+  const getLanguageLabel = (lng: string) => {
     switch (lng) {
       case "nl":
         return "Nederlands";

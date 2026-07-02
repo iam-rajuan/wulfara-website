@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import logoImg from "@/app/images/logo.png";
+import logoImg from "../../../public/assets/logo.png";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "./LanguageSelector";
 
