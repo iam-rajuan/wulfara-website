@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { useTranslation } from "react-i18next";
+import DemoMap from "./DemoMap";
 
 export default function Welcome() {
   const { t } = useTranslation();
@@ -30,16 +30,9 @@ export default function Welcome() {
           </div>
 
           {/* Right Image Column */}
-          <div className="lg:col-span-7 flex justify-center lg:justify-end">
+          <div className="lg:col-span-7 flex justify-center lg:justify-end w-full">
             <div className="relative w-full max-w-2xl aspect-[1.8/1] overflow-hidden rounded border border-[#D4AF3780] shadow-xl bg-[#0b1322]">
-              <Image
-                src="/world-map.png"
-                alt="Wulfara Network World Map"
-                fill
-                className="object-cover hover:scale-[1.02] transition-transform duration-500 opacity-90"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/10 to-transparent pointer-events-none"></div>
+              <DemoMap />
             </div>
           </div>
         </div>
