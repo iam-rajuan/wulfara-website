@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import { ChevronRight, MessageSquare, Building, Mail } from "lucide-react";
 
 interface FaqSidebarProps {
