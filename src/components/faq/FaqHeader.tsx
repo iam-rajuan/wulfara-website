@@ -15,7 +15,7 @@ export default function FaqHeader({
   handleSearch
 }: FaqHeaderProps) {
   return (
-    <div className="w-full bg-[#202c39] text-white py-20 text-center px-4 sm:px-6 lg:px-8 border-b border-[#dca12f]/30 relative">
+    <div className="w-full bg-[#1b2b3a] text-white py-20 text-center px-4 sm:px-6 lg:px-8 border-b border-[#dca12f]/30 relative">
       <div className="relative max-w-3xl mx-auto space-y-5">
         {/* Support Portal Badge */}
         <span className="inline-block text-[10px] tracking-widest text-[#dca12f] font-bold border border-[#dca12f]/40 px-4 py-1.5 uppercase bg-transparent">
