@@ -1,5 +1,5 @@
 import Navbar from "@/components/shared/Navbar";
-import Faq from "@/components/home/Faq";
+import Faq from "@/components/faq/Faq";
 import Footer from "@/components/shared/Footer";
 
 export default function FaqPage() {
