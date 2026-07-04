@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Search, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import heroBg from "../../../public/assets/hero-bg.png";
+import heroBg from "../../../public/assets/rfq-background.png";
 
 export default function RfqHero() {
   const { t } = useTranslation();
