@@ -3,11 +3,11 @@ import { Headset } from "lucide-react";
 
 export default function HelpCenterCta() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto pb-20">
+    <div className="px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto py-20">
       <div className="bg-[#dca12f] rounded-lg p-10 sm:p-14 text-center shadow-lg relative overflow-hidden">
         {/* Subtle background pattern/overlay if needed */}
         <div className="absolute inset-0 bg-black/5"></div>
-        
+
         <div className="relative z-10">
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-4">
             Need further assistance?
@@ -15,7 +15,7 @@ export default function HelpCenterCta() {
           <p className="text-sm text-slate-800 max-w-lg mx-auto font-medium mb-8 leading-relaxed">
             Our dedicated support team is available 24/7 to help you navigate the platform and resolve any complex issues.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href="#contact"

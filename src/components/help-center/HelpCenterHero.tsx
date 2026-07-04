@@ -3,11 +3,10 @@ import { Search } from "lucide-react";
 
 export default function HelpCenterHero() {
   return (
-    <div className="bg-[#1b2b3a] py-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+    <div className="bg-[#1b2b3a] py-[96px] px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
       <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-black tracking-tight text-white mb-8">
         How can we help you?
       </h1>
-      
       {/* Search Bar */}
       <div className="w-full max-w-2xl relative mb-6">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
