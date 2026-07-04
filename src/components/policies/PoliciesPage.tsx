@@ -11,10 +11,9 @@ import {
   CreditCard,
   CircleX,
   AlertTriangle,
-  ExternalLink,
-  ShieldAlert
+  ExternalLink
 } from "lucide-react";
-import { TermsIcon, SupplierListingIcon } from "@/components/icons";
+import { TermsIcon, SupplierListingIcon, PolicyShieldIcon } from "@/components/icons";
 
 export default function PoliciesPage() {
   const [activeSection, setActiveSection] = useState("terms-of-service");
@@ -311,7 +310,7 @@ export default function PoliciesPage() {
             {/* Help CTA Box */}
             <div className="bg-[#dca12f] rounded-lg p-8 relative overflow-hidden mt-8 shadow-md">
               {/* Decorative background icon */}
-              <ShieldAlert className="absolute -right-6 -bottom-6 w-48 h-48 text-black/10 pointer-events-none transform -rotate-12" />
+              <PolicyShieldIcon className="absolute right-2 top-2 w-40 h-40 text-black/10 pointer-events-none transform " />
 
               <div className="relative z-10 flex flex-col items-center text-center gap-6">
                 <div>
