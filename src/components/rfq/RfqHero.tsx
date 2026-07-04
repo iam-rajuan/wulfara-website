@@ -2,7 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import { Search, Building2 } from "lucide-react";
+import { Search } from "lucide-react";
+import { ListCompanyIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import heroBg from "../../../public/assets/rfq-background.png";
 
@@ -10,7 +11,7 @@ export default function RfqHero() {
   const { t } = useTranslation();
 
   return (
-    <div className="relative min-h-[420px] lg:min-h-[480px] flex items-center bg-[#1b2b3a] text-white overflow-hidden">
+    <div className="relative min-h-[420px] py-20 lg:min-h-[480px] flex items-center bg-[#1b2b3a] text-white overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -53,7 +54,7 @@ export default function RfqHero() {
               href="#list-company"
               className="inline-flex items-center gap-2.5 rounded border-2 border-[#dca12f]/80 bg-transparent hover:bg-[#dca12f]/10 text-[#dca12f] px-7 py-3 text-xs sm:text-sm font-bold transition-all uppercase tracking-wide"
             >
-              <Search className="h-4 w-4" />
+              <ListCompanyIcon className="h-4 w-4" />
               <span>{t("listCompany")}</span>
             </a>
           </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, SlidersHorizontal, CheckCircle2, Compass, Building2 } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle2, Compass } from "lucide-react";
+import { ListCompanyIcon } from "@/components/icons";
 import Image from "next/image";
 import heroBg from "../../../public/assets/hero-bg.png";
 import { useTranslation } from "react-i18next";
@@ -105,7 +106,7 @@ export default function Hero() {
             href="#list-company"
             className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all"
           >
-            <Building2 className="h-4 w-4 text-[#dca12f]" />
+            <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
             <span>{t('listCompany')}</span>
           </a>
 

@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
-import { Search, FileText, Handshake } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { FactoryIcon, NetworkIcon } from "@/components/icons";
 import RfqHero from "./RfqHero";
 import RfqPurpose from "./RfqPurpose";
 import RfqWorkflow from "./RfqWorkflow";
@@ -12,7 +13,7 @@ export default function Rfq() {
 
   const features = [
     {
-      icon: Search,
+      icon: FactoryIcon,
       titleKey: "rfqFeatureSearchTitle",
       descKey: "rfqFeatureSearchDesc",
     },
@@ -22,7 +23,7 @@ export default function Rfq() {
       descKey: "rfqFeatureQuotesDesc",
     },
     {
-      icon: Handshake,
+      icon: NetworkIcon,
       titleKey: "rfqFeatureConnectTitle",
       descKey: "rfqFeatureConnectDesc",
     },

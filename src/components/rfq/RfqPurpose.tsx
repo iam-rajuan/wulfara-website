@@ -2,10 +2,10 @@
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import type { LucideIcon } from "lucide-react";
+
 
 interface Feature {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   titleKey: string;
   descKey: string;
 }
