@@ -15,6 +15,8 @@ import {
   BookmarkCheck,
   FileText,
   MessageSquare,
+  LayoutDashboard,
+  Bookmark,
 } from "lucide-react";
 
 export default function SignUpPage() {
@@ -254,9 +256,9 @@ export default function SignUpPage() {
           {/* Feature Cards */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             {/* Save Suppliers */}
-            <div className="bg-[#162236] border border-slate-700/50 rounded-xl p-5 hover:border-slate-600/60 transition-colors group">
+            <div className="bg-[#162236]/80 backdrop-blur-md border border-slate-700/50 rounded-xl p-5 hover:border-slate-600/60 transition-colors group">
               <div className="w-10 h-10 rounded-lg bg-[#dca12f]/15 flex items-center justify-center mb-3">
-                <BookmarkCheck size={20} className="text-[#dca12f]" />
+                <Bookmark size={20} className="text-[#dca12f]" />
               </div>
               <h3 className="text-sm font-semibold text-white mb-1">
                 Save Suppliers
@@ -284,7 +286,7 @@ export default function SignUpPage() {
           <div className="bg-[#162236] border border-slate-700/50 rounded-xl p-5 mb-8 hover:border-slate-600/60 transition-colors group flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-[#dca12f]/15 flex items-center justify-center flex-shrink-0">
-                <MessageSquare size={20} className="text-[#dca12f]" />
+                <Mail size={20} className="text-[#dca12f]" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-white mb-0.5">
@@ -297,39 +299,39 @@ export default function SignUpPage() {
             </div>
             <ArrowRight
               size={18}
-              className="text-slate-500 group-hover:text-[#dca12f] transition-colors flex-shrink-0"
+              className="text-slate-500 group-hover:text-[#dca12f] transition-colors shrink-0"
             />
           </div>
 
           {/* Dashboard Overview Card */}
-          <div className="bg-[#162236] border border-slate-700/50 rounded-xl p-6">
+          <div className="bg-[#ffff] border-t-4 border-[#D4AF37] rounded-xl p-6">
             <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">📊</span>
-                <h3 className="text-sm font-semibold text-white">
+              <div className="flex items-center gap-1">
+                <LayoutDashboard size={14} className="text-[#000000]" />
+                <h3 className="text-sm font-semibold text-[#000000]">
                   Dashboard Overview
                 </h3>
               </div>
-              <span className="text-xs font-medium text-[#dca12f] bg-[#dca12f]/10 px-3 py-1 rounded-full">
+              <span className="text-xs font-medium text-[#44474D] bg-[#E5EEFF] px-3 py-1 rounded-[16px]">
                 Live Data
               </span>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center border-r border-slate-700/50 pr-4">
-                <p className="text-3xl font-bold text-white mb-1">4</p>
-                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                <p className="text-3xl font-bold text-black mb-1">4</p>
+                <p className="text-[10px] font-medium text-[#44474D] uppercase tracking-wider">
                   Active RFQs
                 </p>
               </div>
               <div className="text-center border-r border-slate-700/50 pr-4">
-                <p className="text-3xl font-bold text-white mb-1">8</p>
-                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                <p className="text-3xl font-bold text-black mb-1">8</p>
+                <p className="text-[10px] font-medium text-[#44474D] uppercase tracking-wider">
                   Favorite Suppliers
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-white mb-1">2</p>
-                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                <p className="text-3xl font-bold text-black mb-1">2</p>
+                <p className="text-[10px] font-medium text-[#44474D] uppercase tracking-wider">
                   Recent Messages
                 </p>
               </div>
