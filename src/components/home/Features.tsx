@@ -32,7 +32,7 @@ export default function Features() {
       titleKey: "policies",
       descKey: "policiesDesc",
       icon: ShieldCheck,
-      link: "#policies",
+      link: "/policies",
     },
     {
       titleKey: "listCompany",

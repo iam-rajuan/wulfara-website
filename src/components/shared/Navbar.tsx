@@ -60,7 +60,7 @@ export default function Header() {
               {t('helpCenter')}
             </Link>
             <Link
-              href="#policies"
+              href="/policies"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
               {t('policies')}
@@ -134,7 +134,7 @@ export default function Header() {
               {t('helpCenter')}
             </Link>
             <Link
-              href="#policies"
+              href="/policies"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2"
             >

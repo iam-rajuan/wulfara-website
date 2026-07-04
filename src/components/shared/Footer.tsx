@@ -79,7 +79,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#policies" className="hover:text-[#dca12f] transition-colors">
+                <Link href="/policies" className="hover:text-[#dca12f] transition-colors">
                   {t('policies')}
                 </Link>
               </li>
@@ -93,10 +93,10 @@ export default function Footer() {
             &copy; 2026 WULFARA B2B Marketplace. {t('rightsReserved')}
           </p>
           <div className="flex gap-6">
-            <Link href="#privacy" className="hover:text-[#dca12f] transition-colors">
+            <Link href="/policies#privacy-policy" className="hover:text-[#dca12f] transition-colors">
               {t('privacyPolicy')}
             </Link>
-            <Link href="#terms" className="hover:text-[#dca12f] transition-colors">
+            <Link href="/policies#terms-of-service" className="hover:text-[#dca12f] transition-colors">
               {t('termsOfService')}
             </Link>
           </div>
