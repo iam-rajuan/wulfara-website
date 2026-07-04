@@ -37,13 +37,13 @@ export default function RfqWorkflow({ steps }: RfqWorkflowProps) {
           {steps.map((step) => (
             <div
               key={step.number}
-              className="group relative bg-white rounded-lg border border-slate-200 hover:border-[#dca12f]/40 p-6 sm:p-8 text-center hover:shadow-lg transition-all duration-300"
+              className="group relative bg-white rounded-lg border border-[#D4AF37] hover:border-[#dca12f]/40 p-6 sm:p-8 text-center hover:shadow-lg transition-all duration-300"
             >
               {/* Step Number Circle */}
-              <div className="mx-auto w-14 h-14 rounded-full bg-[#dca12f] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-md">
+              <div className="mx-auto w-14 h-14 rounded-[16px] bg-[#dca12f] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-md">
                 <span
                   style={{ fontFamily: "'Inter', sans-serif" }}
-                  className="text-lg font-black text-white"
+                  className="text-lg font-black text-black "
                 >
                   {step.number}
                 </span>

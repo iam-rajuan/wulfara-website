@@ -23,7 +23,7 @@ export default function RfqPurpose({ features }: RfqPurposeProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-start">
           {/* Left Column - Purpose Text */}
           <div className="space-y-6">
-            {/* Learn More Button */}
+            {/* Purpose Button */}
             <div className="pt-4">
               <a
                 href="#learn-more"
