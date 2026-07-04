@@ -23,10 +23,15 @@ export default function RfqPurpose({ features }: RfqPurposeProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-start">
           {/* Left Column - Purpose Text */}
           <div className="space-y-6">
-            {/* Label */}
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#dca12f] border-b-2 border-[#dca12f]/30 pb-1">
-              {t("rfqPurposeLabel")}
-            </span>
+            {/* Learn More Button */}
+            <div className="pt-4">
+              <a
+                href="#learn-more"
+                className="inline-flex items-center justify-center rounded border-2 border-[#D4AF37] bg-transparent px-8 py-3 text-xs sm:text-sm font-bold text-[#D4AF37] transition-all uppercase tracking-wide"
+              >
+                {t("rfqPurposeLabel")}
+              </a>
+            </div>
 
             {/* Large Heading */}
             <h2
@@ -50,7 +55,7 @@ export default function RfqPurpose({ features }: RfqPurposeProps) {
             <div className="pt-4">
               <a
                 href="#learn-more"
-                className="inline-flex items-center justify-center rounded border-2 border-slate-800 bg-transparent hover:bg-slate-50 px-8 py-3 text-xs sm:text-sm font-bold text-slate-900 transition-all uppercase tracking-wide"
+                className="inline-flex items-center justify-center rounded border-2 border-[#D4AF37] bg-transparent px-8 py-3 text-xs sm:text-sm font-bold text-[#D4AF37] transition-all uppercase tracking-wide"
               >
                 {t("learnMore")}
               </a>
