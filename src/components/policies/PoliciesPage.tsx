@@ -9,11 +9,13 @@ import {
   Building2,
   FileText,
   CreditCard,
-  Ban,
+  CircleX,
   AlertTriangle,
   ExternalLink,
   ShieldAlert
 } from "lucide-react";
+import { TermsIcon, SupplierListingIcon } from "@/components/icons";
+
 export default function PoliciesPage() {
   const [activeSection, setActiveSection] = useState("terms-of-service");
 
@@ -21,7 +23,7 @@ export default function PoliciesPage() {
     {
       id: "terms-of-service",
       title: "Terms of Service",
-      icon: Scale,
+      icon: TermsIcon,
       content: (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
@@ -59,7 +61,7 @@ export default function PoliciesPage() {
     {
       id: "supplier-listing-policy",
       title: "Supplier Listing Policy",
-      icon: Building2,
+      icon: SupplierListingIcon,
       content: (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
@@ -116,7 +118,7 @@ export default function PoliciesPage() {
     {
       id: "cancellation-policy",
       title: "Cancellation Policy",
-      icon: Ban,
+      icon: CircleX,
       content: (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
@@ -149,7 +151,7 @@ export default function PoliciesPage() {
       id: "terms-of-service",
       title: "Terms of Service",
       desc: "Marketplace rules, platform usage, and user responsibilities.",
-      icon: Scale
+      icon: TermsIcon
     },
     {
       id: "privacy-policy",
@@ -161,7 +163,7 @@ export default function PoliciesPage() {
       id: "supplier-listing-policy",
       title: "Supplier Listing",
       desc: "Verification, profile accuracy, and listing requirements.",
-      icon: Building2
+      icon: SupplierListingIcon
     },
     {
       id: "rfq-policy",
@@ -179,7 +181,7 @@ export default function PoliciesPage() {
       id: "cancellation-policy",
       title: "Cancellation",
       desc: "Subscription cancellation terms and timelines.",
-      icon: Ban
+      icon: CircleX
     }
   ];
 
@@ -233,8 +235,8 @@ export default function PoliciesPage() {
                   key={policy.id}
                   onClick={() => scrollToSection(policy.id)}
                   className={`text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeSection === policy.id
-                      ? "bg-slate-100 text-slate-900"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-slate-100 text-slate-900"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     }`}
                 >
                   {policy.title}

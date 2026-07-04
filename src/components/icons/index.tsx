@@ -57,3 +57,35 @@ export function ListCompanyIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function TermsIcon({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 23 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 23.75V21.25H15V23.75H0ZM7.0625 17.6875L0 10.625L2.625 7.9375L9.75 15L7.0625 17.6875ZM15 9.75L7.9375 2.625L10.625 0L17.6875 7.0625L15 9.75ZM20.75 22.5L4.4375 6.1875L6.1875 4.4375L22.5 20.75L20.75 22.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+export function SupplierListingIcon({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 25 23"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M0 22.5V0H12.5V5H25V22.5H0ZM2.5 20H5V17.5H2.5V20ZM2.5 15H5V12.5H2.5V15ZM2.5 10H5V7.5H2.5V10ZM2.5 5H5V2.5H2.5V5ZM7.5 20H10V17.5H7.5V20ZM7.5 15H10V12.5H7.5V15ZM7.5 10H10V7.5H7.5V10ZM7.5 5H10V2.5H7.5V5ZM12.5 20H22.5V7.5H12.5V10H15V12.5H12.5V15H15V17.5H12.5V20ZM17.5 12.5V10H20V12.5H17.5ZM17.5 17.5V15H20V17.5H17.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
