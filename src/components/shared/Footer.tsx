@@ -45,7 +45,7 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link href="#rfq" className="hover:text-[#dca12f] transition-colors">
+                <Link href="/rfq" className="hover:text-[#dca12f] transition-colors">
                   {t('rfq')}
                 </Link>
               </li>

@@ -48,7 +48,7 @@ export default function Header() {
               {t('faq')}
             </Link>
             <Link
-              href="#rfq"
+              href="/rfq"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
               {t('rfq')}
@@ -120,7 +120,7 @@ export default function Header() {
               {t('faq')}
             </Link>
             <Link
-              href="#rfq"
+              href="/rfq"
               onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >
