@@ -2,6 +2,23 @@
 
 import React, { useEffect, useRef } from "react";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+interface MapNode {
+  name: string;
+  pos: LatLng;
+}
+
 const mapStyles = [
   {
     elementType: "geometry",
@@ -28,7 +45,7 @@ const mapStyles = [
   }
 ];
 
-const nodes = [
+const nodes: MapNode[] = [
   { name: "New York", pos: { lat: 40.7128, lng: -74.0060 } },
   { name: "Los Angeles", pos: { lat: 34.0522, lng: -118.2437 } },
   { name: "London", pos: { lat: 51.5074, lng: -0.1278 } },
@@ -41,7 +58,7 @@ const nodes = [
   { name: "Sao Paulo", pos: { lat: -23.5505, lng: -46.6333 } }
 ];
 
-const connections = [
+const connections: LatLng[][] = [
   [nodes[0].pos, nodes[2].pos], // NY - London
   [nodes[1].pos, nodes[7].pos], // LA - Tokyo
   [nodes[2].pos, nodes[3].pos], // London - Amsterdam
@@ -54,8 +71,8 @@ const connections = [
   [nodes[9].pos, nodes[8].pos]  // Sao Paulo - Sydney
 ];
 
-export default function DynamicMap() {
-  const mapRef = useRef(null);
+export default function DynamicMap(): React.JSX.Element {
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initMap = () => {
@@ -107,7 +124,7 @@ export default function DynamicMap() {
       initMap();
     } else {
       const scriptId = "google-maps-script";
-      let script = document.getElementById(scriptId);
+      let script = document.getElementById(scriptId) as HTMLScriptElement | null;
 
       if (!script) {
         script = document.createElement("script");

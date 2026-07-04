@@ -3,8 +3,22 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
+interface MapNode {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  role: string;
+  highlighted?: boolean;
+}
+
+interface Connection {
+  from: string;
+  to: string;
+}
+
 // Global network nodes (coordinates in % of container width/height)
-const nodes = [
+const nodes: MapNode[] = [
   { id: "la", name: "Los Angeles", x: 18, y: 44, role: "Supplier Hub" },
   { id: "ny", name: "New York", x: 28, y: 38, role: "Logistics Hub" },
   { id: "sp", name: "São Paulo", x: 38, y: 72, role: "Supplier Hub" },
@@ -18,14 +32,14 @@ const nodes = [
 ];
 
 // Helper to construct curved Quadratic Bezier path string
-const getCurvePath = (x1, y1, x2, y2) => {
+const getCurvePath = (x1: number, y1: number, x2: number, y2: number): string => {
   const mx = (x1 + x2) / 2;
   const my = (y1 + y2) / 2;
   const controlY = my - Math.abs(x1 - x2) * 0.18;
   return `M ${x1} ${y1} Q ${mx} ${controlY} ${x2} ${y2}`;
 };
 
-const connections = [
+const connections: Connection[] = [
   { from: "ny", to: "ld" },
   { from: "la", to: "tk" },
   { from: "ld", to: "am" },
@@ -38,9 +52,9 @@ const connections = [
   { from: "sp", to: "sd" }
 ];
 
-export default function DemoMap() {
-  const [hoveredNode, setHoveredNode] = useState(null);
-  const [activeCircle, setActiveCircle] = useState(2); // The 3rd circle active by default
+export default function DemoMap(): React.JSX.Element {
+  const [hoveredNode, setHoveredNode] = useState<MapNode | null>(null);
+  const [activeCircle, setActiveCircle] = useState<number>(2); // The 3rd circle active by default
 
   return (
     <div className="relative w-full h-full min-h-[300px] bg-[#222325] select-none group/map overflow-hidden">
