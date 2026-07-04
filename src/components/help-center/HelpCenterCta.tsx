@@ -4,7 +4,7 @@ import { Headset } from "lucide-react";
 export default function HelpCenterCta() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto py-20">
-      <div className="bg-[#dca12f] rounded-lg p-10 sm:p-14 text-center shadow-lg relative overflow-hidden">
+      <div className="bg-[#d4af37] rounded-lg p-10 sm:p-14 text-center shadow-lg relative overflow-hidden">
         {/* Subtle background pattern/overlay if needed */}
         <div className="absolute inset-0 bg-black/5"></div>
 
@@ -26,7 +26,7 @@ export default function HelpCenterCta() {
             </a>
             <a
               href="/faq"
-              className="inline-flex items-center justify-center rounded bg-white hover:bg-slate-50 text-slate-900 px-8 py-3.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center justify-center border border-[#213145] rounded bg-white hover:bg-slate-50 text-slate-900 px-8 py-3.5 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all"
             >
               Visit Full FAQ
             </a>

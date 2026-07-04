@@ -1,5 +1,5 @@
 import React from "react";
-import { Rocket, Search, FileText, BadgeCheck, CreditCard, CircleDollarSign, Scale, Headset } from "lucide-react";
+import { Rocket, Search, FileText, BadgeCheck, CreditCard, CircleDollarSign, Headset, Hammer } from "lucide-react";
 
 export default function HelpCenterTopics() {
   const topics = [
@@ -36,7 +36,7 @@ export default function HelpCenterTopics() {
     {
       title: "Policies",
       description: "Review our terms of service, privacy policy, and community guidelines.",
-      icon: Scale,
+      icon: Hammer,
     },
     {
       title: "Contact Support",
