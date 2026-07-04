@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-const AUTH_ROUTES = ["/signup", "/login"];
+const AUTH_ROUTES = ["/signup", "/login", "/dashboard"];
 
 export default function LayoutShell({
   children,
