@@ -74,7 +74,7 @@ export default function Header() {
 
             {/* Login Link */}
             <Link
-              href="#login"
+              href="/login"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
               {t('login')}
@@ -150,7 +150,7 @@ export default function Header() {
 
             {/* Mobile Login Link */}
             <Link
-              href="#login"
+              href="/login"
               onClick={() => setIsOpen(false)}
               className="text-base font-medium text-slate-300 hover:text-white"
             >
