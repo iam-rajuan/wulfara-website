@@ -40,7 +40,7 @@ export default function SignUpPage() {
   return (
     <div className="flex min-h-screen">
       {/* ───── Left Panel: Sign Up Form ───── */}
-      <div className="w-full lg:w-[45%] xl:w-[42%] flex flex-col justify-center px-8 sm:px-12 md:px-16 lg:px-20 py-10 bg-white relative">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-12 md:px-16 lg:px-20 py-10 bg-white relative">
         {/* Logo */}
         <div className="absolute top-8 left-8 sm:left-12 md:left-16 lg:left-20">
           <Link href="/" className="flex items-center gap-2.5">
@@ -224,7 +224,7 @@ export default function SignUpPage() {
       </div>
 
       {/* ───── Right Panel: Buyer Workspace Showcase ───── */}
-      <div className="hidden lg:flex lg:w-[55%] xl:w-[58%] bg-[#0f1b2d] relative overflow-hidden flex-col justify-center px-12 xl:px-20">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0f1b2d] relative overflow-hidden flex-col justify-center px-12 xl:px-20">
         {/* Background image */}
         <Image
           src={authBg}

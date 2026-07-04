@@ -37,26 +37,26 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* ───── Left Panel: Login Form ───── */}
-      <div className="w-full lg:w-[45%] xl:w-[42%] flex flex-col justify-center px-8 sm:px-12 md:px-16 lg:px-20 py-10 bg-white relative">
-        {/* Logo */}
-        <div className="absolute top-8 left-8 sm:left-12 md:left-16 lg:left-20">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Image
-              src={logoImg}
-              alt="Wulfara Logo"
-              width={28}
-              height={28}
-              className="h-7 w-7 object-contain"
-              priority
-            />
-            <span className="text-lg font-black tracking-wider text-[#1b2b3a] uppercase">
-              WULFARA
-            </span>
-          </Link>
-        </div>
-
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-8 sm:px-12 md:px-16 lg:px-20 py-10 bg-white relative">
         {/* Form Content */}
-        <div className="max-w-[340px] w-full mt-16">
+        <div className="max-w-[340px] w-full">
+          {/* Logo */}
+          <div className="mb-10">
+            <Link href="/" className="flex items-center gap-2.5">
+              <Image
+                src={logoImg}
+                alt="Wulfara Logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+                priority
+              />
+              <span className="text-lg font-black tracking-wider text-[#1b2b3a] uppercase">
+                WULFARA
+              </span>
+            </Link>
+          </div>
+
           <h1 className="text-3xl sm:text-4xl font-bold text-[#1b2b3a] leading-tight mb-2">
             Login to
             <br />
@@ -181,7 +181,7 @@ export default function LoginPage() {
       </div>
 
       {/* ───── Right Panel: Buyer Workspace Showcase ───── */}
-      <div className="hidden lg:flex lg:w-[55%] xl:w-[58%] bg-[#0f1b2d] relative overflow-hidden flex-col justify-center px-12 xl:px-20">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0f1b2d] relative overflow-hidden flex-col justify-center px-12 xl:px-20">
         {/* Background image */}
         <Image
           src={authBg}
