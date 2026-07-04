@@ -192,7 +192,7 @@ export default function PoliciesPage() {
   };
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen pb-20">
+    <div className="bg-[#f8fafc] pb-20">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Header Section */}
         <div className="mb-8">
