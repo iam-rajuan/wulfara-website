@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Search,
   ChevronDown,
@@ -143,7 +142,7 @@ export default function FavoriteSuppliersPage() {
                 className={`w-[60px] h-[60px] rounded-lg border border-gray-100 flex items-center justify-center shrink-0 ${supplier.logoBg}`}
               >
                 {supplier.id === 1 && (
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 shadow-inner flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-linear-to-br from-gray-300 to-gray-500 shadow-inner flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-gray-100"></div>
                   </div>
                 )}
