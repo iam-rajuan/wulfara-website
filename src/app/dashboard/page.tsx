@@ -103,11 +103,11 @@ export default function DashboardOverviewPage() {
         </p>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* ── Left Column ── */}
         <div className="flex-1 min-w-0">
           {/* Stat Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {statCards.map((card) => (
               <div
                 key={card.label}
@@ -138,7 +138,7 @@ export default function DashboardOverviewPage() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider px-6 py-4">
@@ -199,7 +199,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* ── Right Column ── */}
-        <div className="w-[320px] shrink-0 space-y-6">
+        <div className="w-full lg:w-[320px] lg:shrink-0 space-y-6">
           {/* Sourcing Summary */}
           <div className="bg-white border border-gray-200 p-6">
             <h3 className="text-[18px] font-bold text-[#0B172E] mb-4">

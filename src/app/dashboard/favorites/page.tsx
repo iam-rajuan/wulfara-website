@@ -59,7 +59,7 @@ export default function FavoriteSuppliersPage() {
   return (
     <div className="w-auto mx-auto pb-12">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-4 mb-2">
             <h2 className="text-[32px] font-bold text-[#0B172E] tracking-tight">
@@ -79,8 +79,8 @@ export default function FavoriteSuppliersPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8 shadow-sm">
-        <div className="flex gap-4 mb-5">
+      <div className="bg-white border border-gray-200 p-5 mb-8 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-4 mb-5">
           <div className="relative flex-1">
             <Search
               size={18}
@@ -89,10 +89,10 @@ export default function FavoriteSuppliersPage() {
             <input
               type="text"
               placeholder="Search saved suppliers..."
-              className="w-full h-11 pl-11 pr-4 bg-[#F8F9FB] border border-gray-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 transition-all placeholder:text-gray-400"
+              className="w-full h-11 pl-11 pr-4 bg-[#F8F9FB] border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 transition-all placeholder:text-gray-400"
             />
           </div>
-          <button className="flex items-center justify-between px-4 h-11 bg-[#F8F9FB] border border-gray-200 rounded-lg w-[200px] text-sm font-bold text-[#0B172E] hover:bg-gray-100 transition-colors">
+          <button className="flex items-center justify-between px-4 h-11 bg-[#F8F9FB] border border-gray-200 rounded-sm w-full sm:w-[200px] text-[13px] font-bold text-[#0B172E] hover:bg-gray-100 transition-colors">
             Sort: Recently Saved
             <ChevronDown size={16} className="text-gray-400" />
           </button>
@@ -118,7 +118,7 @@ export default function FavoriteSuppliersPage() {
       </div>
 
       {/* Supplier Grid */}
-      <div className="grid grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         {suppliers.map((supplier) => (
           <div
             key={supplier.id}
