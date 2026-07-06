@@ -11,11 +11,14 @@ import {
   Filter,
   ChevronDown,
   X,
+  Eye
 } from "lucide-react";
+import Link from "next/link";
 
 // Initial mock data for RFQs
 const initialRfqData = [
   {
+    id: "RFQ-1048",
     supplier: "Steel Company A",
     product: "Steel sheets and pipes",
     quantity: "500 units",
@@ -25,6 +28,7 @@ const initialRfqData = [
     lastUpdated: "2 hrs ago",
   },
   {
+    id: "RFQ-1049",
     supplier: "Global Logistics Partners",
     product: "Freight forwarding service",
     quantity: "1 Shipment",
@@ -34,6 +38,7 @@ const initialRfqData = [
     lastUpdated: "1 day ago",
   },
   {
+    id: "RFQ-1050",
     supplier: "Industrial Components Inc",
     product: "Heavy duty bearings",
     quantity: "1000 units",
@@ -43,6 +48,7 @@ const initialRfqData = [
     lastUpdated: "2 weeks ago",
   },
   {
+    id: "RFQ-1051",
     supplier: "Alpha Manufacturing",
     product: "Aluminum extrusions",
     quantity: "200 units",
@@ -84,7 +90,11 @@ export default function MyRFQsPage() {
     const dateObj = new Date(newRfq.deadline);
     const formattedDate = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
+    // Generate a random ID for the new RFQ
+    const newId = `RFQ-${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newEntry = {
+      id: newId,
       supplier: newRfq.supplier,
       product: newRfq.product,
       quantity: newRfq.quantity || "1 unit",
@@ -346,7 +356,7 @@ export default function MyRFQsPage() {
                   Status
                 </th>
                 <th className="text-left text-[13px] font-bold text-gray-700 px-6 py-4">
-                  Last Updated
+                  Action
                 </th>
               </tr>
             </thead>
@@ -355,10 +365,16 @@ export default function MyRFQsPage() {
                 filteredRfqs.map((row, i) => (
                   <tr
                     key={i}
-                    className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors"
+                    className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors group"
                   >
-                    <td className="px-6 py-4 text-[14px] text-gray-800 font-medium">
-                      {row.supplier}
+                    <td className="px-6 py-4 text-[14px]">
+                      <Link 
+                        href={`/dashboard/rfqs/${row.id}`} 
+                        className="font-bold text-[#0B172E] hover:text-[#DFB63E] transition-colors"
+                      >
+                        {row.supplier}
+                      </Link>
+                      <div className="text-[11px] text-gray-500 mt-0.5">{row.id}</div>
                     </td>
                     <td className="px-4 py-4 text-[14px] text-gray-600">
                       {row.product}
@@ -376,8 +392,14 @@ export default function MyRFQsPage() {
                         {row.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-[14px] text-gray-500">
-                      {row.lastUpdated}
+                    <td className="px-6 py-4">
+                      <Link 
+                        href={`/dashboard/rfqs/${row.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-[12px] font-bold rounded-md hover:bg-gray-50 hover:text-[#0B172E] hover:border-gray-300 transition-all"
+                      >
+                        <Eye size={14} />
+                        View
+                      </Link>
                     </td>
                   </tr>
                 ))
