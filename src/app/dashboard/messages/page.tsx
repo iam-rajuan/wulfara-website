@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { 
-  Search, 
-  Filter, 
-  CheckCircle, 
-  Clock, 
+import { useState, useRef, useEffect } from "react";
+import {
+  Search,
+  Filter,
+  CheckCircle,
+  Clock,
   PlusSquare,
   Paperclip,
   Send
@@ -63,12 +63,17 @@ const initialMessagesData = [
 export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState("inbox");
   // Set to null initially to show the empty state, until the user clicks a conversation
-  const [activeMessage, setActiveMessage] = useState<number | null>(null); 
+  const [activeMessage, setActiveMessage] = useState<number | null>(null);
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState(initialMessagesData);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeChat = activeMessage ? messages.find(m => m.id === activeMessage) : null;
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [activeChat?.history, activeMessage]);
 
   const handleSendMessage = () => {
     if (!inputText.trim() || !activeMessage) return;
@@ -94,7 +99,7 @@ export default function MessagesPage() {
       }
       return thread;
     }));
-    
+
     setInputText("");
   };
 
@@ -128,7 +133,7 @@ export default function MessagesPage() {
         }
         return thread;
       }));
-      
+
       // Reset input so the same file can be selected again if needed
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -150,17 +155,16 @@ export default function MessagesPage() {
 
       {/* Main Content Layout */}
       <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
-        
+
         {/* Left Sidebar - Message List */}
         <div className="w-full md:w-[380px] bg-white border border-gray-200 rounded-md shadow-sm flex flex-col overflow-hidden h-full">
-          
+
           {/* Tabs */}
           <div className="flex items-center border-b border-gray-200">
-            <button 
+            <button
               onClick={() => setActiveTab("inbox")}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 text-[14px] font-bold transition-colors relative cursor-pointer ${
-                activeTab === "inbox" ? "text-[#0B172E]" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`flex-1 py-4 flex items-center justify-center gap-2 text-[14px] font-bold transition-colors relative cursor-pointer ${activeTab === "inbox" ? "text-[#0B172E]" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               Inbox
               <span className="bg-[#D92D20] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
@@ -168,11 +172,10 @@ export default function MessagesPage() {
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#DFB63E]"></div>
               )}
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("sourcing")}
-              className={`flex-1 py-4 flex items-center justify-center gap-2 text-[14px] font-bold transition-colors relative cursor-pointer ${
-                activeTab === "sourcing" ? "text-[#0B172E]" : "text-gray-500 hover:text-gray-700"
-              }`}
+              className={`flex-1 py-4 flex items-center justify-center gap-2 text-[14px] font-bold transition-colors relative cursor-pointer ${activeTab === "sourcing" ? "text-[#0B172E]" : "text-gray-500 hover:text-gray-700"
+                }`}
             >
               Sourcing
               {activeTab === "sourcing" && (
@@ -210,20 +213,19 @@ export default function MessagesPage() {
               <button
                 key={msg.id}
                 onClick={() => setActiveMessage(msg.id)}
-                className={`w-full text-left p-4 border-b border-gray-100 transition-colors relative cursor-pointer ${
-                  activeMessage === msg.id ? "bg-[#F4F7FF]" : "hover:bg-gray-50"
-                }`}
+                className={`w-full text-left p-4 border-b border-gray-100 transition-colors relative cursor-pointer ${activeMessage === msg.id ? "bg-[#F4F7FF]" : "hover:bg-gray-50"
+                  }`}
               >
                 {activeMessage === msg.id && (
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#DFB63E]"></div>
                 )}
-                
+
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[14px] font-bold text-[#0B172E]">{msg.sender}</span>
                     {msg.isVerified && (
                       <div className="text-[#DFB63E] bg-[#FEF3C7] rounded-full p-[1px]">
-                         <CheckCircle size={12} strokeWidth={3} />
+                        <CheckCircle size={12} strokeWidth={3} />
                       </div>
                     )}
                   </div>
@@ -233,11 +235,10 @@ export default function MessagesPage() {
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                    msg.tagType === "warning" ? "border-[#FDE68A] text-[#D97706] bg-[#FEF3C7]/40" : 
-                    msg.tagType === "primary" ? "border-[#BFDBFE] text-[#1E40AF] bg-[#EFF6FF]" : 
-                    "border-gray-200 text-gray-600 bg-gray-50"
-                  }`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${msg.tagType === "warning" ? "border-[#FDE68A] text-[#D97706] bg-[#FEF3C7]/40" :
+                      msg.tagType === "primary" ? "border-[#BFDBFE] text-[#1E40AF] bg-[#EFF6FF]" :
+                        "border-gray-200 text-gray-600 bg-gray-50"
+                    }`}>
                     {msg.tag}
                   </span>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-gray-500">
@@ -270,8 +271,8 @@ export default function MessagesPage() {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="flex items-center gap-1 text-[11px] text-green-600 font-bold">
-                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                       Online
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      Online
                     </span>
                     <span className="text-[11px] text-gray-400 font-medium">• {activeChat.timeEstimate}</span>
                   </div>
@@ -290,7 +291,7 @@ export default function MessagesPage() {
                   Conversation Started
                 </span>
               </div>
-              
+
               {activeChat.history.map(msg => (
                 <div key={msg.id} className={`flex flex-col max-w-[80%] ${msg.sender === "me" ? "self-end items-end" : "self-start items-start"}`}>
                   <div className="flex items-end gap-2">
@@ -300,17 +301,16 @@ export default function MessagesPage() {
                         {activeChat.sender.charAt(0)}
                       </div>
                     )}
-                    
+
                     {/* Bubble */}
-                    <div className={`p-3.5 rounded-2xl text-[13px] shadow-sm leading-relaxed ${
-                      msg.sender === "me" 
-                        ? "bg-[#0B172E] text-white rounded-br-[4px]" 
+                    <div className={`p-3.5 rounded-2xl text-[13px] shadow-sm leading-relaxed ${msg.sender === "me"
+                        ? "bg-[#0B172E] text-white rounded-br-[4px]"
                         : "bg-white border border-gray-200 text-gray-800 rounded-bl-[4px]"
-                    }`}>
+                      }`}>
                       {msg.isFile ? (
                         <div className="flex items-center gap-2 px-1">
-                           <Paperclip size={16} className={msg.sender === "me" ? "text-gray-300" : "text-gray-500"} />
-                           <span className="font-bold underline cursor-pointer">{msg.fileName}</span>
+                          <Paperclip size={16} className={msg.sender === "me" ? "text-gray-300" : "text-gray-500"} />
+                          <span className="font-bold underline cursor-pointer">{msg.fileName}</span>
                         </div>
                       ) : (
                         msg.text
@@ -322,32 +322,33 @@ export default function MessagesPage() {
                   </span>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Chat Input Area */}
             <div className="p-4 border-t border-gray-200 bg-white">
               <div className="flex items-center gap-3">
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  className="hidden" 
+                  className="hidden"
                 />
-                <button 
+                <button
                   onClick={() => fileInputRef.current?.click()}
                   className="p-2 text-gray-400 hover:text-[#0B172E] transition-colors rounded-full hover:bg-gray-100 cursor-pointer flex-shrink-0"
                 >
                   <Paperclip size={20} />
                 </button>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type your message..." 
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5 text-[14px] text-black focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:bg-white transition-all" 
+                  placeholder="Type your message..."
+                  className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5 text-[14px] text-black focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:bg-white transition-all"
                 />
-                <button 
+                <button
                   onClick={handleSendMessage}
                   className="bg-[#DFB63E] hover:bg-[#cba433] text-black p-2.5 rounded-full transition-colors flex items-center justify-center w-10 h-10 shadow-sm cursor-pointer flex-shrink-0"
                 >
@@ -358,21 +359,21 @@ export default function MessagesPage() {
           </div>
         ) : (
           <div className="flex-1 bg-white border border-gray-200 rounded-md shadow-sm flex flex-col items-center justify-center p-8 h-full">
-            
+
             <div className="relative mb-8 mt-10">
               <div className="absolute inset-0 bg-[#EFF6FF] blur-3xl rounded-full w-48 h-48 -ml-16 -mt-16 z-0"></div>
-              
+
               <div className="relative z-10 flex items-center justify-center">
                 {/* Dark Blue Base Bubble */}
                 <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#0B172E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="transform scale-x-[-1]">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
-                
+
                 {/* Secondary offset line indicating stack */}
                 <div className="absolute top-2 -right-2 z-0">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#0B172E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="transform scale-x-[-1]">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#0B172E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="transform scale-x-[-1]">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
                 </div>
 
                 {/* Golden Yellow Top Bubble */}
@@ -385,9 +386,9 @@ export default function MessagesPage() {
                 </div>
               </div>
             </div>
-            
+
             <h2 className="text-[20px] font-bold text-[#0B172E] mb-3 text-center">
-              Select a conversation to start<br/>messaging
+              Select a conversation to start<br />messaging
             </h2>
             <p className="text-[14px] text-gray-500 text-center max-w-[340px] mb-8 leading-relaxed">
               Choose a message thread from the left to view details, reply to suppliers, or negotiate pricing and terms.
