@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { 
   Search, 
   Filter, 
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 // Added conversation history to each message for the dynamic chat view
-const messagesData = [
+const initialMessagesData = [
   {
     id: 1,
     sender: "Steel Company A",
@@ -24,8 +24,8 @@ const messagesData = [
     excerpt: "We can provide steel sheets. What quantity do you need?",
     timestamp: "New",
     history: [
-      { id: 101, text: "Hello, I am interested in your steel sheets as per RFQ #1042. Are they currently in stock at the New York warehouse?", sender: "me", time: "10:00 AM" },
-      { id: 102, text: "We can provide steel sheets. What quantity do you need?", sender: "them", time: "10:15 AM" }
+      { id: 101, text: "Hello, I am interested in your steel sheets as per RFQ #1042. Are they currently in stock at the New York warehouse?", sender: "me", time: "10:00 AM", isFile: false, fileName: "" },
+      { id: 102, text: "We can provide steel sheets. What quantity do you need?", sender: "them", time: "10:15 AM", isFile: false, fileName: "" }
     ]
   },
   {
@@ -39,8 +39,8 @@ const messagesData = [
     excerpt: "Shipping to your location is available.",
     timestamp: "Yesterday",
     history: [
-      { id: 201, text: "Do you offer direct shipping to our facility in Brooklyn for the requested industrial steel?", sender: "me", time: "Yesterday, 2:00 PM" },
-      { id: 202, text: "Yes, we do. Shipping to your location is available.", sender: "them", time: "Yesterday, 3:30 PM" }
+      { id: 201, text: "Do you offer direct shipping to our facility in Brooklyn for the requested industrial steel?", sender: "me", time: "Yesterday, 2:00 PM", isFile: false, fileName: "" },
+      { id: 202, text: "Yes, we do. Shipping to your location is available.", sender: "them", time: "Yesterday, 3:30 PM", isFile: false, fileName: "" }
     ]
   },
   {
@@ -54,8 +54,8 @@ const messagesData = [
     excerpt: "Please attach your shipment specifications.",
     timestamp: "Oct 24",
     history: [
-      { id: 301, text: "I'm looking for a logistics partner to handle weekly freight forwarding.", sender: "me", time: "Oct 24, 9:00 AM" },
-      { id: 302, text: "We'd be happy to help. Please attach your shipment specifications so we can provide a quote.", sender: "them", time: "Oct 24, 11:45 AM" }
+      { id: 301, text: "I'm looking for a logistics partner to handle weekly freight forwarding.", sender: "me", time: "Oct 24, 9:00 AM", isFile: false, fileName: "" },
+      { id: 302, text: "We'd be happy to help. Please attach your shipment specifications so we can provide a quote.", sender: "them", time: "Oct 24, 11:45 AM", isFile: false, fileName: "" }
     ]
   }
 ];
@@ -65,8 +65,76 @@ export default function MessagesPage() {
   // Set to null initially to show the empty state, until the user clicks a conversation
   const [activeMessage, setActiveMessage] = useState<number | null>(null); 
   const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState(initialMessagesData);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const activeChat = activeMessage ? messagesData.find(m => m.id === activeMessage) : null;
+  const activeChat = activeMessage ? messages.find(m => m.id === activeMessage) : null;
+
+  const handleSendMessage = () => {
+    if (!inputText.trim() || !activeMessage) return;
+
+    const newMsg = {
+      id: Date.now(),
+      text: inputText,
+      sender: "me",
+      time: "Just now",
+      isFile: false,
+      fileName: ""
+    };
+
+    setMessages(prev => prev.map(thread => {
+      if (thread.id === activeMessage) {
+        return {
+          ...thread,
+          excerpt: inputText,
+          timestamp: "Just now",
+          isNew: false, // Clear new state if we replied
+          history: [...thread.history, newMsg]
+        };
+      }
+      return thread;
+    }));
+    
+    setInputText("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0 && activeMessage) {
+      const file = e.target.files[0];
+      const newMsg = {
+        id: Date.now(),
+        text: `Attached file: ${file.name}`,
+        isFile: true,
+        fileName: file.name,
+        sender: "me",
+        time: "Just now"
+      };
+
+      setMessages(prev => prev.map(thread => {
+        if (thread.id === activeMessage) {
+          return {
+            ...thread,
+            excerpt: `Sent an attachment`,
+            timestamp: "Just now",
+            isNew: false,
+            history: [...thread.history, newMsg]
+          };
+        }
+        return thread;
+      }));
+      
+      // Reset input so the same file can be selected again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   return (
     <div className="w-full h-[calc(100vh-120px)] flex flex-col pb-4">
@@ -138,7 +206,7 @@ export default function MessagesPage() {
 
           {/* List */}
           <div className="flex-1 overflow-y-auto">
-            {messagesData.map((msg) => (
+            {messages.map((msg) => (
               <button
                 key={msg.id}
                 onClick={() => setActiveMessage(msg.id)}
@@ -236,10 +304,17 @@ export default function MessagesPage() {
                     {/* Bubble */}
                     <div className={`p-3.5 rounded-2xl text-[13px] shadow-sm leading-relaxed ${
                       msg.sender === "me" 
-                        ? "bg-[#0B172E] text-white rounded-br-sm" 
-                        : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm"
+                        ? "bg-[#0B172E] text-white rounded-br-[4px]" 
+                        : "bg-white border border-gray-200 text-gray-800 rounded-bl-[4px]"
                     }`}>
-                      {msg.text}
+                      {msg.isFile ? (
+                        <div className="flex items-center gap-2 px-1">
+                           <Paperclip size={16} className={msg.sender === "me" ? "text-gray-300" : "text-gray-500"} />
+                           <span className="font-bold underline cursor-pointer">{msg.fileName}</span>
+                        </div>
+                      ) : (
+                        msg.text
+                      )}
                     </div>
                   </div>
                   <span className={`text-[10px] text-gray-400 mt-1.5 font-medium ${msg.sender === "me" ? "mr-1" : "ml-9"}`}>
@@ -252,18 +327,29 @@ export default function MessagesPage() {
             {/* Chat Input Area */}
             <div className="p-4 border-t border-gray-200 bg-white">
               <div className="flex items-center gap-3">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-50 cursor-pointer">
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden" 
+                />
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-2 text-gray-400 hover:text-[#0B172E] transition-colors rounded-full hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                >
                   <Paperclip size={20} />
                 </button>
                 <input 
                   type="text" 
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Type your message..." 
                   className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5 text-[14px] text-black focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:bg-white transition-all" 
                 />
                 <button 
-                  className="bg-[#DFB63E] hover:bg-[#cba433] text-black p-2.5 rounded-full transition-colors flex items-center justify-center w-10 h-10 shadow-sm cursor-pointer"
+                  onClick={handleSendMessage}
+                  className="bg-[#DFB63E] hover:bg-[#cba433] text-black p-2.5 rounded-full transition-colors flex items-center justify-center w-10 h-10 shadow-sm cursor-pointer flex-shrink-0"
                 >
                   <Send size={16} strokeWidth={2.5} className="mr-0.5 mt-0.5" />
                 </button>
