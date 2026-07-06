@@ -48,9 +48,8 @@ export default function DashboardLayout({
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[230px] bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-[230px] bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Logo */}
         <div className="px-5 pt-6 pb-4 flex items-center justify-between">
@@ -107,11 +106,10 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-colors ${
-                  isActive
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-colors ${isActive
                     ? "bg-[#D4AF37] text-white"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
                 {item.label}
@@ -148,7 +146,7 @@ export default function DashboardLayout({
                 className="w-full h-[38px] pl-9 pr-4 text-sm rounded-lg border border-gray-200 bg-[#F8F9FB] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] placeholder:text-gray-400 transition-all"
               />
             </div>
-            
+
             {/* Mobile Search Icon */}
             <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
               <Search size={20} className="text-gray-500" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   FileText,
   Hourglass,
@@ -8,41 +9,11 @@ import {
   Plus,
   Search,
   Filter,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 
-const statCards = [
-  {
-    label: "Total RFQs",
-    value: "24",
-    icon: FileText,
-    iconColor: "text-gray-500",
-    active: false,
-  },
-  {
-    label: "Pending",
-    value: "8",
-    icon: Hourglass,
-    iconColor: "text-[#DFB63E]",
-    active: false,
-  },
-  {
-    label: "Responded",
-    value: "12",
-    icon: Mail,
-    iconColor: "text-[#DFB63E]",
-    active: true,
-  },
-  {
-    label: "Closed",
-    value: "4",
-    icon: CheckCircle,
-    iconColor: "text-gray-500",
-    active: false,
-  },
-];
-
-const rfqData = [
+// Initial mock data for RFQs
+const initialRfqData = [
   {
     supplier: "Steel Company A",
     product: "Steel sheets and pipes",
@@ -70,9 +41,96 @@ const rfqData = [
     statusColor: "border-[#6B7280] text-[#4B5563] bg-[#F3F4F6]",
     lastUpdated: "2 weeks ago",
   },
+  {
+    supplier: "Alpha Manufacturing",
+    product: "Aluminum extrusions",
+    quantity: "200 units",
+    deadline: "Aug 05, 2026",
+    status: "Pending",
+    statusColor: "border-[#F97316] text-[#F97316] bg-[#FFF7ED]",
+    lastUpdated: "5 hrs ago",
+  }
 ];
 
 export default function MyRFQsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeStatusFilter, setActiveStatusFilter] = useState("All");
+  const [selectedDate, setSelectedDate] = useState("Date");
+  const [selectedCategory, setSelectedCategory] = useState("Category");
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Dynamically calculate stats based on data
+  const stats = useMemo(() => {
+    const total = initialRfqData.length;
+    const pending = initialRfqData.filter((r) => r.status === "Pending").length;
+    const responded = initialRfqData.filter((r) => r.status === "Responded").length;
+    const closed = initialRfqData.filter((r) => r.status === "Closed").length;
+
+    return [
+      {
+        id: "All",
+        label: "Total RFQs",
+        value: total,
+        icon: FileText,
+        iconColor: "text-gray-500",
+      },
+      {
+        id: "Pending",
+        label: "Pending",
+        value: pending,
+        icon: Hourglass,
+        iconColor: "text-[#DFB63E]",
+      },
+      {
+        id: "Responded",
+        label: "Responded",
+        value: responded,
+        icon: Mail,
+        iconColor: "text-[#DFB63E]",
+      },
+      {
+        id: "Closed",
+        label: "Closed",
+        value: closed,
+        icon: CheckCircle,
+        iconColor: "text-gray-500",
+      },
+    ];
+  }, []);
+
+  // Filter the RFQs dynamically based on search query and status filter
+  const filteredRfqs = useMemo(() => {
+    let filtered = initialRfqData;
+    
+    // Filter by active status
+    if (activeStatusFilter !== "All") {
+      filtered = filtered.filter((rfq) => rfq.status === activeStatusFilter);
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (rfq) =>
+          rfq.supplier.toLowerCase().includes(lowerQuery) ||
+          rfq.product.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    return filtered;
+  }, [searchQuery, activeStatusFilter]);
+
   return (
     <div className="w-full mx-auto pb-10">
       {/* Header Section */}
@@ -85,7 +143,7 @@ export default function MyRFQsPage() {
             Track your submitted quote requests and supplier responses.
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-semibold py-2.5 px-5 rounded-md transition-colors text-[14px]">
+        <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-semibold py-2.5 px-5 rounded-md transition-colors text-[14px] cursor-pointer">
           <Plus size={18} strokeWidth={2.5} />
           Create New RFQ
         </button>
@@ -93,38 +151,42 @@ export default function MyRFQsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statCards.map((card, idx) => (
-          <div
-            key={idx}
-            className={`bg-white p-5 rounded-md flex flex-col justify-between h-[120px] transition-all ${
-              card.active
-                ? "border-2 border-[#DFB63E]"
-                : "border border-gray-200 shadow-sm"
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <p
-                className={`text-[13px] font-bold ${
-                  card.active ? "text-[#DFB63E]" : "text-gray-600"
-                }`}
-              >
-                {card.label}
-              </p>
-              <card.icon
-                size={18}
-                className={`${card.iconColor}`}
-                strokeWidth={2}
-              />
-            </div>
-            <p
-              className={`text-5xl font-bold leading-none ${
-                card.active ? "text-[#DFB63E]" : "text-[#0B172E]"
+        {stats.map((card) => {
+          const isActive = card.id === activeStatusFilter;
+          return (
+            <button
+              key={card.id}
+              onClick={() => setActiveStatusFilter(card.id)}
+              className={`bg-white p-5 rounded-md flex flex-col justify-between h-[120px] transition-all text-left cursor-pointer ${
+                isActive
+                  ? "border-2 border-[#DFB63E] shadow-md transform scale-[1.02]"
+                  : "border border-gray-200 shadow-sm hover:border-[#DFB63E] hover:shadow-md"
               }`}
             >
-              {card.value}
-            </p>
-          </div>
-        ))}
+              <div className="flex items-start justify-between w-full">
+                <p
+                  className={`text-[13px] font-bold ${
+                    isActive ? "text-[#DFB63E]" : "text-gray-600"
+                  }`}
+                >
+                  {card.label}
+                </p>
+                <card.icon
+                  size={18}
+                  className={`${card.iconColor}`}
+                  strokeWidth={2}
+                />
+              </div>
+              <p
+                className={`text-5xl font-bold leading-none ${
+                  isActive ? "text-[#DFB63E]" : "text-[#0B172E]"
+                }`}
+              >
+                {card.value}
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       {/* Table Section */}
@@ -138,26 +200,95 @@ export default function MyRFQsPage() {
             </div>
             <input
               type="text"
-              placeholder="Search by RFQ ID..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E] placeholder-gray-400"
+              placeholder="Search by supplier or product..."
+              value={searchQuery}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-[14px] text-black focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E] placeholder-gray-400"
             />
           </div>
 
           {/* Filters */}
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-              <Filter size={14} className="text-gray-500" />
-              Status
-              <ChevronDown size={14} className="text-gray-500 ml-1" />
-            </button>
-            <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-              Date
-              <ChevronDown size={14} className="text-gray-500 ml-1" />
-            </button>
-            <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-              Category
-              <ChevronDown size={14} className="text-gray-500 ml-1" />
-            </button>
+          <div className="flex items-center gap-3" ref={dropdownRef}>
+            {/* Status Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setOpenDropdown(openDropdown === "status" ? null : "status")}
+                className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <Filter size={14} className="text-gray-500" />
+                {activeStatusFilter === "All" ? "Status" : activeStatusFilter}
+                <ChevronDown size={14} className="text-gray-500 ml-1" />
+              </button>
+              {openDropdown === "status" && (
+                <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-200 shadow-lg rounded-md z-10 py-1">
+                  {["All", "Pending", "Responded", "Closed"].map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => {
+                        setActiveStatusFilter(opt);
+                        setOpenDropdown(null);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-100"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Date Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setOpenDropdown(openDropdown === "date" ? null : "date")}
+                className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                {selectedDate}
+                <ChevronDown size={14} className="text-gray-500 ml-1" />
+              </button>
+              {openDropdown === "date" && (
+                <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-200 shadow-lg rounded-md z-10 py-1">
+                  {["Date", "Today", "Last 7 days", "Last 30 days"].map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => {
+                        setSelectedDate(opt);
+                        setOpenDropdown(null);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-100"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Category Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setOpenDropdown(openDropdown === "category" ? null : "category")}
+                className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                {selectedCategory}
+                <ChevronDown size={14} className="text-gray-500 ml-1" />
+              </button>
+              {openDropdown === "category" && (
+                <div className="absolute top-full right-0 lg:left-0 lg:right-auto mt-1 w-48 bg-white border border-gray-200 shadow-lg rounded-md z-10 py-1">
+                  {["Category", "Raw Materials", "Logistics", "Components"].map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => {
+                        setSelectedCategory(opt);
+                        setOpenDropdown(null);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-100"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -187,35 +318,46 @@ export default function MyRFQsPage() {
               </tr>
             </thead>
             <tbody>
-              {rfqData.map((row, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors"
-                >
-                  <td className="px-6 py-4 text-[14px] text-gray-800">
-                    {row.supplier}
-                  </td>
-                  <td className="px-4 py-4 text-[14px] text-gray-600">
-                    {row.product}
-                  </td>
-                  <td className="px-4 py-4 text-[14px] text-gray-600">
-                    {row.quantity}
-                  </td>
-                  <td className="px-4 py-4 text-[14px] text-gray-600">
-                    {row.deadline}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span
-                      className={`inline-block text-[11px] font-bold px-3 py-1 rounded-full border ${row.statusColor}`}
-                    >
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-[14px] text-gray-500">
-                    {row.lastUpdated}
+              {filteredRfqs.length > 0 ? (
+                filteredRfqs.map((row, i) => (
+                  <tr
+                    key={i}
+                    className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-[14px] text-gray-800 font-medium">
+                      {row.supplier}
+                    </td>
+                    <td className="px-4 py-4 text-[14px] text-gray-600">
+                      {row.product}
+                    </td>
+                    <td className="px-4 py-4 text-[14px] text-gray-600">
+                      {row.quantity}
+                    </td>
+                    <td className="px-4 py-4 text-[14px] text-gray-600">
+                      {row.deadline}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className={`inline-block text-[11px] font-bold px-3 py-1 rounded-full border ${row.statusColor}`}
+                      >
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-[14px] text-gray-500">
+                      {row.lastUpdated}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-10 text-center text-[14px] text-gray-500"
+                  >
+                    No RFQs found matching your criteria.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
