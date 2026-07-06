@@ -7,13 +7,20 @@ import Image from "next/image";
 import heroBg from "../../../public/assets/hero-bg.png";
 import { useTranslation } from "react-i18next";
 
+import { useRouter } from "next/navigation";
+
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
   const { t } = useTranslation();
+  const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Searching for: ${searchQuery}`);
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push(`/search`);
+    }
   };
 
   const quickLinks = [
