@@ -10,6 +10,7 @@ import {
   Search,
   Filter,
   ChevronDown,
+  X,
 } from "lucide-react";
 
 // Initial mock data for RFQs
@@ -53,13 +54,18 @@ const initialRfqData = [
 ];
 
 export default function MyRFQsPage() {
+  const [rfqData, setRfqData] = useState(initialRfqData);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeStatusFilter, setActiveStatusFilter] = useState("All");
   const [selectedDate, setSelectedDate] = useState("Date");
   const [selectedCategory, setSelectedCategory] = useState("Category");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newRfq, setNewRfq] = useState({ supplier: "", product: "", quantity: "", deadline: "" });
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -70,12 +76,35 @@ export default function MyRFQsPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRfq.supplier || !newRfq.product || !newRfq.deadline) return;
+    
+    // Format date from YYYY-MM-DD to "Mon DD, YYYY" format
+    const dateObj = new Date(newRfq.deadline);
+    const formattedDate = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+    const newEntry = {
+      supplier: newRfq.supplier,
+      product: newRfq.product,
+      quantity: newRfq.quantity || "1 unit",
+      deadline: formattedDate !== "Invalid Date" ? formattedDate : newRfq.deadline,
+      status: "Pending",
+      statusColor: "border-[#F97316] text-[#F97316] bg-[#FFF7ED]",
+      lastUpdated: "Just now",
+    };
+    
+    setRfqData([newEntry, ...rfqData]);
+    setIsCreateModalOpen(false);
+    setNewRfq({ supplier: "", product: "", quantity: "", deadline: "" });
+  };
+
   // Dynamically calculate stats based on data
   const stats = useMemo(() => {
-    const total = initialRfqData.length;
-    const pending = initialRfqData.filter((r) => r.status === "Pending").length;
-    const responded = initialRfqData.filter((r) => r.status === "Responded").length;
-    const closed = initialRfqData.filter((r) => r.status === "Closed").length;
+    const total = rfqData.length;
+    const pending = rfqData.filter((r) => r.status === "Pending").length;
+    const responded = rfqData.filter((r) => r.status === "Responded").length;
+    const closed = rfqData.filter((r) => r.status === "Closed").length;
 
     return [
       {
@@ -107,11 +136,11 @@ export default function MyRFQsPage() {
         iconColor: "text-gray-500",
       },
     ];
-  }, []);
+  }, [rfqData]);
 
   // Filter the RFQs dynamically based on search query and status filter
   const filteredRfqs = useMemo(() => {
-    let filtered = initialRfqData;
+    let filtered = rfqData;
     
     // Filter by active status
     if (activeStatusFilter !== "All") {
@@ -129,7 +158,7 @@ export default function MyRFQsPage() {
     }
 
     return filtered;
-  }, [searchQuery, activeStatusFilter]);
+  }, [searchQuery, activeStatusFilter, rfqData]);
 
   return (
     <div className="w-full mx-auto pb-10">
@@ -143,7 +172,10 @@ export default function MyRFQsPage() {
             Track your submitted quote requests and supplier responses.
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-semibold py-2.5 px-5 rounded-md transition-colors text-[14px] cursor-pointer">
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-semibold py-2.5 px-5 rounded-md transition-colors text-[14px] cursor-pointer"
+        >
           <Plus size={18} strokeWidth={2.5} />
           Create New RFQ
         </button>
@@ -363,6 +395,92 @@ export default function MyRFQsPage() {
           </table>
         </div>
       </div>
+
+      {/* Create New RFQ Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-lg rounded-lg shadow-xl relative animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-gray-200">
+              <h3 className="text-[18px] font-bold text-[#0B172E]">Create New RFQ</h3>
+              <button 
+                onClick={() => setIsCreateModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Modal Body / Form */}
+            <form onSubmit={handleCreateSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[13px] font-bold text-gray-700 mb-1">Supplier Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newRfq.supplier}
+                  onChange={(e) => setNewRfq({...newRfq, supplier: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-[14px] text-black focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]"
+                  placeholder="e.g. Steel Company A"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[13px] font-bold text-gray-700 mb-1">Product/Service</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newRfq.product}
+                  onChange={(e) => setNewRfq({...newRfq, product: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-[14px] text-black focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]"
+                  placeholder="e.g. Steel sheets and pipes"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-bold text-gray-700 mb-1">Quantity</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newRfq.quantity}
+                    onChange={(e) => setNewRfq({...newRfq, quantity: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-[14px] text-black focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]"
+                    placeholder="e.g. 500 units"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-bold text-gray-700 mb-1">Deadline</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={newRfq.deadline}
+                    onChange={(e) => setNewRfq({...newRfq, deadline: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-[14px] text-gray-700 focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 pt-4 mt-2 border-t border-gray-100">
+                <button 
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2 text-[13px] font-bold text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 text-[13px] font-bold bg-[#DFB63E] hover:bg-[#cba433] text-black rounded-md transition-colors shadow-sm cursor-pointer"
+                >
+                  Submit RFQ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
