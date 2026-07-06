@@ -1,10 +1,61 @@
 "use client";
 
-import React from "react";
+import React, { useState, Suspense } from "react";
 import { Search, MapPin, ExternalLink, X, SlidersHorizontal, Maximize2, Map as MapIcon, CheckCircle2, Navigation } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function SearchScreen() {
+// Mock Data
+const mockSuppliers = [
+  {
+    id: 1,
+    name: "Steel Company A",
+    verified: true,
+    premium: true,
+    negotiable: true,
+    pro: false,
+    location: "New York, NY",
+    distance: "12 miles",
+    services: "Steel sheets, pipes.",
+    responseTime: "Typically within 2h",
+    tags: ["Steel sheets", "Pipes", "Manufacturing"],
+  },
+  {
+    id: 2,
+    name: "Steel Company B",
+    verified: true,
+    premium: false,
+    negotiable: false,
+    pro: true,
+    location: "New Jersey",
+    distance: "20 miles",
+    services: "Industrial steel, metal parts.",
+    responseTime: "Typically within 4h",
+    tags: ["Industrial steel", "Metal parts", "Supplier"],
+  },
+];
+
+const initialTags = ['Steel Industry', 'Verified Suppliers', 'Negotiable Rate', 'Within 25 miles', 'Premium Listings'];
+
+function SearchContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  // Initialize query from URL parameter, fallback to "steel suppliers" for visual consistency
+  const urlQuery = searchParams.get("q") || "steel suppliers";
+  
+  const [query, setQuery] = useState(urlQuery);
+  const [activeTags, setActiveTags] = useState(initialTags);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push(`/search?q=${encodeURIComponent(query)}`);
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setActiveTags(activeTags.filter(tag => tag !== tagToRemove));
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
@@ -15,37 +66,38 @@ export default function SearchScreen() {
           <span>/</span>
           <span className="hover:text-slate-900 cursor-pointer">Search</span>
           <span>/</span>
-          <span className="font-semibold text-slate-900">Steel Suppliers</span>
+          <span className="font-semibold text-slate-900 capitalize">{urlQuery}</span>
         </div>
 
         {/* Page Title */}
-        <h1 className="text-3xl font-bold text-[#0F172A] mb-2">Search Results for &quot;steel suppliers&quot;</h1>
-        <p className="text-slate-500 mb-8">Find steel suppliers, manufacturers, and industrial service providers near your location.</p>
+        <h1 className="text-3xl font-bold text-[#0F172A] mb-2">Search Results for &quot;{urlQuery}&quot;</h1>
+        <p className="text-slate-500 mb-8">Find suppliers, manufacturers, and industrial service providers near your location.</p>
 
         {/* Main Search Input */}
-        <div className="flex bg-white rounded-lg border border-slate-300 overflow-hidden shadow-sm mb-4 max-w-3xl">
+        <form onSubmit={handleSearch} className="flex bg-white rounded-lg border border-slate-300 overflow-hidden shadow-sm mb-4 max-w-3xl">
           <div className="flex items-center pl-4 pr-2 text-slate-400">
             <Search size={20} />
           </div>
           <input 
             type="text" 
-            defaultValue="steel suppliers" 
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="flex-1 py-3 focus:outline-none text-slate-700 font-medium" 
           />
-          <button className="bg-[#DFB63E] hover:bg-[#cba433] transition-colors text-slate-900 font-bold px-8 py-3">
+          <button type="submit" className="bg-[#DFB63E] hover:bg-[#cba433] transition-colors text-slate-900 font-bold px-8 py-3">
             Search
           </button>
-        </div>
+        </form>
 
         {/* Filter Tags */}
         <div className="flex items-center gap-3 mb-8">
-          <button className="p-2 border border-slate-300 rounded-md bg-white text-slate-600 hover:bg-slate-50">
+          <button type="button" className="p-2 border border-slate-300 rounded-md bg-white text-slate-600 hover:bg-slate-50">
             <SlidersHorizontal size={18} />
           </button>
           <div className="flex flex-wrap gap-2">
-            {['Steel Industry', 'Verified Suppliers', 'Negotiable Rate', 'Within 25 miles', 'Premium Listings'].map(tag => (
+            {activeTags.map(tag => (
               <span key={tag} className="flex items-center gap-1.5 bg-[#E2E8F0] text-[#334155] px-3 py-1.5 rounded-full text-sm font-medium">
-                {tag} <X size={14} className="cursor-pointer hover:text-slate-800" />
+                {tag} <X size={14} className="cursor-pointer hover:text-slate-800" onClick={() => removeTag(tag)} />
               </span>
             ))}
           </div>
@@ -59,7 +111,7 @@ export default function SearchScreen() {
             <div className="bg-white border border-slate-200 rounded-lg p-5">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-slate-900">Filters</h2>
-                <button className="text-sm font-semibold text-[#2563EB] hover:underline">Clear All</button>
+                <button type="button" className="text-sm font-semibold text-[#2563EB] hover:underline" onClick={() => setActiveTags([])}>Clear All</button>
               </div>
 
               {/* Supplier Category */}
@@ -108,7 +160,7 @@ export default function SearchScreen() {
           {/* Middle Column: Results */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-bold text-slate-900">24 suppliers found</span>
+              <span className="text-sm font-bold text-slate-900">{mockSuppliers.length * 12} suppliers found</span>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-slate-500">Sort by:</span>
                 <select className="border border-slate-300 rounded-md px-2 py-1 text-slate-900 font-medium focus:outline-none bg-white">
@@ -120,86 +172,48 @@ export default function SearchScreen() {
             </div>
 
             <div className="space-y-4">
-              {/* Card 1 */}
-              <div className="bg-white border border-slate-200 rounded-lg p-5">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-slate-900">Steel Company A</h3>
-                    <CheckCircle2 size={18} className="text-[#10B981] fill-[#10B981]/10" />
+              {mockSuppliers.map(supplier => (
+                <div key={supplier.id} className="bg-white border border-slate-200 rounded-lg p-5">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-bold text-slate-900">{supplier.name}</h3>
+                      {supplier.verified && <CheckCircle2 size={18} className="text-[#10B981] fill-[#10B981]/10" />}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {supplier.premium && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Premium</span>}
+                      {supplier.negotiable && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Negotiable</span>}
+                      {supplier.pro && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Pro</span>}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Premium</span>
-                    <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Negotiable</span>
+
+                  <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
+                    <MapPin size={14} />
+                    <span>{supplier.location} • {supplier.distance}</span>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
-                  <MapPin size={14} />
-                  <span>New York, NY • 12 miles</span>
-                </div>
-
-                <div className="mb-4 space-y-1">
-                  <p className="text-sm"><span className="font-semibold text-slate-700">Services:</span> <span className="text-slate-900 font-medium">Steel sheets, pipes.</span></p>
-                  <p className="text-sm"><span className="text-slate-500">Response Time: Typically within 2h</span></p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {['Steel sheets', 'Pipes', 'Manufacturing'].map(pill => (
-                    <span key={pill} className="bg-[#E2E8F0] text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                      {pill}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                  <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 font-bold text-sm rounded hover:bg-slate-50 transition-colors">
-                    <ExternalLink size={14} /> Visit Website
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-[#DFB63E] hover:bg-[#cba433] text-slate-900 font-bold text-sm rounded transition-colors">
-                    <Navigation size={14} className="rotate-45" /> Send RFQ
-                  </button>
-                </div>
-              </div>
-
-              {/* Card 2 */}
-              <div className="bg-white border border-slate-200 rounded-lg p-5">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-slate-900">Steel Company B</h3>
-                    <CheckCircle2 size={18} className="text-[#10B981] fill-[#10B981]/10" />
+                  <div className="mb-4 space-y-1">
+                    <p className="text-sm"><span className="font-semibold text-slate-700">Services:</span> <span className="text-slate-900 font-medium">{supplier.services}</span></p>
+                    <p className="text-sm"><span className="text-slate-500">Response Time: {supplier.responseTime}</span></p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Pro</span>
+
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {supplier.tags.map(tag => (
+                      <span key={tag} className="bg-[#E2E8F0] text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 font-bold text-sm rounded hover:bg-slate-50 transition-colors">
+                      <ExternalLink size={14} /> Visit Website
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-[#DFB63E] hover:bg-[#cba433] text-slate-900 font-bold text-sm rounded transition-colors">
+                      <Navigation size={14} className="rotate-45" /> Send RFQ
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
-                  <MapPin size={14} />
-                  <span>New Jersey • 20 miles</span>
-                </div>
-
-                <div className="mb-4 space-y-1">
-                  <p className="text-sm"><span className="font-semibold text-slate-700">Services:</span> <span className="text-slate-900 font-medium">Industrial steel, metal parts.</span></p>
-                  <p className="text-sm"><span className="text-slate-500">Response Time: Typically within 4h</span></p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {['Industrial steel', 'Metal parts', 'Supplier'].map(pill => (
-                    <span key={pill} className="bg-[#E2E8F0] text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                      {pill}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                  <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 font-bold text-sm rounded hover:bg-slate-50 transition-colors">
-                    <ExternalLink size={14} /> Visit Website
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-[#DFB63E] hover:bg-[#cba433] text-slate-900 font-bold text-sm rounded transition-colors">
-                    <Navigation size={14} className="rotate-45" /> Send RFQ
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -237,5 +251,13 @@ export default function SearchScreen() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SearchScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">Loading...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
