@@ -8,23 +8,22 @@ import logoImg from "../../../public/assets/logo.png";
 import {
   LayoutDashboard,
   Search,
-  Heart,
+  Bookmark,
   FileText,
-  MessageSquare,
+  Mail,
   Settings,
   Plus,
-  Bell,
-  Mail,
   Menu,
   X,
+  Bell,
 } from "lucide-react";
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Search Suppliers", href: "/dashboard/search", icon: Search },
-  { label: "Favorite Suppliers", href: "/dashboard/favorites", icon: Heart },
+  { label: "Favorite Suppliers", href: "/dashboard/favorites", icon: Bookmark },
   { label: "My RFQs", href: "/dashboard/rfqs", icon: FileText },
-  { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+  { label: "Messages", href: "/dashboard/messages", icon: Mail },
   { label: "Profile Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -48,14 +47,14 @@ export default function DashboardLayout({
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[230px] bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 w-[260px] bg-[#F2F5F9] border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         {/* Logo */}
-        <div className="px-5 pt-6 pb-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <Image src={logoImg} alt="WULFARA" width={32} height={32} />
-            <span className="text-[17px] font-extrabold tracking-tight text-[#0f1b2d]">
+        <div className="px-6 pt-8 pb-8 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <Image src={logoImg} alt="WULFARA" width={28} height={28} />
+            <span className="text-[20px] font-extrabold tracking-tight text-[#0B172E]">
               WULFARA
             </span>
           </Link>
@@ -68,33 +67,31 @@ export default function DashboardLayout({
         </div>
 
         {/* User info */}
-        <div className="px-5 pb-5">
+        <div className="px-6 pb-6">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#1a3a5c] flex items-center justify-center text-white text-xs font-bold">
-              AV
-            </div>
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Adlef Vertigo" className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200" />
             <div>
-              <p className="text-sm font-semibold text-[#0f1b2d] leading-tight">
+              <p className="text-[14px] font-bold text-[#0B172E] leading-tight">
                 Adlef Vertigo
               </p>
-              <p className="text-[11px] text-gray-500">Buyer Account</p>
+              <p className="text-[12px] font-bold text-gray-500">Buyer Account</p>
             </div>
           </div>
         </div>
 
         {/* New RFQ button */}
-        <div className="px-4 pb-5">
+        <div className="px-6 pb-6">
           <Link
             href="/dashboard/rfqs/new"
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[#D4AF37] hover:bg-[#c9a02f] text-white text-sm font-semibold transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md bg-[#212E46] hover:bg-[#151D2C] text-white text-[14px] font-semibold transition-colors shadow-sm"
           >
-            <Plus size={16} strokeWidth={2.5} />
+            <Plus size={18} strokeWidth={2.5} />
             New RFQ
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive =
               item.href === "/dashboard"
@@ -106,12 +103,12 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-colors ${isActive
-                    ? "bg-[#D4AF37] text-white"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                className={`flex items-center gap-4 px-4 py-3 rounded-md text-[14px] font-bold transition-colors ${isActive
+                    ? "bg-[#DFB63E] text-[#0B172E] shadow-sm"
+                    : "text-[#4B5563] hover:bg-[#E5E9F0] hover:text-[#0B172E]"
                   }`}
               >
-                <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 {item.label}
               </Link>
             );
