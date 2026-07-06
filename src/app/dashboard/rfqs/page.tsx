@@ -11,7 +11,8 @@ import {
   Filter,
   ChevronDown,
   X,
-  Eye
+  Eye,
+  Download
 } from "lucide-react";
 import Link from "next/link";
 
@@ -107,6 +108,28 @@ export default function MyRFQsPage() {
     setRfqData([newEntry, ...rfqData]);
     setIsCreateModalOpen(false);
     setNewRfq({ supplier: "", product: "", quantity: "", deadline: "" });
+  };
+
+  const handleDownloadCSV = () => {
+    const headers = ["RFQ ID", "Supplier Name", "Product/Service", "Quantity", "Deadline", "Status", "Last Updated"];
+    const csvRows = filteredRfqs.map(rfq => [
+      rfq.id,
+      `"${rfq.supplier}"`,
+      `"${rfq.product}"`,
+      `"${rfq.quantity}"`,
+      `"${rfq.deadline}"`,
+      rfq.status,
+      `"${rfq.lastUpdated}"`
+    ]);
+    const csvContent = [headers.join(","), ...csvRows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "My_RFQs.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Dynamically calculate stats based on data
@@ -332,6 +355,15 @@ export default function MyRFQsPage() {
                 </div>
               )}
             </div>
+            
+            {/* Export Button */}
+            <button 
+              onClick={handleDownloadCSV}
+              className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer ml-2"
+            >
+              <Download size={14} className="text-gray-500" />
+              Export CSV
+            </button>
           </div>
         </div>
 

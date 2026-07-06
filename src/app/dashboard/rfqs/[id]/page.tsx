@@ -1,3 +1,6 @@
+"use client";
+
+import { use } from "react";
 import { 
   ChevronRight, 
   MessageSquare, 
@@ -13,10 +16,40 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default async function RfqDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  // Await params for Next.js 15+ compatibility
-  const resolvedParams = await params;
+export default function RfqDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  // Use React.use() for params in Client Components (Next.js 15+)
+  const resolvedParams = use(params);
   const rfqId = resolvedParams.id || "RFQ-1048";
+  
+  const handleDownloadDetails = () => {
+    const detailsContent = `RFQ ID: ${rfqId}
+Product: Steel sheets and pipes
+Quantity: 500 units
+Deadline: Jul 15 2026
+
+Notes / Specifications:
+Require high-grade industrial steel sheets (10mm thickness) and seamless pipes (schedule 40). Must meet ASTM A36 standards. Delivery required to central warehouse in Brooklyn. Please include estimated freight costs in the quotation.`;
+
+    const blob = new Blob([detailsContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${rfqId}_details.txt`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadAttachment = (filename: string, content: string) => {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   
   return (
     <div className="w-full max-w-4xl mx-auto pb-10">
@@ -45,7 +78,10 @@ export default async function RfqDetailsPage({ params }: { params: Promise<{ id:
             <MessageSquare size={16} />
             Message Supplier
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+          <button 
+            onClick={handleDownloadDetails}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+          >
             <Download size={16} />
             Download Details
           </button>
@@ -146,7 +182,10 @@ export default async function RfqDetailsPage({ params }: { params: Promise<{ id:
                   <p className="text-[11px] text-gray-500">2.4 MB</p>
                 </div>
               </div>
-              <button className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+              <button 
+                onClick={() => handleDownloadAttachment("specification.pdf", "Mock specification content...")}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
                 <Download size={18} />
               </button>
             </div>
@@ -160,7 +199,10 @@ export default async function RfqDetailsPage({ params }: { params: Promise<{ id:
                   <p className="text-[11px] text-gray-500">850 KB</p>
                 </div>
               </div>
-              <button className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+              <button 
+                onClick={() => handleDownloadAttachment("reference.png", "Mock image data...")}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
                 <Download size={18} />
               </button>
             </div>
