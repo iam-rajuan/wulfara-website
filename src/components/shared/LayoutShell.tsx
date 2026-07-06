@@ -21,7 +21,7 @@ export default function LayoutShell({
   return (
     <>
       <Navbar />
-      <main className="flex-grow">{children}</main>
+      <main className="grow">{children}</main>
       <Footer />
     </>
   );
