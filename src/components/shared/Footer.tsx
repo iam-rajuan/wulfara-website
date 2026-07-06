@@ -1,104 +1,108 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import LanguageSelector from "./LanguageSelector";
+import { Globe, ChevronDown } from "lucide-react";
 
 export default function Footer() {
   const { t } = useTranslation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+  }, []);
+
+  if (isLoggedIn) {
+    return (
+      <footer className="bg-[#152033] text-slate-400">
+        <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
+            {/* Left: Brand & Copyright */}
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <div className="text-xl font-black tracking-wider text-white font-sans uppercase mb-1">
+                WULFARA
+              </div>
+              <p className="text-slate-400 text-xs text-center md:text-left">
+                &copy; 2024 WULFARA. All rights reserved. Industrial Reliability Global.
+              </p>
+            </div>
+
+            {/* Middle: Company Links */}
+            <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-xs">
+              <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
+              <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+              <Link href="/careers" className="hover:text-white transition-colors">Careers</Link>
+            </div>
+
+            {/* Right: Legal & Global */}
+            <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-xs">
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/supply-chain" className="hover:text-white transition-colors">Global Supply Chain</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   return (
-    <footer className="bg-[#1b2b3a] text-slate-400 border-t border-[#dca12f]/80">
-      <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          {/* Brand Column */}
-          <div className="md:col-span-2 space-y-6">
-            <div className="flex items-center gap-2.5 text-2xl font-black tracking-wider text-white font-sans uppercase">
-              <Globe className="h-6 w-6 text-[#dca12f]" />
-              <span>WULFARA</span>
+    <footer className="bg-[#1b2b3a] text-slate-400 pt-16 pb-8 border-t border-[#dca12f]/20">
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
+          
+          {/* Left Column (Brand info) */}
+          <div className="md:col-span-5 space-y-6">
+            <div className="text-2xl font-black tracking-wider text-white font-sans uppercase flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full border-2 border-[#dca12f] grid place-items-center">
+                <Globe size={14} className="text-[#dca12f]" />
+              </div>
+              WULFARA
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
-              {t('footerDesc')}
+            <p className="text-sm text-slate-400 leading-relaxed max-w-md">
+              WULFARA is a leading B2B marketplace directory connecting businesses with reliable suppliers, logistics, and manufacturing partners globally.
             </p>
-
-            {/* Brand Link */}
-            <div>
-              <Link 
-                href="/" 
-                className="text-[#dca12f] hover:underline font-semibold text-sm"
-              >
-                wulfara.com
-              </Link>
-            </div>
-
-            {/* Language Selector */}
-            <div className="inline-block">
-              <LanguageSelector />
+            <p className="text-sm text-[#dca12f] font-semibold hover:text-[#c99126] transition-colors cursor-pointer">
+              wulfara.com
+            </p>
+            
+            {/* Language dropdown */}
+            <div className="inline-flex items-center gap-2 bg-[#2a3b4c] border border-slate-600 rounded px-3 py-2 text-sm text-slate-300 cursor-pointer hover:bg-[#34485d] transition-colors w-fit">
+              <Globe size={16} />
+              <span>English</span>
+              <ChevronDown size={16} />
             </div>
           </div>
 
-          {/* Platform Column */}
-          <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-              {t('platform')}
-            </h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/rfq" className="hover:text-[#dca12f] transition-colors">
-                  {t('rfq')}
-                </Link>
-              </li>
-              <li>
-                <Link href="#list-company" className="hover:text-[#dca12f] transition-colors">
-                  {t('listCompany')}
-                </Link>
-              </li>
-              <li>
-                <Link href="#login" className="hover:text-[#dca12f] transition-colors">
-                  {t('login')}
-                </Link>
-              </li>
+          <div className="md:col-span-1 hidden md:block"></div>
+
+          {/* Middle Column (Platform) */}
+          <div className="md:col-span-3 space-y-6">
+            <h3 className="text-xs font-bold text-white tracking-widest uppercase">Platform</h3>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link href="/rfq" className="hover:text-white transition-colors">RFQ</Link></li>
+              <li><Link href="/list-company" className="hover:text-white transition-colors">List Your Company</Link></li>
+              <li><Link href="/login" className="hover:text-white transition-colors">Login</Link></li>
             </ul>
           </div>
 
-          {/* Support Column */}
-          <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
-              {t('support')}
-            </h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/faq" className="hover:text-[#dca12f] transition-colors">
-                  {t('faq')}
-                </Link>
-              </li>
-              <li>
-                <Link href="#help" className="hover:text-[#dca12f] transition-colors">
-                  {t('helpCenter')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/policies" className="hover:text-[#dca12f] transition-colors">
-                  {t('policies')}
-                </Link>
-              </li>
+          {/* Right Column (Support) */}
+          <div className="md:col-span-3 space-y-6">
+            <h3 className="text-xs font-bold text-white tracking-widest uppercase">Support</h3>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link href="/help-center" className="hover:text-white transition-colors">Help Center</Link></li>
+              <li><Link href="/policies" className="hover:text-white transition-colors">Policies</Link></li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <p>
-            &copy; 2026 WULFARA B2B Marketplace. {t('rightsReserved')}
-          </p>
-          <div className="flex gap-6">
-            <Link href="/policies#privacy-policy" className="hover:text-[#dca12f] transition-colors">
-              {t('privacyPolicy')}
-            </Link>
-            <Link href="/policies#terms-of-service" className="hover:text-[#dca12f] transition-colors">
-              {t('termsOfService')}
-            </Link>
+        {/* Bottom copyright */}
+        <div className="pt-8 border-t border-slate-700/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <p>&copy; 2026 WULFARA B2B Marketplace. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

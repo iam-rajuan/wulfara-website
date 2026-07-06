@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   User, 
   Building, 
@@ -11,11 +12,61 @@ import {
   Lock,
   Globe,
   MapPin,
-  Save
+  Save,
+  Loader2,
+  LogOut
 } from "lucide-react";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("profile");
+  
+  // State for loading
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    router.push("/login");
+  };
+
+  // Profile State
+  const [profile, setProfile] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    phone: "+1 (555) 123-4567"
+  });
+
+  // Company State
+  const [company, setCompany] = useState({
+    name: "TechGlobal Industries",
+    website: "https://techglobal.example.com",
+    address: "123 Innovation Drive, Tech City, CA 94000"
+  });
+
+  // Notifications State
+  const [notifications, setNotifications] = useState({
+    rfqReplies: true,
+    directMessages: true,
+    marketingEmails: false
+  });
+
+  // Security State
+  const [security, setSecurity] = useState({
+    currentPassword: "",
+    newPassword: ""
+  });
+
+  // Generic handle save
+  const handleSave = (section: string) => {
+    setIsSaving(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
+      // Here you could add a toast notification or API integration
+      console.log(`Saved ${section} data`);
+    }, 800);
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto pb-10">
@@ -33,50 +84,35 @@ export default function SettingsPage() {
         {/* Sidebar Navigation */}
         <div className="w-full md:w-64 flex-shrink-0">
           <div className="flex flex-col space-y-1">
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-colors cursor-pointer ${
-                activeTab === "profile" 
-                  ? "bg-[#DFB63E] text-black" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-[#0B172E]"
-              }`}
-            >
-              <User size={18} />
-              My Profile
-            </button>
-            <button
-              onClick={() => setActiveTab("company")}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-colors cursor-pointer ${
-                activeTab === "company" 
-                  ? "bg-[#DFB63E] text-black" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-[#0B172E]"
-              }`}
-            >
-              <Building size={18} />
-              Company Details
-            </button>
-            <button
-              onClick={() => setActiveTab("notifications")}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-colors cursor-pointer ${
-                activeTab === "notifications" 
-                  ? "bg-[#DFB63E] text-black" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-[#0B172E]"
-              }`}
-            >
-              <Bell size={18} />
-              Notifications
-            </button>
-            <button
-              onClick={() => setActiveTab("security")}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-colors cursor-pointer ${
-                activeTab === "security" 
-                  ? "bg-[#DFB63E] text-black" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-[#0B172E]"
-              }`}
-            >
-              <Shield size={18} />
-              Security
-            </button>
+            {[
+              { id: "profile", label: "My Profile", icon: User },
+              { id: "company", label: "Company Details", icon: Building },
+              { id: "notifications", label: "Notifications", icon: Bell },
+              { id: "security", label: "Security", icon: Shield }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-colors cursor-pointer ${
+                  activeTab === tab.id 
+                    ? "bg-[#DFB63E] text-black" 
+                    : "text-gray-600 hover:bg-gray-100 hover:text-[#0B172E]"
+                }`}
+              >
+                <tab.icon size={18} />
+                {tab.label}
+              </button>
+            ))}
+            
+            <div className="pt-4 mt-4 border-t border-gray-200">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-md text-[14px] font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
 
@@ -90,7 +126,7 @@ export default function SettingsPage() {
                 
                 <div className="flex items-center gap-6 mb-8">
                   <div className="w-20 h-20 bg-[#E0E7FF] rounded-full flex items-center justify-center text-[#3730A3] text-2xl font-bold border-4 border-white shadow-sm">
-                    JD
+                    {profile.firstName[0]}{profile.lastName[0]}
                   </div>
                   <div>
                     <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors mb-2 cursor-pointer">
@@ -104,11 +140,21 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[12px] font-bold text-gray-700">First Name</label>
-                    <input type="text" defaultValue="John" className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                    <input 
+                      type="text" 
+                      value={profile.firstName} 
+                      onChange={(e) => setProfile({...profile, firstName: e.target.value})}
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[12px] font-bold text-gray-700">Last Name</label>
-                    <input type="text" defaultValue="Doe" className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                    <input 
+                      type="text" 
+                      value={profile.lastName} 
+                      onChange={(e) => setProfile({...profile, lastName: e.target.value})}
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[12px] font-bold text-gray-700">Email Address</label>
@@ -116,20 +162,34 @@ export default function SettingsPage() {
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Mail size={16} className="text-gray-400" />
                        </div>
-                       <input type="email" defaultValue="john.doe@example.com" className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                       <input 
+                         type="email" 
+                         value={profile.email} 
+                         onChange={(e) => setProfile({...profile, email: e.target.value})}
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                       />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[12px] font-bold text-gray-700">Phone Number</label>
-                    <input type="tel" defaultValue="+1 (555) 123-4567" className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                    <input 
+                      type="tel" 
+                      value={profile.phone} 
+                      onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                    />
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer">
-                  <Save size={16} />
-                  Save Changes
+                <button 
+                  onClick={() => handleSave('profile')}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] disabled:opacity-70 text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </div>
@@ -147,7 +207,12 @@ export default function SettingsPage() {
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Building size={16} className="text-gray-400" />
                        </div>
-                       <input type="text" defaultValue="TechGlobal Industries" className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                       <input 
+                         type="text" 
+                         value={company.name} 
+                         onChange={(e) => setCompany({...company, name: e.target.value})}
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                       />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -156,7 +221,12 @@ export default function SettingsPage() {
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Globe size={16} className="text-gray-400" />
                        </div>
-                       <input type="url" defaultValue="https://techglobal.example.com" className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                       <input 
+                         type="url" 
+                         value={company.website} 
+                         onChange={(e) => setCompany({...company, website: e.target.value})}
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                       />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -165,16 +235,25 @@ export default function SettingsPage() {
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <MapPin size={16} className="text-gray-400" />
                        </div>
-                       <input type="text" defaultValue="123 Innovation Drive, Tech City, CA 94000" className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                       <input 
+                         type="text" 
+                         value={company.address} 
+                         onChange={(e) => setCompany({...company, address: e.target.value})}
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                       />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer">
-                  <Save size={16} />
-                  Save Changes
+                <button 
+                  onClick={() => handleSave('company')}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] disabled:opacity-70 text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </div>
@@ -187,21 +266,36 @@ export default function SettingsPage() {
                 
                 <div className="space-y-4">
                   <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#DFB63E] rounded border-gray-300 focus:ring-[#DFB63E]" />
+                    <input 
+                      type="checkbox" 
+                      checked={notifications.rfqReplies} 
+                      onChange={(e) => setNotifications({...notifications, rfqReplies: e.target.checked})}
+                      className="w-4 h-4 text-[#DFB63E] rounded border-gray-300 focus:ring-[#DFB63E]" 
+                    />
                     <div>
                       <p className="text-[14px] font-bold text-[#0B172E]">New RFQ Replies</p>
                       <p className="text-[12px] text-gray-500">Get notified when a supplier responds to your RFQ.</p>
                     </div>
                   </label>
                   <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#DFB63E] rounded border-gray-300 focus:ring-[#DFB63E]" />
+                    <input 
+                      type="checkbox" 
+                      checked={notifications.directMessages} 
+                      onChange={(e) => setNotifications({...notifications, directMessages: e.target.checked})}
+                      className="w-4 h-4 text-[#DFB63E] rounded border-gray-300 focus:ring-[#DFB63E]" 
+                    />
                     <div>
                       <p className="text-[14px] font-bold text-[#0B172E]">Direct Messages</p>
                       <p className="text-[12px] text-gray-500">Get notified when you receive a new direct message.</p>
                     </div>
                   </label>
                   <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" className="w-4 h-4 text-[#DFB63E] rounded border-gray-300 focus:ring-[#DFB63E]" />
+                    <input 
+                      type="checkbox" 
+                      checked={notifications.marketingEmails} 
+                      onChange={(e) => setNotifications({...notifications, marketingEmails: e.target.checked})}
+                      className="w-4 h-4 text-[#DFB63E] rounded border-gray-300 focus:ring-[#DFB63E]" 
+                    />
                     <div>
                       <p className="text-[14px] font-bold text-[#0B172E]">Marketing Emails</p>
                       <p className="text-[12px] text-gray-500">Receive weekly newsletters and feature updates.</p>
@@ -210,9 +304,13 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer">
-                  <Save size={16} />
-                  Save Preferences
+                <button 
+                  onClick={() => handleSave('notifications')}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] disabled:opacity-70 text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  {isSaving ? 'Saving...' : 'Save Preferences'}
                 </button>
               </div>
             </div>
@@ -230,7 +328,13 @@ export default function SettingsPage() {
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Lock size={16} className="text-gray-400" />
                        </div>
-                       <input type="password" placeholder="••••••••" className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                       <input 
+                         type="password" 
+                         placeholder="••••••••" 
+                         value={security.currentPassword}
+                         onChange={(e) => setSecurity({...security, currentPassword: e.target.value})}
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                       />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -239,14 +343,28 @@ export default function SettingsPage() {
                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Lock size={16} className="text-gray-400" />
                        </div>
-                       <input type="password" placeholder="••••••••" className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" />
+                       <input 
+                         type="password" 
+                         placeholder="••••••••" 
+                         value={security.newPassword}
+                         onChange={(e) => setSecurity({...security, newPassword: e.target.value})}
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                       />
                     </div>
                   </div>
                 </div>
               </div>
               <div className="flex justify-end">
-                <button className="flex items-center gap-2 bg-[#0B172E] hover:bg-[#15274d] text-white font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer">
-                  Update Password
+                <button 
+                  onClick={() => {
+                    handleSave('security');
+                    if (!isSaving) setSecurity({ currentPassword: '', newPassword: '' });
+                  }}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 bg-[#0B172E] hover:bg-[#15274d] disabled:opacity-70 text-white font-bold py-2.5 px-6 rounded-md transition-colors text-[14px] cursor-pointer"
+                >
+                  {isSaving && <Loader2 size={16} className="animate-spin" />}
+                  {isSaving ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
             </div>

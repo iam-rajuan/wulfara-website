@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,7 +10,12 @@ import LanguageSelector from "./LanguageSelector";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#1b2b3a] border-b border-[#dca12f]/80 shadow-lg">
@@ -73,16 +78,18 @@ export default function Header() {
             <LanguageSelector />
 
             {/* Login Link */}
-            <Link
-              href="/login"
-              className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-            >
-              {t('login')}
-            </Link>
+            {!isLoggedIn && (
+              <Link
+                href="/login"
+                className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+              >
+                {t('login')}
+              </Link>
+            )}
 
             {/* CTA Button */}
             <Link
-              href="#list-company"
+              href={isLoggedIn ? "/dashboard" : "/login"}
               className="rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-2 text-xs font-bold text-slate-950 transition-all shadow-sm"
             >
               {t('listCompany')}
@@ -149,25 +156,25 @@ export default function Header() {
             <LanguageSelector />
 
             {/* Mobile Login Link */}
-            <Link
-              href="/login"
-              onClick={() => setIsOpen(false)}
-              className="text-base font-medium text-slate-300 hover:text-white"
-            >
-              {t('login')}
-            </Link>
+            {!isLoggedIn && (
+              <Link
+                href="/login"
+                onClick={() => setIsOpen(false)}
+                className="text-base font-medium text-slate-300 hover:text-white"
+              >
+                {t('login')}
+              </Link>
+            )}
           </div>
 
           {/* Mobile CTA Full Width */}
-          <div className="pt-2">
-            <Link
-              href="#list-company"
-              onClick={() => setIsOpen(false)}
-              className="block w-full text-center rounded bg-[#dca12f] hover:bg-[#c99126] px-4 py-3 text-sm font-bold text-slate-950 shadow-md transition-all"
-            >
-              {t('listCompany')}
-            </Link>
-          </div>
+          <Link
+            href={isLoggedIn ? "/dashboard" : "/login"}
+            onClick={() => setIsOpen(false)}
+            className="mt-4 flex w-full items-center justify-center rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-3 text-sm font-bold text-slate-950 transition-colors shadow-sm"
+          >
+            {t('listCompany')}
+          </Link>
         </div>
       )}
     </header>

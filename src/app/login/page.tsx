@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import logoImg from "../../../public/assets/logo.png";
 import authBg from "../../../public/assets/auth-bg.png";
 import {
@@ -17,8 +18,10 @@ import {
 } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,12 +29,17 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Login submitted:", { ...formData, rememberMe });
+    if (formData.email === "mehedi@gmail.com" && formData.password === "password") {
+      localStorage.setItem("isLoggedIn", "true");
+      router.push("/dashboard");
+    } else {
+      setError("Invalid email or password.");
+    }
   };
 
   return (
@@ -69,6 +77,11 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
+                {error}
+              </div>
+            )}
             {/* Email Address */}
             <div>
               <label

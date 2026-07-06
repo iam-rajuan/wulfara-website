@@ -52,7 +52,7 @@ export default function DashboardLayout({
       >
         {/* Logo */}
         <div className="px-6 pt-8 pb-8 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <Image src={logoImg} alt="WULFARA" width={28} height={28} />
             <span className="text-[20px] font-extrabold tracking-tight text-[#0B172E]">
               WULFARA
