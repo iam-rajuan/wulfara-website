@@ -47,6 +47,12 @@ export default function Header() {
               {t('home')}
             </Link>
             <Link
+              href="/category"
+              className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+            >
+              Category
+            </Link>
+            <Link
               href="/faq"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
@@ -118,6 +124,13 @@ export default function Header() {
               className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
             >
               {t('home')}
+            </Link>
+            <Link
+              href="/category"
+              onClick={() => setIsOpen(false)}
+              className="block text-base font-medium text-slate-300 hover:text-white py-2 border-b border-slate-800"
+            >
+              Category
             </Link>
             <Link
               href="/faq"

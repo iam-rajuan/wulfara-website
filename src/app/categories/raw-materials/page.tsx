@@ -2,16 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
-import { 
-  ChevronRight, 
-  Search, 
-  MapPin, 
-  ChevronDown, 
-  CheckCircle2, 
-  Building2, 
-  Factory, 
-  Droplet, 
-  Tractor, 
+import {
+  ChevronRight,
+  Search,
+  MapPin,
+  ChevronDown,
+  CheckCircle2,
+  Building2,
+  Factory,
+  Droplet,
+  Tractor,
   TreePine,
   FileText
 } from "lucide-react";
@@ -20,7 +20,7 @@ export default function RawMaterialsPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
           <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
@@ -34,9 +34,9 @@ export default function RawMaterialsPage() {
         <div className="relative rounded-2xl overflow-hidden mb-8 shadow-sm">
           {/* Background Image & Overlay */}
           <div className="absolute inset-0">
-            <img 
-              src="https://images.unsplash.com/photo-1590487988256-9ed24133863e?q=80&w=2000&auto=format&fit=crop" 
-              alt="Raw Materials Background" 
+            <img
+              src="https://images.unsplash.com/photo-1590487988256-9ed24133863e?q=80&w=2000&auto=format&fit=crop"
+              alt="Raw Materials Background"
               className="w-full h-full object-cover"
             />
             {/* Dark gradient overlay */}
@@ -62,14 +62,14 @@ export default function RawMaterialsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
+
           {/* Left Column: How it works */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-slate-200 rounded-xl p-6 sticky top-24 shadow-sm">
               <h2 className="text-xl font-bold text-slate-900 mb-8">How it works</h2>
-              
+
               <div className="space-y-8 relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-                
+
                 {/* Step 1 */}
                 <div className="relative flex items-start gap-4">
                   <div className="absolute left-0 mt-1 w-6 h-6 rounded-full bg-[#3B82F6] flex items-center justify-center border-4 border-white shadow-sm z-10"></div>
@@ -112,11 +112,11 @@ export default function RawMaterialsPage() {
 
           {/* Right Column: Main Content */}
           <div className="lg:col-span-3">
-            
+
             {/* Choose Industry */}
             <h2 className="text-2xl font-bold text-[#0F172A] mb-6 tracking-tight">Choose Raw Material Industry</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-              
+
               {/* Card 1: Active */}
               <div className="bg-white border-2 border-[#DFB63E] rounded-xl p-4 relative cursor-pointer shadow-sm">
                 <div className="absolute top-0 right-0 bg-[#DFB63E] text-white p-0.5 rounded-bl-lg rounded-tr-lg">
@@ -130,7 +130,7 @@ export default function RawMaterialsPage() {
               {/* Card 2 */}
               <div className="bg-white border border-slate-200 hover:border-[#DFB63E]/50 rounded-xl p-4 cursor-pointer transition-colors shadow-sm">
                 <div className="mb-3 w-6 h-6 flex items-center justify-center">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600"><rect width="16" height="16" x="4" y="4" rx="2"/><path d="M4 12h16"/><path d="M12 4v16"/><path d="M8 8h.01"/><path d="M16 8h.01"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600"><rect width="16" height="16" x="4" y="4" rx="2" /><path d="M4 12h16" /><path d="M12 4v16" /><path d="M8 8h.01" /><path d="M16 8h.01" /><path d="M8 16h.01" /><path d="M16 16h.01" /></svg>
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 mb-1">Oil & Gas</h3>
                 <p className="text-[11px] text-slate-500 leading-tight">Crude, refined products, and...</p>
@@ -162,9 +162,9 @@ export default function RawMaterialsPage() {
             <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col md:flex-row items-center gap-3 mb-10 shadow-sm">
               <div className="flex-1 relative w-full">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search specifically within Steel..." 
+                <input
+                  type="text"
+                  placeholder="Search specifically within Steel..."
                   className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]"
                 />
               </div>
@@ -200,7 +200,7 @@ export default function RawMaterialsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
+
               {/* Supplier 1 */}
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col h-full">
                 <div className="flex items-start justify-between mb-4">
@@ -211,7 +211,7 @@ export default function RawMaterialsPage() {
                     <CheckCircle2 size={12} /> Verified
                   </span>
                 </div>
-                
+
                 <h3 className="text-sm font-bold text-slate-900 mb-1">Atlas Heavy Steel Co.</h3>
                 <div className="flex items-center gap-1 text-[11px] text-slate-500 mb-4">
                   <MapPin size={12} /> Ruhr Valley, DE &bull; 240 km
@@ -252,7 +252,7 @@ export default function RawMaterialsPage() {
                     <Building2 size={20} />
                   </div>
                 </div>
-                
+
                 <h3 className="text-sm font-bold text-slate-900 mb-1">Nordic Metals Group</h3>
                 <div className="flex items-center gap-1 text-[11px] text-slate-500 mb-4">
                   <MapPin size={12} /> Gothenburg, SE &bull; 850 km
@@ -295,7 +295,7 @@ export default function RawMaterialsPage() {
                     <CheckCircle2 size={12} /> Verified
                   </span>
                 </div>
-                
+
                 <h3 className="text-sm font-bold text-slate-900 mb-1">IronWorks Global</h3>
                 <div className="flex items-center gap-1 text-[11px] text-slate-500 mb-4">
                   <MapPin size={12} /> Chicago, USA &bull; Intl
@@ -338,15 +338,14 @@ export default function RawMaterialsPage() {
     </div>
   );
 }
-
 // Simple custom warehouse icon since it's missing in basic lucide sets sometimes
 function WarehouseIcon({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 2.8 6.7l9-5.4a2 2 0 0 1 2.4 0l9 5.4A2 2 0 0 1 22 8.35Z"/>
-      <path d="M6 18h12"/>
-      <path d="M6 14h12"/>
-      <rect width="12" height="12" x="6" y="10"/>
+      <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 2.8 6.7l9-5.4a2 2 0 0 1 2.4 0l9 5.4A2 2 0 0 1 22 8.35Z" />
+      <path d="M6 18h12" />
+      <path d="M6 14h12" />
+      <rect width="12" height="12" x="6" y="10" />
     </svg>
   );
 }
