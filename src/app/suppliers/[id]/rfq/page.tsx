@@ -12,8 +12,12 @@ import {
   Send, 
   UploadCloud,
   FileText,
-  ChevronLeft
+  ChevronLeft,
+  Check,
+  Eye,
+  GitBranch
 } from "lucide-react";
+import MessageSupplierModal from "@/components/suppliers/MessageSupplierModal";
 
 // Mock data (same as the supplier profile page for consistency)
 const mockSupplier = {
@@ -52,6 +56,8 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +65,124 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
-      alert("RFQ submitted successfully!");
+      setIsSuccess(true);
     }, 1500);
   };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 py-12">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-12 w-full max-w-4xl">
+          
+          {/* Header */}
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-[#dca12f] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+              <CheckCircle2 size={32} className="text-[#1b2b3a]" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#1b2b3a] tracking-tight mb-4 max-w-xl">
+              Your RFQ has been sent successfully.
+            </h1>
+            <p className="text-slate-500 font-medium text-lg max-w-2xl">
+              {supplier.name} has received your request and can respond directly with pricing, availability, and delivery details.
+            </p>
+          </div>
+
+          {/* Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+            
+            {/* RFQ Details */}
+            <div className="bg-[#FAFAFA] border border-slate-100 rounded-xl p-6 sm:p-8">
+              <h3 className="text-xl font-bold text-[#1b2b3a] flex items-center gap-2 mb-6">
+                <FileText size={20} className="text-emerald-700" /> RFQ Details
+              </h3>
+              <div className="flex flex-col gap-4 text-sm">
+                <div className="flex justify-between items-center py-2 border-b border-slate-200/60">
+                  <span className="font-bold text-slate-500">Supplier</span>
+                  <span className="font-bold text-[#1b2b3a] text-right">{supplier.name}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-200/60">
+                  <span className="font-bold text-slate-500">Product</span>
+                  <span className="font-bold text-[#1b2b3a] text-right">{formData.productNeeded || "-"}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-200/60">
+                  <span className="font-bold text-slate-500">Quantity</span>
+                  <span className="font-bold text-[#1b2b3a] text-right">{formData.quantity} {formData.unit}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-slate-200/60">
+                  <span className="font-bold text-slate-500">Deadline</span>
+                  <span className="font-bold text-[#1b2b3a] text-right">
+                    {formData.expectedDelivery ? new Date(formData.expectedDelivery).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "-"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="font-bold text-slate-500">Status</span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold text-right">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    Pending Supplier Response
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* What happens next? */}
+            <div className="bg-[#FAFAFA] border border-slate-100 rounded-xl p-6 sm:p-8 relative">
+              <h3 className="text-xl font-bold text-[#1b2b3a] flex items-center gap-2 mb-6">
+                <GitBranch size={20} className="text-emerald-700" /> What happens next?
+              </h3>
+              
+              <div className="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-2">
+                <div className="relative pl-6">
+                  <div className="absolute w-3 h-3 bg-blue-600 rounded-full -left-[7px] top-1.5 ring-4 ring-[#FAFAFA]"></div>
+                  <h4 className="font-black text-[#1b2b3a] text-sm mb-1">1. Review</h4>
+                  <p className="text-xs font-medium text-slate-500 leading-relaxed">Supplier reviews your requirements and specifications.</p>
+                </div>
+                <div className="relative pl-6">
+                  <div className="absolute w-3 h-3 bg-slate-200 rounded-full -left-[7px] top-1.5 ring-4 ring-[#FAFAFA]"></div>
+                  <h4 className="font-bold text-slate-700 text-sm mb-1">2. Response</h4>
+                  <p className="text-xs font-medium text-slate-500 leading-relaxed">You receive a formal quote via email and dashboard.</p>
+                </div>
+                <div className="relative pl-6">
+                  <div className="absolute w-3 h-3 bg-slate-200 rounded-full -left-[7px] top-1.5 ring-4 ring-[#FAFAFA]"></div>
+                  <h4 className="font-bold text-slate-700 text-sm mb-1">3. Negotiate</h4>
+                  <p className="text-xs font-medium text-slate-500 leading-relaxed">Discuss terms and finalize the transaction securely.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-slate-100">
+            <Link 
+              href="/dashboard/rfqs"
+              className="w-full sm:w-auto px-6 py-3 bg-[#1b2b3a] hover:bg-[#2a4054] text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Eye size={18} /> View RFQ Status
+            </Link>
+            <button 
+              onClick={() => setIsMessageModalOpen(true)}
+              className="w-full sm:w-auto px-6 py-3 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <MessageSquare size={18} /> Message Supplier
+            </button>
+            <Link 
+              href="/suppliers"
+              className="w-full sm:w-auto px-6 py-3 bg-white border border-slate-300 text-[#1b2b3a] hover:bg-slate-50 text-sm font-bold rounded-lg transition-colors flex items-center justify-center shadow-sm"
+            >
+              Continue Browsing
+            </Link>
+          </div>
+
+        </div>
+
+        <MessageSupplierModal 
+          isOpen={isMessageModalOpen}
+          onClose={() => setIsMessageModalOpen(false)}
+          supplier={supplier}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20">
@@ -252,7 +373,10 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
                 <button className="w-full py-2.5 bg-white border border-slate-300 text-[#1b2b3a] text-sm font-bold rounded hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                   <ExternalLink size={16} /> Visit Company Website
                 </button>
-                <button className="w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm font-bold rounded transition-colors flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => setIsMessageModalOpen(true)}
+                  className="w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm font-bold rounded transition-colors flex items-center justify-center gap-2"
+                >
                   <MessageSquare size={16} /> Message Supplier
                 </button>
               </div>
@@ -283,6 +407,12 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
         </div>
 
       </div>
+
+      <MessageSupplierModal 
+        isOpen={isMessageModalOpen}
+        onClose={() => setIsMessageModalOpen(false)}
+        supplier={supplier}
+      />
     </div>
   );
 }

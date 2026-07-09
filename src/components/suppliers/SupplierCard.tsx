@@ -79,9 +79,9 @@ export default function SupplierCard({ sup }: SupplierCardProps) {
         <Link href={`/suppliers/${sup.id}`} className="w-full py-2 bg-[#1b2b3a] hover:bg-slate-800 text-white text-[11px] font-bold rounded transition-colors shadow-sm text-center">
           View Profile
         </Link>
-        <button className="w-full py-2 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-[11px] font-bold rounded transition-colors shadow-sm">
+        <Link href={`/suppliers/${sup.id}/rfq`} className="w-full py-2 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-[11px] font-bold rounded transition-colors shadow-sm text-center block">
           Send RFQ Now
-        </button>
+        </Link>
         <button className="w-full py-2 bg-[#f0f4f8] hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded transition-colors shadow-sm">
           Request Quote
         </button>
