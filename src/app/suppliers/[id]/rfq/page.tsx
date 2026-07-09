@@ -33,8 +33,9 @@ const mockSupplier = {
   ]
 };
 
-export default function SendRFQPage({ params }: { params: { id: string } }) {
-  // In a real app, you would fetch supplier data based on params.id
+export default function SendRFQPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
+  // In a real app, you would fetch supplier data based on resolvedParams.id
   const supplier = {
     ...mockSupplier,
     businessType: mockSupplier.categories.join(", "),
@@ -67,7 +68,7 @@ export default function SendRFQPage({ params }: { params: { id: string } }) {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         
         {/* Back Navigation */}
-        <Link href={`/suppliers/${params.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors">
+        <Link href={`/suppliers/${resolvedParams.id}`} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors">
           <ChevronLeft size={16} /> Back to Supplier Profile
         </Link>
 
@@ -101,7 +102,7 @@ export default function SendRFQPage({ params }: { params: { id: string } }) {
                   value={formData.productNeeded}
                   onChange={(e) => setFormData({...formData, productNeeded: e.target.value})}
                   placeholder="e.g., Hot Rolled Steel Coils, ASTM A36" 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
                 />
               </div>
 
@@ -117,12 +118,12 @@ export default function SendRFQPage({ params }: { params: { id: string } }) {
                       value={formData.quantity}
                       onChange={(e) => setFormData({...formData, quantity: e.target.value})}
                       placeholder="e.g., 500" 
-                      className="w-full flex-1 px-4 py-3 rounded-l-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
+                      className="w-full flex-1 px-4 py-3 rounded-l-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
                     />
                     <select 
                       value={formData.unit}
                       onChange={(e) => setFormData({...formData, unit: e.target.value})}
-                      className="px-4 py-3 rounded-r-lg border-y border-r border-slate-200 bg-slate-50 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors cursor-pointer border-l shrink-0"
+                      className="px-4 py-3 rounded-r-lg border-y border-r border-slate-200 bg-slate-50 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors cursor-pointer border-l shrink-0"
                     >
                       <option>Units</option>
                       <option>Tons</option>
@@ -141,7 +142,7 @@ export default function SendRFQPage({ params }: { params: { id: string } }) {
                       required
                       value={formData.expectedDelivery}
                       onChange={(e) => setFormData({...formData, expectedDelivery: e.target.value})}
-                      className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm text-slate-700"
+                      className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
                     />
                   </div>
                 </div>
@@ -153,9 +154,13 @@ export default function SendRFQPage({ params }: { params: { id: string } }) {
                 <textarea 
                   rows={4}
                   value={formData.additionalNotes}
-                  onChange={(e) => setFormData({...formData, additionalNotes: e.target.value})}
+                  onChange={(e) => {
+                    setFormData({...formData, additionalNotes: e.target.value});
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
                   placeholder="Provide any specific requirements, tolerances, or shipping instructions..." 
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm resize-none overflow-hidden"
                 ></textarea>
               </div>
 
@@ -175,7 +180,7 @@ export default function SendRFQPage({ params }: { params: { id: string } }) {
               {/* Form Actions */}
               <div className="flex items-center justify-end gap-4 mt-4 pt-6 border-t border-slate-100">
                 <Link 
-                  href={`/suppliers/${params.id}`}
+                  href={`/suppliers/${resolvedParams.id}`}
                   className="px-6 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm"
                 >
                   Cancel
