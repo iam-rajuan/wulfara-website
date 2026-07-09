@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { BadgeCheck, MapPin, Map, Star, Settings, Factory as FactoryIcon } from "lucide-react";
 
 export interface SupplierData {
@@ -75,9 +76,9 @@ export default function SupplierCard({ sup }: SupplierCardProps) {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-2 w-full lg:w-[140px] shrink-0 justify-center">
-        <button className="w-full py-2 bg-[#1b2b3a] hover:bg-slate-800 text-white text-[11px] font-bold rounded transition-colors shadow-sm">
+        <Link href={`/suppliers/${sup.id}`} className="w-full py-2 bg-[#1b2b3a] hover:bg-slate-800 text-white text-[11px] font-bold rounded transition-colors shadow-sm text-center">
           View Profile
-        </button>
+        </Link>
         <button className="w-full py-2 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-[11px] font-bold rounded transition-colors shadow-sm">
           Send RFQ Now
         </button>
