@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import { Search, MapPin, ChevronDown, Map, ChevronLeft, ChevronRight } from "lucide-react";
 import SupplierHero from "@/components/suppliers/SupplierHero";
 import ServiceTypeGrid from "@/components/suppliers/ServiceTypeGrid";
@@ -185,9 +186,9 @@ export default function ServiceSuppliersPage() {
           <button className="px-6 py-2.5 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-sm font-bold rounded transition-colors shadow-sm shrink-0 whitespace-nowrap">
             Apply Filters
           </button>
-          <button className="px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded transition-colors shadow-sm shrink-0 flex items-center gap-2 whitespace-nowrap">
+          <Link href="/suppliers/map" className="px-5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded transition-colors shadow-sm shrink-0 flex items-center gap-2 whitespace-nowrap">
             <Map size={16} /> Map View
-          </button>
+          </Link>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
