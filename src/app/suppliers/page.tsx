@@ -52,6 +52,13 @@ export default function ServiceSuppliersPage() {
     companySize: ""
   });
   
+  const [topFilters, setTopFilters] = useState({
+    query: "",
+    location: "",
+    type: "Manufacturing Type",
+    distance: "Distance"
+  });
+  
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
 
@@ -76,6 +83,25 @@ export default function ServiceSuppliersPage() {
   const filteredSuppliers = useMemo(() => {
     let result = [...MOCK_SUPPLIERS];
     
+    // Filter by Top Bar Inputs
+    if (topFilters.query) {
+      const q = topFilters.query.toLowerCase();
+      result = result.filter(sup => 
+        sup.name.toLowerCase().includes(q) || 
+        sup.desc.toLowerCase().includes(q) || 
+        sup.tags.some(t => t.toLowerCase().includes(q))
+      );
+    }
+    if (topFilters.location) {
+      const l = topFilters.location.toLowerCase();
+      result = result.filter(sup => sup.location.toLowerCase().includes(l));
+    }
+    
+    // Type dropdown filter
+    if (topFilters.type !== "Manufacturing Type") {
+      result = result.filter(sup => sup.tags.includes(topFilters.type));
+    }
+
     // Filter by Company Size
     if (activeFilters.companySize) {
       result = result.filter(sup => sup.companySize === activeFilters.companySize);
@@ -114,6 +140,8 @@ export default function ServiceSuppliersPage() {
             <input 
               type="text" 
               placeholder="Company or service..." 
+              value={topFilters.query}
+              onChange={(e) => { setTopFilters(p => ({...p, query: e.target.value})); setCurrentPage(1); }}
               className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded text-sm text-slate-900 focus:outline-none focus:border-[#dca12f]"
             />
           </div>
@@ -122,18 +150,35 @@ export default function ServiceSuppliersPage() {
             <input 
               type="text" 
               placeholder="City, State, ZIP..." 
+              value={topFilters.location}
+              onChange={(e) => { setTopFilters(p => ({...p, location: e.target.value})); setCurrentPage(1); }}
               className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded text-sm text-slate-900 focus:outline-none focus:border-[#dca12f]"
             />
           </div>
           <div className="relative flex-[0.8]">
-            <select className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded text-sm text-slate-700 appearance-none focus:outline-none focus:border-[#dca12f]">
-              <option>Manufacturing Type</option>
+            <select 
+              value={topFilters.type}
+              onChange={(e) => { setTopFilters(p => ({...p, type: e.target.value})); setCurrentPage(1); }}
+              className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded text-sm text-slate-700 appearance-none focus:outline-none focus:border-[#dca12f]"
+            >
+              <option value="Manufacturing Type">Manufacturing Type</option>
+              <option value="Contract Mfg">Contract Mfg</option>
+              <option value="Assembly">Assembly</option>
+              <option value="Fabrication">Fabrication</option>
+              <option value="CNC Machining">CNC Machining</option>
+              <option value="Electronics">Electronics</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
           <div className="relative flex-[0.6]">
-            <select className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded text-sm text-slate-700 appearance-none focus:outline-none focus:border-[#dca12f]">
-              <option>Distance</option>
+            <select 
+              value={topFilters.distance}
+              onChange={(e) => { setTopFilters(p => ({...p, distance: e.target.value})); setCurrentPage(1); }}
+              className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded text-sm text-slate-700 appearance-none focus:outline-none focus:border-[#dca12f]"
+            >
+              <option value="Distance">Distance</option>
+              <option value="< 50 miles">&lt; 50 miles</option>
+              <option value="< 100 miles">&lt; 100 miles</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
           </div>
