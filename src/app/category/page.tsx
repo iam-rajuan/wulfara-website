@@ -73,9 +73,9 @@ export default function CategoryPage() {
               Find vetted raw material suppliers for steel, oil and gas, forestry and lumber, cotton farming, rubber, and other industrial sourcing needs.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="px-6 py-3 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 font-bold rounded shadow-sm transition-colors">
+              <Link href="/suppliers" className="inline-block px-6 py-3 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 font-bold rounded shadow-sm transition-colors text-center">
                 Find Suppliers
-              </button>
+              </Link>
               <button className="px-6 py-3 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded shadow-sm transition-colors">
                 Post an RFQ
               </button>
