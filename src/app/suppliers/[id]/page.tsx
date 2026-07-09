@@ -73,7 +73,7 @@ export default function SupplierProfilePage({ params }: { params: { id: string }
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full md:w-auto text-center sm:text-left">
             {/* Logo */}
-            <div className="w-24 h-24 rounded bg-gradient-to-tr from-slate-800 to-[#1b2b3a] shrink-0 flex items-center justify-center relative overflow-hidden shadow-inner">
+            <div className="w-24 h-24 rounded bg-linear-to-tr from-slate-800 to-[#1b2b3a] shrink-0 flex items-center justify-center relative overflow-hidden shadow-inner">
                <div className="w-12 h-12 border-4 border-white/20 rounded-full flex items-center justify-center relative z-10">
                  <Building2 className="text-white/80" size={24} />
                </div>
@@ -105,9 +105,9 @@ export default function SupplierProfilePage({ params }: { params: { id: string }
             <button className="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2">
               Visit Website <ExternalLink size={14} />
             </button>
-            <button className="flex-1 sm:flex-none px-6 py-2.5 bg-[#1b2b3a] hover:bg-slate-800 text-white text-sm font-bold rounded transition-colors shadow-sm flex items-center justify-center gap-2">
+            <Link href={`/suppliers/${supplier.id}/rfq`} className="flex-1 sm:flex-none px-6 py-2.5 bg-[#1b2b3a] hover:bg-slate-800 text-white text-sm font-bold rounded transition-colors shadow-sm flex items-center justify-center gap-2">
               <FileText size={16} /> Send RFQ
-            </button>
+            </Link>
             <button className="flex-1 sm:flex-none px-6 py-2.5 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-sm font-bold rounded transition-colors shadow-sm flex items-center justify-center gap-2">
               <FileText size={16} /> Request Quote
             </button>
@@ -272,9 +272,9 @@ export default function SupplierProfilePage({ params }: { params: { id: string }
               Connect directly with their sales team to discuss bulk pricing, technical specifications, and delivery timelines for your next project.
             </p>
           </div>
-          <button className="px-8 py-4 bg-[#1b2b3a] hover:bg-slate-900 text-white font-bold rounded-lg transition-colors shadow-xl shrink-0 flex items-center gap-2 group">
+          <Link href={`/suppliers/${supplier.id}/rfq`} className="px-8 py-4 bg-[#1b2b3a] hover:bg-slate-900 text-white font-bold rounded-lg transition-colors shadow-xl shrink-0 flex items-center gap-2 group">
             Send RFQ Now <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </button>
+          </Link>
         </div>
 
       </div>
