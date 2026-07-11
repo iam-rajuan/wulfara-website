@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   ChevronDown,
@@ -55,6 +57,43 @@ const suppliers = [
 ];
 
 export default function FavoriteSuppliersPage() {
+  const router = useRouter();
+  const [sortBy, setSortBy] = useState("Recently Saved");
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const sortOptions = ["Recently Saved", "Name (A-Z)", "Name (Z-A)"];
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openFilter, setOpenFilter] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({
+    Category: "All",
+    Location: "All",
+    "Supplier Type": "All",
+    "Response Time": "All",
+  });
+  const [isNegotiable, setIsNegotiable] = useState(false);
+
+  const filterOptions: Record<string, string[]> = {
+    Category: ["All", "Metals", "Electronics"],
+    Location: ["All", "New York, USA", "New Jersey, USA", "Shenzhen, China"],
+    "Supplier Type": ["All", "Manufacturer", "Distributor"],
+    "Response Time": ["All", "Replies in 2 hours", "Replies in 12 hours"],
+  };
+
+  const filteredAndSortedSuppliers = [...suppliers]
+    .filter((supplier) => {
+      if (searchQuery && !supplier.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (isNegotiable && !supplier.tags.some(tag => tag.label === "Negotiable Rate")) return false;
+      if (activeFilters.Location !== "All" && supplier.location !== activeFilters.Location) return false;
+      if (activeFilters["Supplier Type"] !== "All" && !supplier.tags.some(tag => tag.label === activeFilters["Supplier Type"])) return false;
+      if (activeFilters["Response Time"] !== "All" && !supplier.tags.some(tag => tag.label === activeFilters["Response Time"])) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "Name (A-Z)") return a.name.localeCompare(b.name);
+      if (sortBy === "Name (Z-A)") return b.name.localeCompare(a.name);
+      return 0;
+    });
+
   return (
     <div className="w-auto mx-auto pb-12">
       {/* Header */}
@@ -88,29 +127,92 @@ export default function FavoriteSuppliersPage() {
             <input
               type="text"
               placeholder="Search saved suppliers..."
-              className="w-full h-11 pl-11 pr-4 bg-[#F8F9FB] border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 transition-all placeholder:text-gray-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-11 pl-11 pr-4 text-black border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 transition-all placeholder:text-gray-400"
             />
           </div>
-          <button className="flex items-center justify-between px-4 h-11 bg-[#F8F9FB] border border-gray-200 rounded-sm w-full sm:w-[200px] text-[13px] font-bold text-[#0B172E] hover:bg-gray-100 transition-colors">
-            Sort: Recently Saved
-            <ChevronDown size={16} className="text-gray-400" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+              className="flex items-center justify-between px-4 h-11 bg-[#F8F9FB] border border-gray-200 rounded-sm w-full sm:w-[200px] text-[13px] font-bold text-[#0B172E] hover:bg-gray-100 transition-colors"
+            >
+              Sort: {sortBy}
+              <ChevronDown
+                size={16}
+                className={`text-gray-400 transition-transform ${
+                  isSortDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {isSortDropdownOpen && (
+              <div className="absolute right-0 mt-1 w-full sm:w-[200px] bg-white border border-gray-200 shadow-lg rounded-sm z-10 py-1">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      setSortBy(option);
+                      setIsSortDropdownOpen(false);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-[13px] hover:bg-gray-50 transition-colors ${
+                      sortBy === option
+                        ? "font-bold text-[#D4AF37]"
+                        : "text-[#0B172E]"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Chips */}
         <div className="flex flex-wrap gap-3">
-          {["Category", "Location", "Supplier Type", "Response Time"].map(
-            (filter) => (
+          {Object.keys(filterOptions).map((filter) => (
+            <div key={filter} className="relative">
               <button
-                key={filter}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-[13px] font-bold text-[#0B172E] hover:bg-gray-50 transition-colors"
+                onClick={() => setOpenFilter(openFilter === filter ? null : filter)}
+                className={`flex items-center gap-2 px-4 py-2 border rounded-full text-[13px] font-bold transition-colors ${
+                  activeFilters[filter] !== "All"
+                    ? "bg-[#F8F9FB] border-[#D4AF37] text-[#D4AF37]"
+                    : "bg-white border-gray-200 text-[#0B172E] hover:bg-gray-50"
+                }`}
               >
-                {filter}
-                <ChevronDown size={14} className="text-gray-400" />
+                {activeFilters[filter] !== "All" ? activeFilters[filter] : filter}
+                <ChevronDown size={14} className={activeFilters[filter] !== "All" ? "text-[#D4AF37]" : "text-gray-400"} />
               </button>
-            )
-          )}
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-[13px] font-bold text-[#0B172E] hover:bg-gray-50 transition-colors">
+              
+              {openFilter === filter && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 shadow-lg rounded-sm z-20 py-1">
+                  {filterOptions[filter].map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setActiveFilters({ ...activeFilters, [filter]: option });
+                        setOpenFilter(null);
+                      }}
+                      className={`block w-full text-left px-4 py-2 text-[13px] hover:bg-gray-50 transition-colors ${
+                        activeFilters[filter] === option ? 'font-bold text-[#D4AF37]' : 'text-[#0B172E]'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          <button 
+            onClick={() => setIsNegotiable(!isNegotiable)}
+            className={`flex items-center gap-2 px-4 py-2 border rounded-full text-[13px] font-bold transition-colors ${
+              isNegotiable 
+                ? "bg-[#F8F9FB] border-[#D4AF37] text-[#D4AF37]" 
+                : "bg-white border-gray-200 text-[#0B172E] hover:bg-gray-50"
+            }`}
+          >
             Negotiable Rate
           </button>
         </div>
@@ -118,7 +220,7 @@ export default function FavoriteSuppliersPage() {
 
       {/* Supplier Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        {suppliers.map((supplier) => (
+        {filteredAndSortedSuppliers.map((supplier) => (
           <div
             key={supplier.id}
             className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative group"
@@ -198,6 +300,11 @@ export default function FavoriteSuppliersPage() {
               {/* Action Buttons */}
               <div className="flex gap-3 mb-4">
                 <button
+                  onClick={() => {
+                    if (supplier.isActive) {
+                      router.push(`/suppliers/${supplier.id}`);
+                    }
+                  }}
                   className={`flex-1 py-2.5 rounded-lg text-[13px] font-bold transition-colors ${supplier.isActive
                     ? "bg-[#1E293B] hover:bg-[#0f172a] text-white"
                     : "bg-[#64748B] text-gray-200 cursor-not-allowed"
@@ -206,6 +313,11 @@ export default function FavoriteSuppliersPage() {
                   View Profile
                 </button>
                 <button
+                  onClick={() => {
+                    if (supplier.isActive) {
+                      router.push(`/suppliers/${supplier.id}/rfq`);
+                    }
+                  }}
                   className={`flex-1 py-2.5 rounded-lg text-[13px] font-bold transition-colors ${supplier.isActive
                     ? "bg-[#DDA52D] hover:bg-[#c49021] text-[#0B172E]"
                     : "bg-[#E2CB96] text-gray-400 cursor-not-allowed"
