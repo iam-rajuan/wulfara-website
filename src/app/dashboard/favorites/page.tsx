@@ -58,6 +58,18 @@ const suppliers = [
 
 export default function FavoriteSuppliersPage() {
   const router = useRouter();
+  const [suppliersList, setSuppliersList] = useState(suppliers);
+
+  const toggleFavorite = (id: number) => {
+    setSuppliersList((current) =>
+      current.map((supplier) =>
+        supplier.id === id
+          ? { ...supplier, isFavorite: !supplier.isFavorite }
+          : supplier
+      )
+    );
+  };
+
   const [sortBy, setSortBy] = useState("Recently Saved");
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const sortOptions = ["Recently Saved", "Name (A-Z)", "Name (Z-A)"];
@@ -79,7 +91,7 @@ export default function FavoriteSuppliersPage() {
     "Response Time": ["All", "Replies in 2 hours", "Replies in 12 hours"],
   };
 
-  const filteredAndSortedSuppliers = [...suppliers]
+  const filteredAndSortedSuppliers = [...suppliersList]
     .filter((supplier) => {
       if (searchQuery && !supplier.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (isNegotiable && !supplier.tags.some(tag => tag.label === "Negotiable Rate")) return false;
@@ -226,7 +238,10 @@ export default function FavoriteSuppliersPage() {
             className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative group"
           >
             {/* Heart Icon */}
-            <button className="absolute top-6 right-6 z-10">
+            <button
+              onClick={() => toggleFavorite(supplier.id)}
+              className="absolute top-6 right-6 z-10"
+            >
               <Heart
                 size={22}
                 className={
@@ -329,8 +344,11 @@ export default function FavoriteSuppliersPage() {
 
               {/* Remove Favorite */}
               {supplier.isActive ? (
-                <button className="w-full text-center py-2 text-[13px] font-bold text-[#DC2626] hover:text-[#b91c1c] transition-colors">
-                  Remove Favorite
+                <button
+                  onClick={() => toggleFavorite(supplier.id)}
+                  className="w-full text-center py-2 text-[13px] font-bold text-[#DC2626] hover:text-[#b91c1c] transition-colors"
+                >
+                  {supplier.isFavorite ? "Remove Favorite" : "Add Favorite"}
                 </button>
               ) : null}
             </div>
