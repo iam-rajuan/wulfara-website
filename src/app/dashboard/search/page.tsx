@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown } from "lucide-react";
 
 // Mock data for suppliers
@@ -74,10 +75,60 @@ const suppliers = [
 ];
 
 export default function SearchSuppliersPage() {
+  const router = useRouter();
+  const [suppliersList, setSuppliersList] = useState(suppliers);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activeLocation, setActiveLocation] = useState("");
+  const [sortBy, setSortBy] = useState("Best Match");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
   
   const categories = ["All", "Raw Materials", "Machinery", "Electronics", "Logistics", "Plastics"];
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeCategory, activeLocation, sortBy]);
+
+  const toggleFavorite = (id: number) => {
+    setSuppliersList((current) =>
+      current.map((supplier) =>
+        supplier.id === id
+          ? { ...supplier, isFavorite: !supplier.isFavorite }
+          : supplier
+      )
+    );
+  };
+
+  const filteredSuppliers = suppliersList.filter((supplier) => {
+    if (activeCategory !== "All" && !supplier.categories.includes(activeCategory)) return false;
+
+    if (activeLocation === "europe" && !supplier.location.includes("Germany") && !supplier.location.includes("UK")) return false;
+    if (activeLocation === "asia" && !supplier.location.includes("Japan") && !supplier.location.includes("South Korea")) return false;
+    if (activeLocation === "na" && !supplier.location.includes("USA") && !supplier.location.includes("Canada")) return false;
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesName = supplier.name.toLowerCase().includes(q);
+      const matchesDesc = supplier.description.toLowerCase().includes(q);
+      const matchesCategory = supplier.categories.some(c => c.toLowerCase().includes(q));
+      if (!matchesName && !matchesDesc && !matchesCategory) return false;
+    }
+
+    return true;
+  });
+
+  const sortedSuppliers = [...filteredSuppliers].sort((a, b) => {
+    if (sortBy === "Highest Rated") return b.rating - a.rating;
+    if (sortBy === "Most Reviews") return b.reviews - a.reviews;
+    return 0;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedSuppliers.length / itemsPerPage));
+  const paginatedSuppliers = sortedSuppliers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="w-auto mx-auto pb-10">
@@ -114,14 +165,18 @@ export default function SearchSuppliersPage() {
               placeholder="Search by supplier name, product, or keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-[48px] pl-12 pr-4 text-[15px] rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] placeholder:text-gray-400 transition-all shadow-sm"
+              className="w-full h-[48px] pl-12 pr-4 text-black text-[15px] rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] placeholder:text-gray-400 transition-all shadow-sm"
             />
           </div>
 
           {/* Location Dropdown */}
           <div className="relative md:w-[220px]">
             <MapPin size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <select className="w-full h-[48px] pl-12 pr-10 text-[15px] text-[#0B172E] font-medium rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] appearance-none shadow-sm cursor-pointer">
+            <select
+              value={activeLocation}
+              onChange={(e) => setActiveLocation(e.target.value)}
+              className="w-full h-[48px] pl-12 pr-10 text-[15px] text-[#0B172E] font-medium rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] appearance-none shadow-sm cursor-pointer"
+            >
               <option value="">Any Location</option>
               <option value="europe">Europe</option>
               <option value="asia">Asia</option>
@@ -157,12 +212,16 @@ export default function SearchSuppliersPage() {
       {/* Results Section */}
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h3 className="text-[18px] font-bold text-[#0B172E]">
-          {suppliers.length} Suppliers Found
+          {sortedSuppliers.length} Suppliers Found
         </h3>
         
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-bold text-gray-500">Sort by:</span>
-          <select className="text-[13px] font-bold text-[#0B172E] bg-transparent focus:outline-none cursor-pointer">
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="text-[13px] font-bold text-[#0B172E] bg-transparent focus:outline-none cursor-pointer"
+          >
             <option>Best Match</option>
             <option>Highest Rated</option>
             <option>Most Reviews</option>
@@ -173,7 +232,7 @@ export default function SearchSuppliersPage() {
 
       {/* Supplier Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {suppliers.map(supplier => (
+        {paginatedSuppliers.map(supplier => (
           <div key={supplier.id} className="bg-white border border-gray-200 flex flex-col group hover:shadow-md transition-shadow">
             {/* Image Header */}
             <div className="h-[180px] relative overflow-hidden bg-gray-100">
@@ -182,7 +241,10 @@ export default function SearchSuppliersPage() {
                 alt={supplier.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <button className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white text-gray-400 hover:text-[#D4AF37] transition-colors shadow-sm">
+              <button 
+                onClick={() => toggleFavorite(supplier.id)}
+                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white text-gray-400 hover:text-[#D4AF37] transition-colors shadow-sm"
+              >
                 <Bookmark size={18} className={supplier.isFavorite ? "fill-[#D4AF37] text-[#D4AF37]" : ""} />
               </button>
               <div className="absolute bottom-3 left-3 flex flex-wrap gap-2 pr-3">
@@ -224,7 +286,10 @@ export default function SearchSuppliersPage() {
                   <Mail size={16} />
                   Contact
                 </button>
-                <button className="flex items-center justify-center py-2.5 bg-[#137847] hover:bg-[#0f6139] text-white text-[14px] font-bold rounded transition-colors">
+                <button 
+                  onClick={() => router.push(`/suppliers/${supplier.id}`)}
+                  className="flex items-center justify-center py-2.5 bg-[#137847] hover:bg-[#0f6139] text-white text-[14px] font-bold rounded transition-colors"
+                >
                   View Profile
                 </button>
               </div>
@@ -233,16 +298,46 @@ export default function SearchSuppliersPage() {
         ))}
       </div>
       
-      {/* Pagination (Simple) */}
-      <div className="mt-10 flex justify-center">
-        <div className="flex items-center gap-1">
-          <button className="px-4 py-2 border border-gray-200 text-gray-500 text-[14px] font-bold rounded-l hover:bg-gray-50" disabled>Previous</button>
-          <button className="px-4 py-2 border-y border-gray-200 bg-[#212E46] text-white text-[14px] font-bold">1</button>
-          <button className="px-4 py-2 border border-gray-200 text-[#0B172E] text-[14px] font-bold hover:bg-gray-50">2</button>
-          <button className="px-4 py-2 border-y border-gray-200 text-[#0B172E] text-[14px] font-bold hover:bg-gray-50">3</button>
-          <button className="px-4 py-2 border border-gray-200 text-[#0B172E] text-[14px] font-bold rounded-r hover:bg-gray-50">Next</button>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-10 flex justify-center">
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 border border-gray-200 text-[14px] font-bold rounded-l transition-colors ${
+                currentPage === 1 ? 'text-gray-400 bg-gray-50 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-4 py-2 border-y border-r first-of-type:border-l-0 border-gray-200 text-[14px] font-bold transition-colors ${
+                  currentPage === page 
+                    ? 'bg-[#212E46] text-white border-[#212E46]' 
+                    : 'text-[#0B172E] bg-white hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 border border-gray-200 text-[14px] font-bold rounded-r transition-colors ${
+                currentPage === totalPages ? 'text-gray-400 bg-gray-50 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

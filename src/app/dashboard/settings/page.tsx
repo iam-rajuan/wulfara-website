@@ -144,7 +144,7 @@ export default function SettingsPage() {
                       type="text" 
                       value={profile.firstName} 
                       onChange={(e) => setProfile({...profile, firstName: e.target.value})}
-                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                     />
                   </div>
                   <div className="space-y-2">
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                       type="text" 
                       value={profile.lastName} 
                       onChange={(e) => setProfile({...profile, lastName: e.target.value})}
-                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                     />
                   </div>
                   <div className="space-y-2">
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                          type="email" 
                          value={profile.email} 
                          onChange={(e) => setProfile({...profile, email: e.target.value})}
-                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
                   </div>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                       type="tel" 
                       value={profile.phone} 
                       onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                      className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                     />
                   </div>
                 </div>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                          type="text" 
                          value={company.name} 
                          onChange={(e) => setCompany({...company, name: e.target.value})}
-                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
                   </div>
@@ -225,7 +225,7 @@ export default function SettingsPage() {
                          type="url" 
                          value={company.website} 
                          onChange={(e) => setCompany({...company, website: e.target.value})}
-                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
                   </div>
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                          type="text" 
                          value={company.address} 
                          onChange={(e) => setCompany({...company, address: e.target.value})}
-                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
                   </div>
@@ -333,7 +333,7 @@ export default function SettingsPage() {
                          placeholder="••••••••" 
                          value={security.currentPassword}
                          onChange={(e) => setSecurity({...security, currentPassword: e.target.value})}
-                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
                   </div>
@@ -348,7 +348,7 @@ export default function SettingsPage() {
                          placeholder="••••••••" 
                          value={security.newPassword}
                          onChange={(e) => setSecurity({...security, newPassword: e.target.value})}
-                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
+                         className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
                   </div>
