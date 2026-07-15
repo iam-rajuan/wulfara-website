@@ -183,7 +183,7 @@ export default function LoginPage() {
           {/* Continue as Guest */}
           <p className="text-sm text-gray-500 mt-8 text-center">
             <Link
-              href="/"
+              href="/dashboard"
               className="text-[#1b2b3a] font-semibold hover:text-[#dca12f] transition-colors inline-flex items-center gap-1"
             >
               Continue as Guest

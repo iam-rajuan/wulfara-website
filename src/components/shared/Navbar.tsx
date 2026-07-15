@@ -46,14 +46,13 @@ export default function Header() {
             >
               {t('home')}
             </Link>
-            {isLoggedIn && (
-              <Link
-                href="/category"
-                className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-              >
-                Category
-              </Link>
-            )}
+            <Link
+              href="/category"
+              className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+            >
+              Category
+            </Link>
+
             <Link
               href="/faq"
               className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
