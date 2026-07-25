@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import ProtectedRoute from "@/components/shared/ProtectedRoute";
 
 export const metadata: Metadata = {
   title: "Dashboard | WULFARA - Buyer Overview",
@@ -12,5 +13,9 @@ export default function DashboardRootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <ProtectedRoute>
+      <DashboardLayout>{children}</DashboardLayout>
+    </ProtectedRoute>
+  );
 }

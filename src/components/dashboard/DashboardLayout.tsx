@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import logoImg from "../../../public/assets/logo.png";
 import {
   LayoutDashboard,
@@ -34,6 +36,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useSelector((state: RootState) => state.auth);
 
   return (
     <div className="flex h-screen bg-[#F8F9FB] overflow-hidden">
@@ -69,12 +72,12 @@ export default function DashboardLayout({
         {/* User info */}
         <div className="px-6 pb-6">
           <div className="flex items-center gap-3">
-            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Adlef Vertigo" className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200" />
+            <img src={`https://ui-avatars.com/api/?name=${user?.name || "User"}&background=212E46&color=fff`} alt={user?.name || "User"} className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200" />
             <div>
-              <p className="text-[14px] font-bold text-[#0B172E] leading-tight">
-                Adlef Vertigo
+              <p className="text-[14px] font-bold text-[#0B172E] leading-tight truncate w-[150px]">
+                {user?.name || "Loading..."}
               </p>
-              <p className="text-[12px] font-bold text-gray-500">Buyer Account</p>
+              <p className="text-[12px] font-bold text-gray-500 capitalize">{user?.role || "buyer"} Account</p>
             </div>
           </div>
         </div>

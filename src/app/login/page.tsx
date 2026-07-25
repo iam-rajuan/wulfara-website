@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearError } from "@/store/slices/authSlice";
+import { AppDispatch, RootState } from "@/store/store";
 import logoImg from "../../../public/assets/logo.png";
 import authBg from "../../../public/assets/auth-bg.png";
 import {
@@ -27,6 +30,19 @@ export default function LoginPage() {
     password: "",
   });
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoading, error: reduxError, token } = useSelector((state: RootState) => state.auth);
+
+  React.useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [token, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
@@ -34,12 +50,11 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.email === "mehedi@gmail.com" && formData.password === "password") {
-      localStorage.setItem("isLoggedIn", "true");
-      router.push("/dashboard");
-    } else {
-      setError("Invalid email or password.");
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields.");
+      return;
     }
+    dispatch(loginUser({ email: formData.email, password: formData.password }));
   };
 
   return (
@@ -77,9 +92,9 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
+            {(error || reduxError) && (
               <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
-                {error}
+                {error || reduxError}
               </div>
             )}
             {/* Email Address */}
@@ -164,10 +179,11 @@ export default function LoginPage() {
             {/* Login Button */}
             <button
               type="submit"
+              disabled={isLoading}
               id="login-btn"
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#dca12f] hover:bg-[#c99126] py-3.5 text-sm font-bold text-[#1b2b3a] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#dca12f] hover:bg-[#c99126] py-3.5 text-sm font-bold text-[#1b2b3a] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </button>
 
             {/* Create Account */}

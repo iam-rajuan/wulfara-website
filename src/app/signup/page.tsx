@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, clearError } from "@/store/slices/authSlice";
+import { AppDispatch, RootState } from "@/store/store";
 import logoImg from "../../../public/assets/logo.png";
 import authBg from "../../../public/assets/auth-bg.png";
 import {
@@ -29,14 +33,42 @@ export default function SignUpPage() {
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoading, error: reduxError, token } = useSelector((state: RootState) => state.auth);
+
+  React.useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [token, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (!formData.fullName || !formData.workEmail || !formData.password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    dispatch(registerUser({ 
+      name: formData.fullName, 
+      email: formData.workEmail, 
+      password: formData.password,
+      role: "buyer" // Automatically set to buyer based on UI design
+    }));
   };
 
   return (
@@ -74,6 +106,11 @@ export default function SignUpPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {(error || reduxError) && (
+              <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
+                {error || reduxError}
+              </div>
+            )}
             {/* Full Name */}
             <div>
               <label
@@ -195,11 +232,12 @@ export default function SignUpPage() {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={isLoading}
               id="create-buyer-account-btn"
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#dca12f] hover:bg-[#c99126] py-3.5 text-sm font-bold text-[#1b2b3a] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#dca12f] hover:bg-[#c99126] py-3.5 text-sm font-bold text-[#1b2b3a] transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Create Buyer Account
-              <ArrowRight size={16} strokeWidth={2.5} />
+              {isLoading ? "Creating Account..." : "Create Buyer Account"}
+              {!isLoading && <ArrowRight size={16} strokeWidth={2.5} />}
             </button>
 
             {/* Continue as Guest */}

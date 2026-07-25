@@ -7,14 +7,24 @@ import Image from "next/image";
 import logoImg from "../../../public/assets/logo.png";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "./LanguageSelector";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store/store";
+import { logout } from "@/store/slices/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
+  
+  const dispatch = useDispatch();
+  const router = useRouter();
+  
+  const token = useSelector((state: RootState) => state.auth.token);
+  const isLoggedIn = mounted && !!token;
 
   useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+    setMounted(true);
   }, []);
 
   return (
@@ -84,14 +94,24 @@ export default function Header() {
             {/* Language Switcher */}
             <LanguageSelector />
 
-            {/* Login Link */}
-            {!isLoggedIn && (
+            {/* Auth Links */}
+            {!isLoggedIn ? (
               <Link
                 href="/login"
                 className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
               >
                 {t('login')}
               </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  dispatch(logout());
+                  router.push('/');
+                }}
+                className="text-sm font-medium text-slate-300 hover:text-white transition-colors cursor-pointer"
+              >
+                Logout
+              </button>
             )}
 
             {/* CTA Button */}
@@ -171,8 +191,8 @@ export default function Header() {
             {/* Mobile Language Selector */}
             <LanguageSelector />
 
-            {/* Mobile Login Link */}
-            {!isLoggedIn && (
+            {/* Mobile Auth Links */}
+            {!isLoggedIn ? (
               <Link
                 href="/login"
                 onClick={() => setIsOpen(false)}
@@ -180,6 +200,17 @@ export default function Header() {
               >
                 {t('login')}
               </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  dispatch(logout());
+                  setIsOpen(false);
+                  router.push('/');
+                }}
+                className="text-base font-medium text-slate-300 hover:text-white"
+              >
+                Logout
+              </button>
             )}
           </div>
 
