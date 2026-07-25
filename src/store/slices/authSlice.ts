@@ -116,8 +116,7 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
-        state.token = action.payload.token;
-        if (typeof window !== 'undefined') localStorage.setItem('token', action.payload.token);
+        // Do not auto-login on registration. Let the user manually login.
       })
       .addCase(registerUser.rejected, (state, action: PayloadAction<any>) => {
         state.isLoading = false;

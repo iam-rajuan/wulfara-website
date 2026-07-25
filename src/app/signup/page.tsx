@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser, clearError } from "@/store/slices/authSlice";
 import { AppDispatch, RootState } from "@/store/store";
+import toast from "react-hot-toast";
 import logoImg from "../../../public/assets/logo.png";
 import authBg from "../../../public/assets/auth-bg.png";
 import {
@@ -68,7 +69,20 @@ export default function SignUpPage() {
       email: formData.workEmail, 
       password: formData.password,
       role: "buyer" // Automatically set to buyer based on UI design
-    }));
+    }))
+      .unwrap()
+      .then(() => {
+        toast.success("Registration successful! Redirecting to login...", {
+          duration: 2000,
+        });
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      })
+      .catch((err) => {
+        // Redux already sets the error in state, but we can also toast it
+        toast.error(err || "Registration failed");
+      });
   };
 
   return (
