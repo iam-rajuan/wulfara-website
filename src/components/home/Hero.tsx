@@ -41,7 +41,7 @@ export default function Hero() {
       {/* Background Image with Dark Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={heroBg}
+          src={cmsHero?.heroSettings?.bgImage || heroBg}
           alt="Warehouse Interior Background"
           fill
           className="object-cover opacity-25"
