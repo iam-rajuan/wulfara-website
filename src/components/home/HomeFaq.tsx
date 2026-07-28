@@ -4,12 +4,16 @@ import React, { useState } from "react";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function HomeFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const faqPage = pagesResponse?.data?.find((p: any) => p.slug === 'faq');
+  const cmsFaqs = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
   const { t } = useTranslation();
 
-  const faqs = [
+  const staticFaqs = [
     { qKey: "q1", aKey: "a1" },
     { qKey: "q2", aKey: "a2" },
     { qKey: "q3", aKey: "a3" },
@@ -18,6 +22,12 @@ export default function HomeFaq() {
     { qKey: "q6", aKey: "a6" },
     { qKey: "q7", aKey: "a7" }
   ];
+
+  const activeFaqs = cmsFaqs.length > 0 ? cmsFaqs.map((f: any) => ({
+    qKey: f.question,
+    aKey: f.answer,
+    isDynamic: true
+  })) : staticFaqs.map(f => ({ ...f, isDynamic: false }));
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -38,7 +48,7 @@ export default function HomeFaq() {
 
         {/* FAQ Accordion List */}
         <div className="space-y-4 mb-12">
-          {faqs.map((faq, idx) => {
+          {activeFaqs.map((faq: any, idx: number) => {
             const isOpen = openIndex === idx;
             return (
               <div
@@ -51,7 +61,9 @@ export default function HomeFaq() {
                 >
                   <div className="flex items-center gap-3.5">
                     <HelpCircle className="h-5 w-5 text-[#dca12f] flex-shrink-0" />
-                    <span className="text-sm sm:text-base font-bold text-slate-900">{t(faq.qKey)}</span>
+                    <span className="text-sm sm:text-base font-bold text-slate-900">
+                      {faq.isDynamic ? faq.qKey : t(faq.qKey)}
+                    </span>
                   </div>
                   <ChevronDown
                     className={`h-5 w-5 text-[#dca12f]/80 transition-transform duration-300 ${
@@ -67,7 +79,11 @@ export default function HomeFaq() {
                   }`}
                 >
                   <div className="px-6 py-5 text-xs sm:text-sm text-slate-600 leading-relaxed bg-[#fbfcfd]">
-                    {t(faq.aKey)}
+                    {faq.isDynamic ? (
+                      <div dangerouslySetInnerHTML={{ __html: faq.aKey }} />
+                    ) : (
+                      t(faq.aKey)
+                    )}
                   </div>
                 </div>
               </div>
