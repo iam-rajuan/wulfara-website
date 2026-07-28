@@ -6,15 +6,19 @@ import FaqHeader from "@/components/faq/FaqHeader";
 import FaqSidebar from "@/components/faq/FaqSidebar";
 import FaqAccordions from "@/components/faq/FaqAccordions";
 import FaqFooterCta from "@/components/faq/FaqFooterCta";
+import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function FaqPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0); // Default open the first item
   const [activeTopic, setActiveTopic] = useState<string>("General Questions");
   const [searchInput, setSearchInput] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const faqPage = pagesResponse?.data?.find((p: any) => p.slug === 'faq');
+  const cmsFaqs = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
   const { t } = useTranslation();
 
-  const faqs = [
+  const staticFaqs = [
     { qKey: "q1", aKey: "a1", topic: "General Questions" },
     { qKey: "q2", aKey: "a2", topic: "Suppliers" },
     { qKey: "q3", aKey: "a3", topic: "General Questions" },
@@ -50,11 +54,19 @@ export default function FaqPage() {
     setOpenIndex(searchInput ? 0 : null);
   };
 
+  // Use CMS FAQs if available, otherwise fallback to static FAQs
+  const activeFaqs = cmsFaqs.length > 0 ? cmsFaqs.map((f: any, i: number) => ({
+    qKey: f.question, // Reusing keys for dynamic data
+    aKey: f.answer,
+    topic: "General Questions", // Map all to General for now or read from f.topic if added later
+    isDynamic: true
+  })) : staticFaqs.map(f => ({ ...f, isDynamic: false }));
+
   // Filter FAQs based on search or active topic
-  const filteredFaqs = faqs.filter((faq) => {
+  const filteredFaqs = activeFaqs.filter((faq: any) => {
     if (searchQuery) {
-      const questionText = t(faq.qKey).toLowerCase();
-      const answerText = t(faq.aKey).toLowerCase();
+      const questionText = faq.isDynamic ? faq.qKey.toLowerCase() : t(faq.qKey).toLowerCase();
+      const answerText = faq.isDynamic ? faq.aKey.toLowerCase() : t(faq.aKey).toLowerCase();
       const query = searchQuery.toLowerCase();
       return questionText.includes(query) || answerText.includes(query);
     }

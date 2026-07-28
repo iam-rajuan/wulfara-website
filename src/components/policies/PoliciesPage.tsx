@@ -14,8 +14,13 @@ import {
   ExternalLink
 } from "lucide-react";
 import { TermsIcon, SupplierListingIcon, PolicyShieldIcon } from "@/components/icons";
+import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function PoliciesPage() {
+  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const policyPage = pagesResponse?.data?.find((p: any) => p.slug === 'policies');
+  const cmsPolicies = policyPage?.htmlContent ? JSON.parse(policyPage.htmlContent) : null;
+
   const [activeSection, setActiveSection] = useState("terms-of-service");
 
   const policies = [
@@ -23,7 +28,9 @@ export default function PoliciesPage() {
       id: "terms-of-service",
       title: "Terms of Service",
       icon: TermsIcon,
-      content: (
+      content: cmsPolicies?.termsOfService ? (
+        <div dangerouslySetInnerHTML={{ __html: cmsPolicies.termsOfService }} className="text-sm text-slate-600 mb-3 leading-relaxed" />
+      ) : (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
             WULFARA serves as a matchmaking platform and marketplace; we are not a party to the transactions between buyers and suppliers.
@@ -42,7 +49,9 @@ export default function PoliciesPage() {
       id: "privacy-policy",
       title: "Privacy Policy",
       icon: Lock,
-      content: (
+      content: cmsPolicies?.privacyPolicy ? (
+        <div dangerouslySetInnerHTML={{ __html: cmsPolicies.privacyPolicy }} className="text-sm text-slate-600 mb-3 leading-relaxed" />
+      ) : (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
             We collect essential business data to facilitate B2B connections and improve platform experience.
@@ -61,7 +70,9 @@ export default function PoliciesPage() {
       id: "supplier-listing-policy",
       title: "Supplier Listing Policy",
       icon: SupplierListingIcon,
-      content: (
+      content: cmsPolicies?.supplierListingPolicy ? (
+        <div dangerouslySetInnerHTML={{ __html: cmsPolicies.supplierListingPolicy }} className="text-sm text-slate-600 mb-3 leading-relaxed" />
+      ) : (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
             Suppliers must maintain an active, verified account to list products or services.
@@ -80,7 +91,9 @@ export default function PoliciesPage() {
       id: "rfq-policy",
       title: "RFQ Policy",
       icon: FileText,
-      content: (
+      content: cmsPolicies?.rfqPolicy ? (
+        <div dangerouslySetInnerHTML={{ __html: cmsPolicies.rfqPolicy }} className="text-sm text-slate-600 mb-3 leading-relaxed" />
+      ) : (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
             Buyers can search the marketplace and submit detailed RFQs to specific or multiple suppliers.
@@ -99,7 +112,9 @@ export default function PoliciesPage() {
       id: "payment-subscription-policy",
       title: "Payment & Subscription Policy",
       icon: CreditCard,
-      content: (
+      content: cmsPolicies?.paymentSubscriptionPolicy ? (
+        <div dangerouslySetInnerHTML={{ __html: cmsPolicies.paymentSubscriptionPolicy }} className="text-sm text-slate-600 mb-3 leading-relaxed" />
+      ) : (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
             Browsing the marketplace and submitting basic RFQs is free for qualified procurement officers.
@@ -118,7 +133,9 @@ export default function PoliciesPage() {
       id: "cancellation-policy",
       title: "Cancellation Policy",
       icon: CircleX,
-      content: (
+      content: cmsPolicies?.cancellationPolicy ? (
+        <div dangerouslySetInnerHTML={{ __html: cmsPolicies.cancellationPolicy }} className="text-sm text-slate-600 mb-3 leading-relaxed" />
+      ) : (
         <>
           <p className="text-sm text-slate-600 mb-3 leading-relaxed">
             New subscriptions include a 5-day grace period for cancellation with a full refund.

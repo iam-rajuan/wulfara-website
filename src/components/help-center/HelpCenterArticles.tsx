@@ -1,8 +1,13 @@
 import React from "react";
 import { FileText, ArrowRight, ChevronRight } from "lucide-react";
+import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function HelpCenterArticles() {
-  const articles = [
+  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const helpCenterPage = pagesResponse?.data?.find((p: any) => p.slug === 'help-center');
+  const cmsArticles = helpCenterPage?.htmlContent ? JSON.parse(helpCenterPage.htmlContent) : [];
+
+  const staticArticles = [
     "What is WULFARA?",
     "How do I search for verified suppliers?",
     "Creating an effective RFQ",
@@ -10,6 +15,8 @@ export default function HelpCenterArticles() {
     "Understanding supplier trust badges",
     "How to upgrade your supplier tier",
   ];
+
+  const articlesToRender = cmsArticles.length > 0 ? cmsArticles.map((a: any) => a.title) : staticArticles;
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto ">
@@ -21,7 +28,7 @@ export default function HelpCenterArticles() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {articles.map((article, index) => (
+        {articlesToRender.map((article: any, index: number) => (
           <a
             key={index}
             href="#"

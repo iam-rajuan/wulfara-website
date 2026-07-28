@@ -1,16 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, SlidersHorizontal, CheckCircle2, Compass } from "lucide-react";
 import { ListCompanyIcon } from "@/components/icons";
 import Image from "next/image";
 import heroBg from "../../../public/assets/hero-bg.png";
 import { useTranslation } from "react-i18next";
+import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 import { useRouter } from "next/navigation";
 
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const cmsHero = pagesResponse?.data?.find((p: any) => p.slug === 'homepage')?.htmlContent
+    ? JSON.parse(pagesResponse.data.find((p: any) => p.slug === 'homepage').htmlContent)
+    : null;
+
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -51,12 +57,12 @@ export default function Hero() {
           style={{ fontFamily: "'Inter', sans-serif" }}
           className="text-4xl sm:text-6xl md:text-[72px] font-extrabold tracking-[-1.8px] text-white mb-6 leading-tight md:leading-[72px] text-center max-w-4xl mx-auto"
         >
-          {t('findSuppliersTitle')}
+          {cmsHero?.title || t('findSuppliersTitle')}
         </h1>
 
         {/* Subtitle */}
         <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-          {t('heroSubtitle')}
+          {cmsHero?.subtitle || t('heroSubtitle')}
         </p>
 
         {/* Search Bar Container */}
@@ -68,7 +74,7 @@ export default function Hero() {
             <Search className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 ml-2 sm:ml-3 mr-2 sm:mr-3 flex-shrink-0" />
             <input
               type="text"
-              placeholder={t('searchPlaceholder')}
+              placeholder={cmsHero?.searchPlaceholder || t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent pr-2 py-2 sm:py-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none min-w-0"
@@ -80,7 +86,7 @@ export default function Hero() {
             type="submit"
             className="rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer flex-shrink-0"
           >
-            {t('searchBtn')}
+            {cmsHero?.searchButtonText || t('searchBtn')}
           </button>
         </form>
 
@@ -101,20 +107,20 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
           {/* Browse Suppliers Button */}
           <a
-            href="#features"
+            href={cmsHero?.primaryCtaLink || "#features"}
             className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all"
           >
             <Compass className="h-4 w-4 text-slate-950" />
-            <span>{t('browseSuppliers')}</span>
+            <span>{cmsHero?.primaryCtaText || t('browseSuppliers')}</span>
           </a>
 
           {/* List Your Company Button */}
           <a
-            href="#list-company"
+            href={cmsHero?.secondaryCtaLink || "#list-company"}
             className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all"
           >
             <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
-            <span>{t('listCompany')}</span>
+            <span>{cmsHero?.secondaryCtaText || t('listCompany')}</span>
           </a>
 
           {/* Login Button */}

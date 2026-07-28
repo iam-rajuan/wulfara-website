@@ -8,6 +8,7 @@ interface FaqItem {
   qKey: string;
   aKey: string;
   topic: string;
+  isDynamic?: boolean;
 }
 
 interface FaqAccordionsProps {
@@ -55,7 +56,7 @@ export default function FaqAccordions({
                   onClick={() => toggleFaq(idx)}
                   className="flex w-full items-center justify-between px-5 py-4 text-left rtl:text-right font-semibold text-slate-900 outline-none cursor-pointer hover:bg-slate-50/40"
                 >
-                  <span className="text-sm">{t(faq.qKey)}</span>
+                  <span className="text-sm">{faq.isDynamic ? faq.qKey : t(faq.qKey)}</span>
                   <ChevronDown
                     className={`h-4 w-4 text-[#dca12f] transition-transform duration-300 flex-shrink-0 ml-4 ${isOpen ? "rotate-180" : ""
                       }`}
@@ -68,7 +69,11 @@ export default function FaqAccordions({
                     }`}
                 >
                   <div className="px-5 pb-5 pt-1 text-sm text-slate-600 leading-relaxed">
-                    {t(faq.aKey)}
+                    {faq.isDynamic ? (
+                      <div dangerouslySetInnerHTML={{ __html: faq.aKey }} />
+                    ) : (
+                      t(faq.aKey)
+                    )}
                   </div>
                 </div>
               </div>
