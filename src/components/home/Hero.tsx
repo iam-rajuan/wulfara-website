@@ -105,31 +105,46 @@ export default function Hero() {
 
         {/* Action Buttons Row */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-          {/* Browse Suppliers Button */}
-          <a
-            href="#features"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all"
-          >
-            <Compass className="h-4 w-4 text-slate-950" />
-            <span>{cmsHero?.buttonSettings?.primaryCTA || t('browseSuppliers')}</span>
-          </a>
-
-          {/* List Your Company Button */}
-          <a
-            href="#list-company"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all"
-          >
-            <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
-            <span>{cmsHero?.buttonSettings?.secondaryCTA || t('listCompany')}</span>
-          </a>
-
-          {/* Login Button */}
-          <a
-            href="#login"
-            className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center"
-          >
-            {t('login')}
-          </a>
+          {cmsHero?.dynamicButtons ? (
+            cmsHero.dynamicButtons.map((btn: any) => {
+              if (btn.style === 'primary') {
+                return (
+                  <a key={btn.id} href={btn.route} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all">
+                    <Compass className="h-4 w-4 text-slate-950" />
+                    <span>{btn.label}</span>
+                  </a>
+                );
+              }
+              if (btn.style === 'secondary') {
+                return (
+                  <a key={btn.id} href={btn.route} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all">
+                    <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
+                    <span>{btn.label}</span>
+                  </a>
+                );
+              }
+              return (
+                <a key={btn.id} href={btn.route} className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center">
+                  {btn.label}
+                </a>
+              );
+            })
+          ) : (
+            <>
+              {/* Fallback backward compatibility */}
+              <a href="#features" className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all">
+                <Compass className="h-4 w-4 text-slate-950" />
+                <span>{cmsHero?.buttonSettings?.primaryCTA || t('browseSuppliers')}</span>
+              </a>
+              <a href="#list-company" className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all">
+                <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
+                <span>{cmsHero?.buttonSettings?.secondaryCTA || t('listCompany')}</span>
+              </a>
+              <a href="#login" className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center">
+                {cmsHero?.buttonSettings?.accountLogin || t('login')}
+              </a>
+            </>
+          )}
         </div>
       </div>
     </section>
