@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserProfile, logout } from "@/store/slices/authSlice";
+import { AppDispatch, RootState } from "@/store/store";
+import toast from "react-hot-toast";
 import { 
   User, 
   Building, 
@@ -24,18 +28,33 @@ export default function SettingsPage() {
   // State for loading
   const [isSaving, setIsSaving] = useState(false);
   
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
+
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
+    dispatch(logout());
     router.push("/login");
   };
 
   // Profile State
   const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567"
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: ""
   });
+
+  useEffect(() => {
+    if (user) {
+      const nameParts = user.name ? user.name.split(" ") : [""];
+      setProfile({
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        email: user.email || "",
+        phone: (user as any).phone || "" // Note: phone might not be in the TS type yet
+      });
+    }
+  }, [user]);
 
   // Company State
   const [company, setCompany] = useState({
@@ -59,13 +78,27 @@ export default function SettingsPage() {
 
   // Generic handle save
   const handleSave = (section: string) => {
-    setIsSaving(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
-      // Here you could add a toast notification or API integration
-      console.log(`Saved ${section} data`);
-    }, 800);
+    if (section === "profile") {
+      setIsSaving(true);
+      const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+      dispatch(updateUserProfile({ name: fullName, phone: profile.phone }))
+        .unwrap()
+        .then(() => {
+          setIsSaving(false);
+          toast.success("Profile updated successfully");
+        })
+        .catch((err) => {
+          setIsSaving(false);
+          toast.error(err || "Failed to update profile");
+        });
+    } else {
+      setIsSaving(true);
+      // Simulate API call for other sections
+      setTimeout(() => {
+        setIsSaving(false);
+        toast.success(`Saved ${section} data`);
+      }, 800);
+    }
   };
 
   return (

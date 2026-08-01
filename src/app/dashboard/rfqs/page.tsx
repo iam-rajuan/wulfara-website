@@ -16,52 +16,39 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-// Initial mock data for RFQs
-const initialRfqData = [
-  {
-    id: "RFQ-1048",
-    supplier: "Steel Company A",
-    product: "Steel sheets and pipes",
-    quantity: "500 units",
-    deadline: "Jul 15, 2026",
-    status: "Pending",
-    statusColor: "border-[#F97316] text-[#F97316] bg-[#FFF7ED]",
-    lastUpdated: "2 hrs ago",
-  },
-  {
-    id: "RFQ-1049",
-    supplier: "Global Logistics Partners",
-    product: "Freight forwarding service",
-    quantity: "1 Shipment",
-    deadline: "Jul 20, 2026",
-    status: "Responded",
-    statusColor: "border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF]",
-    lastUpdated: "1 day ago",
-  },
-  {
-    id: "RFQ-1050",
-    supplier: "Industrial Components Inc",
-    product: "Heavy duty bearings",
-    quantity: "1000 units",
-    deadline: "Jun 30, 2026",
-    status: "Closed",
-    statusColor: "border-[#6B7280] text-[#4B5563] bg-[#F3F4F6]",
-    lastUpdated: "2 weeks ago",
-  },
-  {
-    id: "RFQ-1051",
-    supplier: "Alpha Manufacturing",
-    product: "Aluminum extrusions",
-    quantity: "200 units",
-    deadline: "Aug 05, 2026",
-    status: "Pending",
-    statusColor: "border-[#F97316] text-[#F97316] bg-[#FFF7ED]",
-    lastUpdated: "5 hrs ago",
-  }
-];
+import { useGetBuyerRfqsQuery } from "@/store/api/rfqApi";
 
 export default function MyRFQsPage() {
-  const [rfqData, setRfqData] = useState(initialRfqData);
+  const { data: rfqResponse, isLoading } = useGetBuyerRfqsQuery();
+  const apiRfqs = rfqResponse?.data || [];
+  
+  const rfqData = useMemo(() => {
+    return apiRfqs.map((rfq: any) => {
+      let deadline = "Not set";
+      if (rfq.details) {
+        const match = rfq.details.match(/Expected Delivery: (.+?)\n/);
+        if (match) deadline = match[1];
+      }
+      
+      const statusFormat = rfq.status.charAt(0).toUpperCase() + rfq.status.slice(1);
+      
+      let statusColor = "border-[#F97316] text-[#F97316] bg-[#FFF7ED]"; // Pending
+      if (rfq.status === "responded") statusColor = "border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF]";
+      else if (rfq.status === "closed") statusColor = "border-[#6B7280] text-[#4B5563] bg-[#F3F4F6]";
+      else if (rfq.status === "reviewed") statusColor = "border-[#DFB63E] text-[#DFB63E] bg-[#FEF9C3]";
+      
+      return {
+        id: rfq._id,
+        supplier: rfq.supplier?.companyName || "Unknown Supplier",
+        product: rfq.subject?.replace("RFQ: ", "") || "Product",
+        quantity: `${rfq.quantity || 1} units`,
+        deadline,
+        status: statusFormat,
+        statusColor,
+        lastUpdated: new Date(rfq.updatedAt).toLocaleDateString()
+      };
+    });
+  }, [apiRfqs]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeStatusFilter, setActiveStatusFilter] = useState("All");
   const [selectedDate, setSelectedDate] = useState("Date");
@@ -85,29 +72,8 @@ export default function MyRFQsPage() {
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newRfq.supplier || !newRfq.product || !newRfq.deadline) return;
-    
-    // Format date from YYYY-MM-DD to "Mon DD, YYYY" format
-    const dateObj = new Date(newRfq.deadline);
-    const formattedDate = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-
-    // Generate a random ID for the new RFQ
-    const newId = `RFQ-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const newEntry = {
-      id: newId,
-      supplier: newRfq.supplier,
-      product: newRfq.product,
-      quantity: newRfq.quantity || "1 unit",
-      deadline: formattedDate !== "Invalid Date" ? formattedDate : newRfq.deadline,
-      status: "Pending",
-      statusColor: "border-[#F97316] text-[#F97316] bg-[#FFF7ED]",
-      lastUpdated: "Just now",
-    };
-    
-    setRfqData([newEntry, ...rfqData]);
+    alert("Please navigate to a supplier's profile to create a new RFQ.");
     setIsCreateModalOpen(false);
-    setNewRfq({ supplier: "", product: "", quantity: "", deadline: "" });
   };
 
   const handleDownloadCSV = () => {
@@ -192,6 +158,10 @@ export default function MyRFQsPage() {
 
     return filtered;
   }, [searchQuery, activeStatusFilter, rfqData]);
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500">Loading RFQs...</div>;
+  }
 
   return (
     <div className="w-full mx-auto pb-10">

@@ -25,7 +25,8 @@ const initialState: AuthState = {
   error: null,
 };
 
-const API_URL = 'http://localhost:5000/api/v1/auth';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = `${BASE_URL}/auth`;
 
 // Async Thunks
 export const registerUser = createAsyncThunk(
@@ -94,6 +95,57 @@ export const fetchMe = createAsyncThunk(
   }
 );
 
+export const verifyEmailUser = createAsyncThunk(
+  'auth/verifyEmail',
+  async (verifyData: { email: string, verifyCode: string }, thunkAPI) => {
+    try {
+      const response = await fetch(`${API_URL}/verify-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(verifyData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        return thunkAPI.rejectWithValue(data.message || 'Failed to verify email');
+      }
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData: any, thunkAPI) => {
+    const state: any = thunkAPI.getState();
+    const token = state.auth.token;
+    
+    if (!token) return thunkAPI.rejectWithValue('No token found');
+
+    try {
+      // NOTE: user routes are at /users, not /auth
+      const response = await fetch(`${BASE_URL}/users/me`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        return thunkAPI.rejectWithValue(data.message || 'Failed to update profile');
+      }
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -149,6 +201,32 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         if (typeof window !== 'undefined') localStorage.removeItem('token');
+      })
+      // Verify Email
+      .addCase(verifyEmailUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(verifyEmailUser.fulfilled, (state) => {
+        state.isLoading = false;
+        if (state.user) state.user.isVerified = true;
+      })
+      .addCase(verifyEmailUser.rejected, (state, action: PayloadAction<any>) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Update Profile
+      .addCase(updateUserProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action: PayloadAction<any>) => {
+        state.isLoading = false;
+        state.user = action.payload.data;
+      })
+      .addCase(updateUserProfile.rejected, (state, action: PayloadAction<any>) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });

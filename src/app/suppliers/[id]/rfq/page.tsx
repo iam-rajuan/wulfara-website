@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   Check,
   Eye,
-  GitBranch
+  GitBranch,
+  X
 } from "lucide-react";
 import MessageSupplierModal from "@/components/suppliers/MessageSupplierModal";
 
@@ -28,6 +29,9 @@ const mockSupplier = {
   location: "New York, USA",
   distance: "12 miles away",
   replyTime: "Replies in 2 hours",
+  responseAvg: "Replies in 2 hours",
+  businessType: "Manufacturer, Distributor",
+  coreServices: "Structural Steel, Hot Rolled",
   categories: ["Manufacturer", "Distributor"],
   services: [
     { title: "Structural Steel" },
@@ -37,7 +41,7 @@ const mockSupplier = {
   ]
 };
 
-import { useCreateRfqMutation } from "@/store/api/rfqApi";
+import { useCreateRfqMutation, useGetRfqUploadUrlMutation } from "@/store/api/rfqApi";
 import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
 import { useSelector } from "react-redux";
 
@@ -52,7 +56,8 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
     ...mockSupplier,
     id: backendSupplier._id,
     name: backendSupplier.companyName,
-    businessType: backendSupplier.categories?.map((c: any) => c.name).join(", ") || "",
+    businessType: backendSupplier.categories?.map((c: any) => c.name).join(", ") || mockSupplier.businessType,
+    coreServices: backendSupplier.services?.map((s: any) => s.name || s.title).join(", ") || mockSupplier.coreServices,
     responseAvg: "Replies in 24 hours",
     verified: backendSupplier.isApproved,
     location: backendSupplier.contactInfo?.address || "Global",
@@ -73,12 +78,33 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
   });
 
   const [createRfq, { isLoading: isSubmitting }] = useCreateRfqMutation();
+  const [getRfqUploadUrl] = useGetRfqUploadUrlMutation();
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsUploading(true);
+      let attachmentUrls: string[] = [];
+      
+      // Upload files sequentially
+      for (const file of attachments) {
+        const res = await getRfqUploadUrl({ contentType: file.type }).unwrap();
+        const { uploadUrl, fileUrl } = res.data;
+        
+        await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type }
+        });
+        
+        attachmentUrls.push(fileUrl);
+      }
+      setIsUploading(false);
+
       await createRfq({
         supplierId: supplier.id,
         buyerName: formData.buyerName,
@@ -86,11 +112,13 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
         buyerPhone: formData.buyerPhone,
         subject: `RFQ: ${formData.productNeeded}`,
         details: `Unit: ${formData.unit}\nExpected Delivery: ${formData.expectedDelivery}\nNotes: ${formData.additionalNotes}`,
-        quantity: Number(formData.quantity)
+        quantity: Number(formData.quantity),
+        attachments: attachmentUrls
       }).unwrap();
       setIsSuccess(true);
     } catch (err) {
       console.error("Failed to send RFQ", err);
+      setIsUploading(false);
       alert("Failed to send RFQ. Please try again.");
     }
   };
@@ -352,7 +380,19 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
               {/* Attachments */}
               <div>
                 <label className="block text-sm font-bold text-[#1b2b3a] mb-2">Attachments (Optional)</label>
-                <div className="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer p-8 flex flex-col items-center justify-center text-center group">
+                <div 
+                  className="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer p-8 flex flex-col items-center justify-center text-center group relative"
+                >
+                  <input 
+                    type="file" 
+                    multiple
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setAttachments([...attachments, ...Array.from(e.target.files)]);
+                      }
+                    }}
+                  />
                   <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 text-slate-400 group-hover:text-[#dca12f] group-hover:scale-110 transition-all">
                     <UploadCloud size={24} />
                   </div>
@@ -360,6 +400,26 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
                   <p className="text-xs text-slate-500 mb-4">or click to browse from your computer</p>
                   <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Supported formats: PDF, DOCX, XLSX, JPG, PNG (Max 20MB)</p>
                 </div>
+                
+                {attachments.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {attachments.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <FileText size={16} className="text-[#dca12f]" />
+                          <span className="text-sm font-medium text-slate-700">{file.name}</span>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))}
+                          className="text-slate-400 hover:text-red-500 transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Form Actions */}
@@ -372,10 +432,10 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
                 </Link>
                 <button 
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUploading}
                   className="px-6 py-2.5 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-sm font-bold rounded transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <Send size={16} /> {isSubmitting ? "Submitting..." : "Submit RFQ"}
+                  <Send size={16} /> {isSubmitting || isUploading ? "Submitting..." : "Submit RFQ"}
                 </button>
               </div>
             </form>

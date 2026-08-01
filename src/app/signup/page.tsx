@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, clearError } from "@/store/slices/authSlice";
+import { registerUser, verifyEmailUser, clearError } from "@/store/slices/authSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
 import logoImg from "../../../public/assets/logo.png";
@@ -34,6 +34,8 @@ export default function SignUpPage() {
     confirmPassword: "",
   });
 
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -72,7 +74,24 @@ export default function SignUpPage() {
     }))
       .unwrap()
       .then(() => {
-        toast.success("Registration successful! Redirecting to login...", {
+        toast.success("Registration successful! Please check your email for the verification code.");
+        setShowOtpModal(true);
+      })
+      .catch((err) => {
+        toast.error(err || "Registration failed");
+      });
+  };
+
+  const handleVerifyEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode) {
+      toast.error("Please enter the verification code");
+      return;
+    }
+    dispatch(verifyEmailUser({ email: formData.workEmail, verifyCode: otpCode }))
+      .unwrap()
+      .then(() => {
+        toast.success("Email verified successfully! Redirecting to login...", {
           duration: 2000,
         });
         setTimeout(() => {
@@ -80,8 +99,7 @@ export default function SignUpPage() {
         }, 2000);
       })
       .catch((err) => {
-        // Redux already sets the error in state, but we can also toast it
-        toast.error(err || "Registration failed");
+        toast.error(err || "Verification failed");
       });
   };
 
@@ -391,6 +409,54 @@ export default function SignUpPage() {
           </div>
         </div>
       </div>
+
+      {/* ───── OTP Verification Modal ───── */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center relative overflow-hidden">
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#D4AF37]"></div>
+            
+            <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+              <Mail className="text-[#1b2b3a] w-8 h-8" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-[#1b2b3a] mb-2">Check your email</h2>
+            <p className="text-gray-500 mb-8">
+              We&apos;ve sent a verification code to <br />
+              <span className="font-semibold text-gray-800">{formData.workEmail}</span>
+            </p>
+
+            <form onSubmit={handleVerifyEmail}>
+              <div className="mb-6">
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit code"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  className="w-full text-center text-2xl tracking-[0.5em] font-mono py-4 border-2 border-gray-200 rounded-xl focus:border-[#1b2b3a] focus:ring-0 transition-colors outline-none"
+                  maxLength={6}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || otpCode.length < 6}
+                className="w-full bg-[#1b2b3a] hover:bg-[#14202b] text-white font-medium py-3.5 px-4 rounded-xl transition-all flex justify-center items-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Verify Email
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

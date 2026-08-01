@@ -10,7 +10,22 @@ export const rfqApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['RFQ'],
     }),
+    getBuyerRfqs: builder.query<any, void>({
+      query: () => '/rfqs/buyer',
+      providesTags: ['RFQ'],
+    }),
+    getRfqUploadUrl: builder.mutation<any, { contentType: string }>({
+      query: (data) => ({
+        url: '/rfqs/upload-url',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useCreateRfqMutation } = rfqApi;
+export const { 
+  useCreateRfqMutation, 
+  useGetBuyerRfqsQuery, 
+  useGetRfqUploadUrlMutation 
+} = rfqApi;
