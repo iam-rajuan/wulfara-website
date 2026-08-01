@@ -4,48 +4,25 @@ import React, { useState, Suspense } from "react";
 import { Search, MapPin, ExternalLink, X, SlidersHorizontal, Maximize2, Map as MapIcon, CheckCircle2, Navigation } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useGetSuppliersQuery } from "@/store/api/supplierApi";
 
-// Mock Data
-const mockSuppliers = [
-  {
-    id: 1,
-    name: "Steel Company A",
-    verified: true,
-    premium: true,
-    negotiable: true,
-    pro: false,
-    location: "New York, NY",
-    distance: "12 miles",
-    services: "Steel sheets, pipes.",
-    responseTime: "Typically within 2h",
-    tags: ["Steel sheets", "Pipes", "Manufacturing"],
-  },
-  {
-    id: 2,
-    name: "Steel Company B",
-    verified: true,
-    premium: false,
-    negotiable: false,
-    pro: true,
-    location: "New Jersey",
-    distance: "20 miles",
-    services: "Industrial steel, metal parts.",
-    responseTime: "Typically within 4h",
-    tags: ["Industrial steel", "Metal parts", "Supplier"],
-  },
-];
-
-const initialTags = ['Steel Industry', 'Verified Suppliers', 'Negotiable Rate', 'Within 25 miles', 'Premium Listings'];
+const initialTags = ['Verified Suppliers', 'Premium Listings'];
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Initialize query from URL parameter, fallback to "steel suppliers" for visual consistency
-  const urlQuery = searchParams.get("q") || "steel suppliers";
+  // Initialize query from URL parameter, fallback to empty
+  const urlQuery = searchParams.get("q") || "";
   
   const [query, setQuery] = useState(urlQuery);
   const [activeTags, setActiveTags] = useState(initialTags);
+
+  // Fetch real suppliers from backend
+  const { data, isLoading } = useGetSuppliersQuery(
+    urlQuery ? `keyword=${encodeURIComponent(urlQuery)}` : ''
+  );
+  const suppliers = data?.data || [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +137,7 @@ function SearchContent() {
           {/* Middle Column: Results */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-bold text-slate-900">{mockSuppliers.length * 12} suppliers found</span>
+              <span className="text-sm font-bold text-slate-900">{isLoading ? "Searching..." : `${suppliers.length} suppliers found`}</span>
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-slate-500">Sort by:</span>
                 <select className="border border-slate-300 rounded-md px-2 py-1 text-slate-900 font-medium focus:outline-none bg-white">
@@ -172,45 +149,42 @@ function SearchContent() {
             </div>
 
             <div className="space-y-4">
-              {mockSuppliers.map(supplier => (
-                <div key={supplier.id} className="bg-white border border-slate-200 rounded-lg p-5">
+              {suppliers.map((supplier: any) => (
+                <div key={supplier._id} className="bg-white border border-slate-200 rounded-lg p-5">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-bold text-slate-900">{supplier.name}</h3>
-                      {supplier.verified && <CheckCircle2 size={18} className="text-[#10B981] fill-[#10B981]/10" />}
+                      <h3 className="text-xl font-bold text-slate-900">{supplier.companyName}</h3>
+                      {supplier.isApproved && <CheckCircle2 size={18} className="text-[#10B981] fill-[#10B981]/10" />}
                     </div>
                     <div className="flex items-center gap-2">
-                      {supplier.premium && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Premium</span>}
-                      {supplier.negotiable && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Negotiable</span>}
-                      {supplier.pro && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded">Pro</span>}
+                      {supplier.subscriptionPlan !== 'basic' && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded capitalize">{supplier.subscriptionPlan}</span>}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
                     <MapPin size={14} />
-                    <span>{supplier.location} • {supplier.distance}</span>
+                    <span>Global • Verified</span>
                   </div>
 
                   <div className="mb-4 space-y-1">
-                    <p className="text-sm"><span className="font-semibold text-slate-700">Services:</span> <span className="text-slate-900 font-medium">{supplier.services}</span></p>
-                    <p className="text-sm"><span className="text-slate-500">Response Time: {supplier.responseTime}</span></p>
+                    <p className="text-sm"><span className="font-semibold text-slate-700">Description:</span> <span className="text-slate-900 font-medium">{supplier.description?.substring(0, 100)}...</span></p>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {supplier.tags.map(tag => (
-                      <span key={tag} className="bg-[#E2E8F0] text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                        {tag}
+                    {supplier.categories?.map((cat: any) => (
+                      <span key={cat._id} className="bg-[#E2E8F0] text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                        {cat.name}
                       </span>
                     ))}
                   </div>
 
                   <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 font-bold text-sm rounded hover:bg-slate-50 transition-colors">
-                      <ExternalLink size={14} /> Visit Website
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-[#DFB63E] hover:bg-[#cba433] text-slate-900 font-bold text-sm rounded transition-colors">
+                    <Link href={`/suppliers/${supplier._id}`} className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 font-bold text-sm rounded hover:bg-slate-50 transition-colors">
+                      <ExternalLink size={14} /> View Profile
+                    </Link>
+                    <Link href={`/suppliers/${supplier._id}?action=rfq`} className="flex items-center gap-2 px-4 py-2 bg-[#DFB63E] hover:bg-[#cba433] text-slate-900 font-bold text-sm rounded transition-colors">
                       <Navigation size={14} className="rotate-45" /> Send RFQ
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}

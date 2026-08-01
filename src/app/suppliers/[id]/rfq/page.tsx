@@ -37,17 +37,34 @@ const mockSupplier = {
   ]
 };
 
+import { useCreateRfqMutation } from "@/store/api/rfqApi";
+import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
+import { useSelector } from "react-redux";
+
 export default function SendRFQPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
-  // In a real app, you would fetch supplier data based on resolvedParams.id
-  const supplier = {
-    ...mockSupplier,
-    businessType: mockSupplier.categories.join(", "),
-    coreServices: mockSupplier.services.map(s => s.title).slice(0, 3).join(", "),
-    responseAvg: mockSupplier.replyTime,
-  };
+  
+  const { data, isLoading } = useGetSupplierByIdQuery(resolvedParams.id, { skip: !resolvedParams.id });
+  const backendSupplier = data?.data;
 
+  // Combine real supplier with fallbacks for UI
+  const supplier = backendSupplier ? {
+    ...mockSupplier,
+    id: backendSupplier._id,
+    name: backendSupplier.companyName,
+    businessType: backendSupplier.categories?.map((c: any) => c.name).join(", ") || "",
+    responseAvg: "Replies in 24 hours",
+    verified: backendSupplier.isApproved,
+    location: backendSupplier.contactInfo?.address || "Global",
+    distance: ""
+  } : mockSupplier;
+
+  const { user } = useSelector((state: any) => state.auth || {});
+  
   const [formData, setFormData] = useState({
+    buyerName: user?.name || "",
+    buyerEmail: user?.email || "",
+    buyerPhone: "",
     productNeeded: "",
     quantity: "",
     unit: "Units",
@@ -55,19 +72,30 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
     additionalNotes: ""
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createRfq, { isLoading: isSubmitting }] = useCreateRfqMutation();
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await createRfq({
+        supplierId: supplier.id,
+        buyerName: formData.buyerName,
+        buyerEmail: formData.buyerEmail,
+        buyerPhone: formData.buyerPhone,
+        subject: `RFQ: ${formData.productNeeded}`,
+        details: `Unit: ${formData.unit}\nExpected Delivery: ${formData.expectedDelivery}\nNotes: ${formData.additionalNotes}`,
+        quantity: Number(formData.quantity)
+      }).unwrap();
       setIsSuccess(true);
-    }, 1500);
+    } catch (err) {
+      console.error("Failed to send RFQ", err);
+      alert("Failed to send RFQ. Please try again.");
+    }
   };
+
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   if (isSuccess) {
     return (
@@ -214,6 +242,42 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
             </div>
 
             <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+              {/* Buyer Information (For Guests or Logged In Users) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-[#1b2b3a] mb-2">Your Name <span className="text-red-500">*</span></label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.buyerName}
+                    onChange={(e) => setFormData({...formData, buyerName: e.target.value})}
+                    placeholder="e.g., John Doe" 
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#1b2b3a] mb-2">Your Email <span className="text-red-500">*</span></label>
+                  <input 
+                    type="email" 
+                    required
+                    value={formData.buyerEmail}
+                    onChange={(e) => setFormData({...formData, buyerEmail: e.target.value})}
+                    placeholder="e.g., john@example.com" 
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-[#1b2b3a] mb-2">Phone Number</label>
+                  <input 
+                    type="text" 
+                    value={formData.buyerPhone}
+                    onChange={(e) => setFormData({...formData, buyerPhone: e.target.value})}
+                    placeholder="e.g., +1 234 567 890" 
+                    className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-slate-50 text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#dca12f]/50 focus:border-[#dca12f] transition-colors text-sm"
+                  />
+                </div>
+              </div>
+
               {/* Product / Service */}
               <div>
                 <label className="block text-sm font-bold text-[#1b2b3a] mb-2">Product/Service Needed <span className="text-red-500">*</span></label>
