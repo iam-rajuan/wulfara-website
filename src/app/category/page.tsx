@@ -7,8 +7,12 @@ import {
   Wrench, Flame, TreePine, Leaf, Droplets,
   Search, MapPin, BadgeCheck, ArrowRight, Factory, 
   ChevronDown, Building2, Map, FileText, CheckCircle2,
-  FileCheck
+  FileCheck, Heart
 } from "lucide-react";
+
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
 
 import { useGetCategoriesQuery } from "@/store/api/categoryApi";
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
@@ -28,6 +32,35 @@ export default function CategoryPage() {
   const [locationFilter, setLocationFilter] = useState("Any Location");
   const [distanceFilter, setDistanceFilter] = useState("Distance");
   const [typeFilter, setTypeFilter] = useState("Supplier Type");
+
+  const user = useSelector((state: any) => state.auth.user);
+  const { data: favoritesData } = useGetFavoritesQuery(undefined, { skip: !user });
+  const [addFavorite] = useAddFavoriteMutation();
+  const [removeFavorite] = useRemoveFavoriteMutation();
+  const favorites = favoritesData?.data || [];
+
+  const handleFavoriteToggle = async (supplierId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please login to save favorites");
+      return;
+    }
+
+    const existingFav = favorites.find((f: any) => f.supplier?._id === supplierId || f.supplier === supplierId);
+    try {
+      if (existingFav) {
+        await removeFavorite(existingFav._id).unwrap();
+        toast.success("Removed from favorites");
+      } else {
+        await addFavorite({ supplierId }).unwrap();
+        toast.success("Added to favorites");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to update favorites");
+    }
+  };
 
   // Fetch Categories
   const { data: categoriesResponse } = useGetCategoriesQuery();
@@ -275,11 +308,22 @@ export default function CategoryPage() {
                         <div className="w-11 h-11 rounded-xl bg-[#F1F5F9] text-slate-600 flex items-center justify-center shrink-0">
                           <Building2 size={22} className="text-[#64748B]" />
                         </div>
-                        {sup.isApproved && (
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F0FDF4] text-[#15803D] rounded-full text-[11px] font-bold border border-[#DCFCE7]">
-                            <BadgeCheck size={14} className="text-[#15803D]" /> Verified
-                          </div>
-                        )}
+                        <div className="flex flex-col items-end gap-2">
+                          {sup.isApproved && (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F0FDF4] text-[#15803D] rounded-full text-[11px] font-bold border border-[#DCFCE7]">
+                              <BadgeCheck size={14} className="text-[#15803D]" /> Verified
+                            </div>
+                          )}
+                          <button 
+                            onClick={(e) => handleFavoriteToggle(sup._id, e)}
+                            className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                          >
+                            <Heart 
+                              size={20} 
+                              className={favorites.some((f: any) => f.supplier?._id === sup._id || f.supplier === sup._id) ? "fill-red-500 text-red-500" : ""} 
+                            />
+                          </button>
+                        </div>
                       </div>
                       
                       {/* Title & Location */}

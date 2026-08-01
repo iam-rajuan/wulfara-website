@@ -16,8 +16,13 @@ import {
   Layers,
   ChevronLeft,
   Settings,
-  ExternalLink
+  ExternalLink,
+  Heart
 } from "lucide-react";
+
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
 
 // Mock data based on the screenshot
 const mockSupplier = {
@@ -64,6 +69,31 @@ export default function SupplierProfilePage() {
   const id = params.id as string;
   const { data, isLoading } = useGetSupplierByIdQuery(id, { skip: !id });
   const supplier = data?.data;
+
+  const user = useSelector((state: any) => state.auth.user);
+  const { data: favoritesData } = useGetFavoritesQuery(undefined, { skip: !user });
+  const [addFavorite] = useAddFavoriteMutation();
+  const [removeFavorite] = useRemoveFavoriteMutation();
+  const favorites = favoritesData?.data || [];
+
+  const handleFavoriteToggle = async () => {
+    if (!user) {
+      toast.error("Please login to save favorites");
+      return;
+    }
+    const existingFav = favorites.find((f: any) => f.supplier?._id === id || f.supplier === id);
+    try {
+      if (existingFav) {
+        await removeFavorite(existingFav._id).unwrap();
+        toast.success("Removed from favorites");
+      } else {
+        await addFavorite({ supplierId: id }).unwrap();
+        toast.success("Added to favorites");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to update favorites");
+    }
+  };
 
   if (isLoading) {
     return <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">Loading...</div>;
@@ -129,6 +159,13 @@ export default function SupplierProfilePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
+            <button 
+              onClick={handleFavoriteToggle}
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              <Heart size={16} className={favorites.some((f: any) => f.supplier?._id === id || f.supplier === id) ? "fill-red-500 text-red-500" : ""} />
+              {favorites.some((f: any) => f.supplier?._id === id || f.supplier === id) ? "Saved" : "Save"}
+            </button>
             {supplier.contactInfo?.website && (
               <a href={supplier.contactInfo.website} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2">
                 Visit Website <ExternalLink size={14} />
