@@ -1,17 +1,16 @@
 "use client";
-
 import React from "react";
 import Link from "next/link";
-import { 
-  MapPin, 
-  Clock, 
-  Phone, 
-  Mail, 
-  Building2, 
-  FileText, 
-  ArrowRight, 
-  CheckCircle2, 
-  Wrench, 
+import {
+  MapPin,
+  Clock,
+  Phone,
+  Mail,
+  Building2,
+  FileText,
+  ArrowRight,
+  CheckCircle2,
+  Wrench,
   Box,
   Layers,
   ChevronLeft,
@@ -23,43 +22,6 @@ import {
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
-
-// Mock data based on the screenshot
-const mockSupplier = {
-  id: "1",
-  name: "Steel Company A",
-  verified: true,
-  isGold: true,
-  location: "New York, USA",
-  distance: "12 miles away",
-  replyTime: "Replies in 2 hours",
-  about: "Established in 1985, Steel Company A is a premier provider of high-grade industrial steel and specialized raw materials for the global manufacturing sector. With a commitment to structural integrity and innovative fabrication processes, we have consistently delivered exceptional quality to our partners across the aerospace, automotive, and heavy construction industries.\n\nOur state-of-the-art facilities in New York span over 500,000 square feet, equipping us with the capacity to handle large-scale, complex orders while maintaining stringent quality control standards. We pride ourselves on our robust supply chain logistics and our ability to meet aggressive delivery schedules without compromising on excellence.",
-  contact: {
-    phone: "+1 (555) 019-6273",
-    email: "sales@steelcompanya.com",
-    address: "124 Industrial Parkway\nSuite 400\nNew York, NY 10001, USA"
-  },
-  details: {
-    founded: "1985",
-    employees: "250 - 500",
-    turnover: "$50M - $100M",
-    markets: "North America, Europe",
-    certifications: ["ISO 9001:2015", "AS9100D"]
-  },
-  categories: ["Raw Materials", "Construction", "Manufacturing", "Metallurgy"],
-  services: [
-    { title: "Structural Steel", desc: "High-strength beams, columns, and joists for commercial construction.", icon: <Wrench size={16} /> },
-    { title: "Custom Pipes & Tubes", desc: "Precision-engineered piping solutions for fluid transport and structural.", icon: <Layers size={16} /> },
-    { title: "Metal Fabrication", desc: "Advanced CNC machining, welding, and custom assembly services.", icon: <Settings size={16} /> },
-    { title: "Raw Steel Coils", desc: "Hot and cold-rolled steel coils for diverse industrial manufacturing.", icon: <Box size={16} /> }
-  ],
-  gallery: [
-    "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?ixlib=rb-4.0.3&w=400&q=80",
-    "https://images.unsplash.com/photo-1565439390236-419b4b0eb198?ixlib=rb-4.0.3&w=400&q=80",
-    "https://images.unsplash.com/photo-1580983582522-835694ce25cc?ixlib=rb-4.0.3&w=400&q=80",
-    "https://images.unsplash.com/photo-1533618451877-fcc3fbb54e4c?ixlib=rb-4.0.3&w=400&q=80"
-  ]
-};
 
 import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
 import { useParams } from "next/navigation";
@@ -103,21 +65,28 @@ export default function SupplierProfilePage() {
     return <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">Supplier not found.</div>;
   }
 
-  // Fallbacks for data that might not be in the schema yet
-  const displayLocation = supplier.contactInfo?.address || "Global";
-  const displayReplyTime = "Replies in 24 hours";
+  // Map real supplier data
+  const displayLocation = supplier.contactInfo?.address || "Location not specified";
+  const displayReplyTime = "Replies in 24 hours"; // Could be dynamically calculated if tracked
   const displayAbout = supplier.description || "No description provided.";
-  const displayServices = [
-    { title: "Core Services", desc: "Industrial sourcing and supply.", icon: <Wrench size={16} /> }
-  ];
-  const displayGallery = supplier.gallery && supplier.gallery.length > 0 
-    ? supplier.gallery.map((g: any) => g.url) 
-    : ["https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?ixlib=rb-4.0.3&w=400&q=80"];
+
+  // Dynamically map core products/services
+  const displayServices = supplier.coreProducts && supplier.coreProducts.length > 0
+    ? supplier.coreProducts.map((prod: string) => ({
+      title: prod,
+      desc: "Core product/service offered by the supplier.",
+      icon: <Wrench size={16} />
+    }))
+    : [{ title: "Core Services", desc: "Industrial sourcing and supply.", icon: <Wrench size={16} /> }];
+
+  const displayGallery = supplier.gallery && supplier.gallery.length > 0
+    ? supplier.gallery.map((g: any) => g.url)
+    : [];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
-        
+
         {/* Breadcrumb / Back Navigation */}
         <Link href="/suppliers" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors">
           <ChevronLeft size={16} /> Back to Search Results
@@ -128,18 +97,18 @@ export default function SupplierProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full md:w-auto text-center sm:text-left">
             {/* Logo */}
             <div className="w-24 h-24 rounded bg-linear-to-tr from-slate-800 to-[#1b2b3a] shrink-0 flex items-center justify-center relative overflow-hidden shadow-inner">
-               {supplier.logo?.url ? (
-                 <img src={supplier.logo.url} alt="Logo" className="w-full h-full object-cover" />
-               ) : (
-                 <div className="w-12 h-12 border-4 border-white/20 rounded-full flex items-center justify-center relative z-10">
-                   <Building2 className="text-white/80" size={24} />
-                 </div>
-               )}
-               {supplier.isApproved && (
-                 <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 border-2 border-white z-20">
-                   <CheckCircle2 size={16} />
-                 </div>
-               )}
+              {supplier.logo?.url ? (
+                <img src={supplier.logo.url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 border-4 border-white/20 rounded-full flex items-center justify-center relative z-10">
+                  <Building2 className="text-white/80" size={24} />
+                </div>
+              )}
+              {supplier.isApproved && (
+                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 border-2 border-white z-20">
+                  <CheckCircle2 size={16} />
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col justify-center h-full pt-1">
@@ -159,7 +128,7 @@ export default function SupplierProfilePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
-            <button 
+            <button
               onClick={handleFavoriteToggle}
               className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2"
             >
@@ -179,10 +148,10 @@ export default function SupplierProfilePage() {
 
         {/* 2-Column Main Content */}
         <div className="flex flex-col lg:flex-row gap-6 mb-12">
-          
+
           {/* Left Column (Main Info) */}
           <div className="flex-1 flex flex-col gap-6">
-            
+
             {/* About */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-4">About the Company</h2>
@@ -195,7 +164,7 @@ export default function SupplierProfilePage() {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Products & Services</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {displayServices.map((service, idx) => (
+                {displayServices.map((service: any, idx: number) => (
                   <div key={idx} className="bg-slate-50 border border-slate-100 rounded-lg p-5 flex gap-4 hover:border-slate-200 transition-colors">
                     <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center shrink-0 text-slate-700">
                       {service.icon}
@@ -210,31 +179,33 @@ export default function SupplierProfilePage() {
             </div>
 
             {/* Gallery */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Gallery</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {displayGallery.map((img: string, idx: number) => (
-                  <div key={idx} className="rounded-lg overflow-hidden h-[200px] bg-slate-100 group relative">
-                    <img 
-                      src={img} 
-                      alt={`Gallery image ${idx + 1}`} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
-                  </div>
-                ))}
+            {displayGallery.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Gallery</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {displayGallery.map((img: string, idx: number) => (
+                    <div key={idx} className="rounded-lg overflow-hidden h-[200px] bg-slate-100 group relative border border-slate-100">
+                      <img
+                        src={img}
+                        alt={`Gallery image ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
 
           {/* Right Column (Sidebar) */}
           <div className="w-full lg:w-[380px] shrink-0 flex flex-col gap-6">
-            
+
             {/* Contact Information */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Contact Information</h2>
-              
+
               <div className="flex flex-col gap-6">
                 <div className="flex items-start gap-4">
                   <div className="text-[#dca12f] mt-0.5"><Phone size={18} /></div>
@@ -243,7 +214,7 @@ export default function SupplierProfilePage() {
                     <p className="text-sm font-medium text-slate-800">{supplier.contactInfo?.phone || "N/A"}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-4">
                   <div className="text-[#dca12f] mt-0.5"><Mail size={18} /></div>
                   <div>
@@ -265,7 +236,7 @@ export default function SupplierProfilePage() {
             {/* Business Details */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Business Details</h2>
-              
+
               <div className="flex flex-col gap-4 text-sm">
                 <div className="flex justify-between items-center py-2 border-b border-slate-50">
                   <span className="text-slate-500">Established</span>
