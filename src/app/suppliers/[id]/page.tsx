@@ -140,7 +140,7 @@ export default function SupplierProfilePage() {
                 Visit Website <ExternalLink size={14} />
               </a>
             )}
-            <Link href={`/suppliers/${supplier._id}?action=rfq`} className="flex-1 sm:flex-none px-6 py-2.5 bg-[#1b2b3a] hover:bg-slate-800 text-white text-sm font-bold rounded transition-colors shadow-sm flex items-center justify-center gap-2">
+            <Link href={`/suppliers/${supplier._id}/rfq`} className="flex-1 sm:flex-none px-6 py-2.5 bg-[#1b2b3a] hover:bg-slate-800 text-white text-sm font-bold rounded transition-colors shadow-sm flex items-center justify-center gap-2">
               <FileText size={16} /> Send RFQ
             </Link>
           </div>
@@ -291,7 +291,7 @@ export default function SupplierProfilePage() {
               Connect directly with their sales team to discuss bulk pricing, technical specifications, and delivery timelines for your next project.
             </p>
           </div>
-          <Link href={`/suppliers/${supplier._id}?action=rfq`} className="px-8 py-4 bg-[#1b2b3a] hover:bg-slate-900 text-white font-bold rounded-lg transition-colors shadow-xl shrink-0 flex items-center gap-2 group">
+          <Link href={`/suppliers/${supplier._id}/rfq`} className="px-8 py-4 bg-[#1b2b3a] hover:bg-slate-900 text-white font-bold rounded-lg transition-colors shadow-xl shrink-0 flex items-center gap-2 group">
             Send RFQ Now <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
