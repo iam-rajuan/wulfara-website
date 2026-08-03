@@ -434,7 +434,7 @@ export default function SignUpPage() {
                   placeholder="Enter 6-digit code"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  className="w-full text-center text-2xl tracking-[0.5em] font-mono py-4 border-2 border-gray-200 rounded-xl focus:border-[#1b2b3a] focus:ring-0 transition-colors outline-none"
+                  className="w-full text-center text-black text-2xl tracking-[0.5em] font-mono py-4 border-2 border-gray-200 rounded-xl focus:border-[#dca12f] focus:ring-0 transition-colors outline-none"
                   maxLength={6}
                 />
               </div>
