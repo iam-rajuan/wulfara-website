@@ -18,11 +18,22 @@ import Link from "next/link";
 
 import { useGetBuyerRfqsQuery } from "@/store/api/rfqApi";
 
+export interface RFQDataRow {
+  id: string;
+  supplier: string;
+  product: string;
+  quantity: string;
+  deadline: string;
+  status: string;
+  statusColor: string;
+  lastUpdated: string;
+}
+
 export default function MyRFQsPage() {
   const { data: rfqResponse, isLoading } = useGetBuyerRfqsQuery();
   const apiRfqs = rfqResponse?.data || [];
   
-  const rfqData = useMemo(() => {
+  const rfqData: RFQDataRow[] = useMemo(() => {
     return apiRfqs.map((rfq: any) => {
       let deadline = "Not set";
       if (rfq.details) {
@@ -78,7 +89,7 @@ export default function MyRFQsPage() {
 
   const handleDownloadCSV = () => {
     const headers = ["RFQ ID", "Supplier Name", "Product/Service", "Quantity", "Deadline", "Status", "Last Updated"];
-    const csvRows = filteredRfqs.map(rfq => [
+    const csvRows = filteredRfqs.map((rfq: RFQDataRow) => [
       rfq.id,
       `"${rfq.supplier}"`,
       `"${rfq.product}"`,
@@ -87,7 +98,7 @@ export default function MyRFQsPage() {
       rfq.status,
       `"${rfq.lastUpdated}"`
     ]);
-    const csvContent = [headers.join(","), ...csvRows.map(e => e.join(","))].join("\n");
+    const csvContent = [headers.join(","), ...csvRows.map((e: any[]) => e.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -101,9 +112,9 @@ export default function MyRFQsPage() {
   // Dynamically calculate stats based on data
   const stats = useMemo(() => {
     const total = rfqData.length;
-    const pending = rfqData.filter((r) => r.status === "Pending").length;
-    const responded = rfqData.filter((r) => r.status === "Responded").length;
-    const closed = rfqData.filter((r) => r.status === "Closed").length;
+    const pending = rfqData.filter((r: RFQDataRow) => r.status === "Pending").length;
+    const responded = rfqData.filter((r: RFQDataRow) => r.status === "Responded").length;
+    const closed = rfqData.filter((r: RFQDataRow) => r.status === "Closed").length;
 
     return [
       {
@@ -143,16 +154,17 @@ export default function MyRFQsPage() {
     
     // Filter by active status
     if (activeStatusFilter !== "All") {
-      filtered = filtered.filter((rfq) => rfq.status === activeStatusFilter);
+      filtered = filtered.filter((rfq: RFQDataRow) => rfq.status === activeStatusFilter);
     }
 
     // Filter by search query
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (rfq) =>
+        (rfq: RFQDataRow) =>
+          rfq.product.toLowerCase().includes(lowerQuery) ||
           rfq.supplier.toLowerCase().includes(lowerQuery) ||
-          rfq.product.toLowerCase().includes(lowerQuery)
+          rfq.id.toLowerCase().includes(lowerQuery)
       );
     }
 
@@ -229,7 +241,7 @@ export default function MyRFQsPage() {
         {/* Toolbar */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 border-b border-gray-200">
           {/* Search */}
-          <div className="relative w-full lg:w-[400px]">
+          <div className="relative w-full lg:w-100">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search size={18} className="text-gray-400" />
             </div>
@@ -339,7 +351,7 @@ export default function MyRFQsPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
+          <table className="w-full min-w-225">
             <thead>
               <tr className="border-b border-gray-200 bg-white">
                 <th className="text-left text-[13px] font-bold text-gray-700 px-6 py-4">
@@ -364,7 +376,7 @@ export default function MyRFQsPage() {
             </thead>
             <tbody>
               {filteredRfqs.length > 0 ? (
-                filteredRfqs.map((row, i) => (
+                filteredRfqs.map((row: RFQDataRow, i: number) => (
                   <tr
                     key={i}
                     className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors group"
