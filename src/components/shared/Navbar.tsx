@@ -16,12 +16,14 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
-  
+
   const dispatch = useDispatch();
   const router = useRouter();
-  
+
   const token = useSelector((state: RootState) => state.auth.token);
+  const user = useSelector((state: RootState) => state.auth.user);
   const isLoggedIn = mounted && !!token;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -103,24 +105,49 @@ export default function Header() {
                 {t('login')}
               </Link>
             ) : (
-              <button
-                onClick={() => {
-                  dispatch(logout());
-                  router.push('/');
-                }}
-                className="text-sm font-medium text-slate-300 hover:text-white transition-colors cursor-pointer"
-              >
-                Logout
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-8 h-8 rounded-full bg-[#dca12f] text-slate-900 font-bold flex items-center justify-center hover:bg-[#c99126] transition-colors shadow-sm"
+                >
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-slate-200 z-50">
+                    <Link
+                      href="/dashboard"
+                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        dispatch(logout());
+                        router.push('/');
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100 font-medium"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* CTA Button */}
-            <Link
-              href={isLoggedIn ? "/dashboard" : "/login"}
-              className="rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-2 text-xs font-bold text-slate-950 transition-all shadow-sm"
-            >
-              {t('listCompany')}
-            </Link>
+            {!isLoggedIn && (
+              <a
+                href="http://localhost:5173/sign-in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-2 text-xs font-bold text-slate-950 transition-all shadow-sm"
+              >
+                {t('listCompany')}
+              </a>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -215,13 +242,17 @@ export default function Header() {
           </div>
 
           {/* Mobile CTA Full Width */}
-          <Link
-            href={isLoggedIn ? "/dashboard" : "/login"}
-            onClick={() => setIsOpen(false)}
-            className="mt-4 flex w-full items-center justify-center rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-3 text-sm font-bold text-slate-950 transition-colors shadow-sm"
-          >
-            {t('listCompany')}
-          </Link>
+          {!isLoggedIn && (
+            <a
+              href="http://localhost:5173/sign-in"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="mt-4 flex w-full items-center justify-center rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-3 text-sm font-bold text-slate-950 transition-colors shadow-sm"
+            >
+              {t('listCompany')}
+            </a>
+          )}
         </div>
       )}
     </header>
