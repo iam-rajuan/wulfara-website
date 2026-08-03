@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -16,58 +16,46 @@ import {
   Handshake,
 } from "lucide-react";
 
-const suppliers = [
-  {
-    id: 1,
-    name: "Steel Company A",
-    location: "New York, USA",
-    isVerified: true,
-    isFavorite: true,
-    logoBg: "bg-[#0F172A]",
-    tags: [
-      { label: "Replies in 2 hours", icon: Clock },
-      { label: "Negotiable Rate", icon: Handshake },
-    ],
-    isActive: true,
-  },
-  {
-    id: 2,
-    name: "Steel Company B",
-    location: "New Jersey, USA",
-    isVerified: true,
-    isFavorite: true,
-    logoBg: "bg-[#F0F9FF]",
-    logoText: "text-[#0284C7]",
-    tags: [
-      { label: "Manufacturer", icon: Building2 },
-      { label: "Global Shipping", icon: Truck },
-    ],
-    isActive: true,
-  },
-  {
-    id: 3,
-    name: "Tech Components Ltd",
-    location: "Shenzhen, China",
-    isVerified: false,
-    isFavorite: false,
-    logoBg: "bg-gray-100",
-    tags: [{ label: "Replies in 12 hours", icon: Clock }],
-    isActive: false,
-  },
-];
+import { useGetFavoritesQuery, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
 
 export default function FavoriteSuppliersPage() {
   const router = useRouter();
-  const [suppliersList, setSuppliersList] = useState(suppliers);
+  const { data: response, isLoading } = useGetFavoritesQuery();
+  const [removeFavoriteApi] = useRemoveFavoriteMutation();
+  const [suppliersList, setSuppliersList] = useState<any[]>([]);
 
-  const toggleFavorite = (id: number) => {
-    setSuppliersList((current) =>
-      current.map((supplier) =>
-        supplier.id === id
-          ? { ...supplier, isFavorite: !supplier.isFavorite }
-          : supplier
-      )
-    );
+  useEffect(() => {
+    if (response?.data) {
+      const formatted = response.data.map((fav: any) => {
+        const sup = fav.supplier;
+        if (!sup) return null;
+        return {
+          id: sup._id,
+          favoriteId: fav._id,
+          userId: sup.user,
+          name: sup.companyName,
+          location: sup.location?.formattedAddress || "Global",
+          isVerified: true, // Assuming approved
+          isFavorite: true,
+          logoBg: "bg-[#0F172A]",
+          tags: [
+            { label: "Replies in 2 hours", icon: Clock },
+            { label: "Manufacturer", icon: Building2 },
+          ],
+          isActive: true,
+        };
+      }).filter(Boolean);
+      setSuppliersList(formatted);
+    }
+  }, [response]);
+
+  const toggleFavorite = async (id: string, favoriteId: string) => {
+    try {
+      await removeFavoriteApi(favoriteId).unwrap();
+      setSuppliersList(current => current.filter(s => s.favoriteId !== favoriteId));
+    } catch (err) {
+      console.error("Failed to remove favorite", err);
+    }
   };
 
   const [sortBy, setSortBy] = useState("Recently Saved");
@@ -94,10 +82,10 @@ export default function FavoriteSuppliersPage() {
   const filteredAndSortedSuppliers = [...suppliersList]
     .filter((supplier) => {
       if (searchQuery && !supplier.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      if (isNegotiable && !supplier.tags.some(tag => tag.label === "Negotiable Rate")) return false;
+      if (isNegotiable && !supplier.tags.some((tag: any) => tag.label === "Negotiable Rate")) return false;
       if (activeFilters.Location !== "All" && supplier.location !== activeFilters.Location) return false;
-      if (activeFilters["Supplier Type"] !== "All" && !supplier.tags.some(tag => tag.label === activeFilters["Supplier Type"])) return false;
-      if (activeFilters["Response Time"] !== "All" && !supplier.tags.some(tag => tag.label === activeFilters["Response Time"])) return false;
+      if (activeFilters["Supplier Type"] !== "All" && !supplier.tags.some((tag: any) => tag.label === activeFilters["Supplier Type"])) return false;
+      if (activeFilters["Response Time"] !== "All" && !supplier.tags.some((tag: any) => tag.label === activeFilters["Response Time"])) return false;
       return true;
     })
     .sort((a, b) => {
@@ -239,7 +227,7 @@ export default function FavoriteSuppliersPage() {
           >
             {/* Heart Icon */}
             <button
-              onClick={() => toggleFavorite(supplier.id)}
+              onClick={() => toggleFavorite(supplier.id, supplier.favoriteId)}
               className="absolute top-6 right-6 z-10"
             >
               <Heart
@@ -298,7 +286,7 @@ export default function FavoriteSuppliersPage() {
 
             {/* Tags */}
             <div className="flex flex-col gap-2 mb-8">
-              {supplier.tags.map((tag, i) => (
+              {supplier.tags.map((tag: any, i: number) => (
                 <div
                   key={i}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F1F5F9] rounded w-fit"
@@ -345,7 +333,7 @@ export default function FavoriteSuppliersPage() {
               {/* Remove Favorite */}
               {supplier.isActive ? (
                 <button
-                  onClick={() => toggleFavorite(supplier.id)}
+                  onClick={() => toggleFavorite(supplier.id, supplier.favoriteId)}
                   className="w-full text-center py-2 text-[13px] font-bold text-[#DC2626] hover:text-[#b91c1c] transition-colors"
                 >
                   {supplier.isFavorite ? "Remove Favorite" : "Add Favorite"}

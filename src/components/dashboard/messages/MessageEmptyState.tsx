@@ -1,4 +1,5 @@
 import { PlusSquare } from "lucide-react";
+import Link from "next/link";
 
 export default function MessageEmptyState() {
   return (
@@ -32,10 +33,12 @@ export default function MessageEmptyState() {
       <p className="text-[14px] text-gray-500 text-center max-w-[340px] mb-8 leading-relaxed">
         Choose a message thread from the left to view details, reply to suppliers, or negotiate pricing and terms.
       </p>
-      <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[13px] cursor-pointer">
-        <PlusSquare size={16} strokeWidth={2.5} />
-        Start New RFQ
-      </button>
+      <Link href="/dashboard/search">
+        <button className="flex items-center gap-2 bg-[#DFB63E] hover:bg-[#cba433] text-black font-bold py-2.5 px-6 rounded-md transition-colors text-[13px] cursor-pointer mt-4">
+          <PlusSquare size={16} strokeWidth={2.5} />
+          Find Suppliers to Message
+        </button>
+      </Link>
     </div>
   );
 }

@@ -1,139 +1,75 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import MessageSidebar from "@/components/dashboard/messages/MessageSidebar";
 import MessageChat from "@/components/dashboard/messages/MessageChat";
 import MessageEmptyState from "@/components/dashboard/messages/MessageEmptyState";
-
-// Added conversation history to each message for the dynamic chat view
-const initialMessagesData = [
-  {
-    id: 1,
-    sender: "Steel Company A",
-    isVerified: true,
-    isNew: true,
-    tag: "RFQ #1042",
-    tagType: "warning", // yellow
-    timeEstimate: "Replies in 2 hours",
-    excerpt: "We can provide steel sheets. What quantity do you need?",
-    timestamp: "New",
-    history: [
-      { id: 101, text: "Hello, I am interested in your steel sheets as per RFQ #1042. Are they currently in stock at the New York warehouse?", sender: "me", time: "10:00 AM", isFile: false, fileName: "" },
-      { id: 102, text: "We can provide steel sheets. What quantity do you need?", sender: "them", time: "10:15 AM", isFile: false, fileName: "" }
-    ]
-  },
-  {
-    id: 2,
-    sender: "New Jersey Industrial Steel",
-    isVerified: false,
-    isNew: false,
-    tag: "RFQ #1038",
-    tagType: "neutral", // gray
-    timeEstimate: "Replies in 4 hours",
-    excerpt: "Shipping to your location is available.",
-    timestamp: "Yesterday",
-    history: [
-      { id: 201, text: "Do you offer direct shipping to our facility in Brooklyn for the requested industrial steel?", sender: "me", time: "Yesterday, 2:00 PM", isFile: false, fileName: "" },
-      { id: 202, text: "Yes, we do. Shipping to your location is available.", sender: "them", time: "Yesterday, 3:30 PM", isFile: false, fileName: "" }
-    ]
-  },
-  {
-    id: 3,
-    sender: "Global Logistics Partner",
-    isVerified: false,
-    isNew: false,
-    tag: "Sourcing",
-    tagType: "primary", // blue
-    timeEstimate: "Replies in 1 day",
-    excerpt: "Please attach your shipment specifications.",
-    timestamp: "Oct 24",
-    history: [
-      { id: 301, text: "I'm looking for a logistics partner to handle weekly freight forwarding.", sender: "me", time: "Oct 24, 9:00 AM", isFile: false, fileName: "" },
-      { id: 302, text: "We'd be happy to help. Please attach your shipment specifications so we can provide a quote.", sender: "them", time: "Oct 24, 11:45 AM", isFile: false, fileName: "" }
-    ]
-  }
-];
+import { useGetConversationsQuery } from "@/store/features/messages/messagesApi";
 
 export default function MessagesPage() {
+  const searchParams = useSearchParams();
+  const newSupplierId = searchParams.get('new');
+  const newSupplierName = searchParams.get('name');
+
   const [activeTab, setActiveTab] = useState("inbox");
-  // Set to null initially to show the empty state, until the user clicks a conversation
-  const [activeMessage, setActiveMessage] = useState<number | null>(null); 
-  const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState(initialMessagesData);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeMessage, setActiveMessage] = useState<string | null>(newSupplierId ? `new-${newSupplierId}` : null); 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const activeChat = activeMessage ? messages.find(m => m.id === activeMessage) : null;
+  const { data: conversationsResponse, isLoading } = useGetConversationsQuery(undefined, { pollingInterval: 30000 });
+  
+  const rawConversations = conversationsResponse?.data || [];
+  
+  const formattedConversations = rawConversations.map((conv: any, idx: number) => {
+    const otherUser = conv.participants?.find((p: any) => p.role === 'supplier' || p.role === 'admin') || conv.participants?.[0] || {};
+    
+    return {
+      id: conv._id, // string id from mongo
+      sender: otherUser.firstName ? `${otherUser.firstName} ${otherUser.lastName}` : "Unknown Supplier",
+      isVerified: idx % 2 === 0, // Mock verification
+      isNew: !conv.hasUnread, 
+      tag: conv.rfq ? `RFQ #${conv.rfq.rfqNumber || '...'}` : 'Sourcing',
+      tagType: conv.rfq ? "warning" : "primary",
+      timeEstimate: "Replies in 2 hours",
+      excerpt: conv.lastMessage?.text || "Started a new conversation...",
+      timestamp: new Date(conv.lastMessageAt || Date.now()).toLocaleDateString(),
+      history: [] // We'll fetch this in MessageChat
+    };
+  });
+
+  const messages = useMemo(() => {
+    let list = [...formattedConversations];
+    
+    // Check if we are starting a new conversation that isn't in the list
+    if (newSupplierId && newSupplierName) {
+      // Check if we already have a conversation with this supplier
+      // Note: this is a simple mock matching since we don't map supplier IDs strictly in this UI
+      // but if it's a completely new one, we add a placeholder.
+      const exists = rawConversations.some((c: any) => c.participants?.some((p: any) => p._id === newSupplierId));
+      if (!exists) {
+        list.unshift({
+          id: `new-${newSupplierId}`,
+          recipientId: newSupplierId, // Pass this to MessageChat
+          sender: newSupplierName,
+          isVerified: true,
+          isNew: true,
+          tag: "Sourcing",
+          tagType: "primary",
+          timeEstimate: "Replies typically in 2 hours",
+          excerpt: "Start a conversation...",
+          timestamp: "New",
+          history: []
+        });
+      }
+    }
+    return list;
+  }, [formattedConversations, newSupplierId, newSupplierName, rawConversations]);
+
+  const activeChat = activeMessage ? messages.find((m: any) => m.id === activeMessage) : null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeChat?.history, activeMessage]);
-
-  const handleSendMessage = () => {
-    if (!inputText.trim() || !activeMessage) return;
-
-    const newMsg = {
-      id: Date.now(),
-      text: inputText,
-      sender: "me",
-      time: "Just now",
-      isFile: false,
-      fileName: ""
-    };
-
-    setMessages(prev => prev.map(thread => {
-      if (thread.id === activeMessage) {
-        return {
-          ...thread,
-          excerpt: inputText,
-          timestamp: "Just now",
-          isNew: false, // Clear new state if we replied
-          history: [...thread.history, newMsg]
-        };
-      }
-      return thread;
-    }));
-    
-    setInputText("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSendMessage();
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0 && activeMessage) {
-      const file = e.target.files[0];
-      const newMsg = {
-        id: Date.now(),
-        text: `Attached file: ${file.name}`,
-        isFile: true,
-        fileName: file.name,
-        sender: "me",
-        time: "Just now"
-      };
-
-      setMessages(prev => prev.map(thread => {
-        if (thread.id === activeMessage) {
-          return {
-            ...thread,
-            excerpt: `Sent an attachment`,
-            timestamp: "Just now",
-            isNew: false,
-            history: [...thread.history, newMsg]
-          };
-        }
-        return thread;
-      }));
-      
-      // Reset input so the same file can be selected again if needed
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
 
   return (
     <div className="w-full h-[calc(100vh-120px)] flex flex-col pb-4">
@@ -162,12 +98,6 @@ export default function MessagesPage() {
         {activeChat ? (
           <MessageChat 
             activeChat={activeChat}
-            inputText={inputText}
-            setInputText={setInputText}
-            handleSendMessage={handleSendMessage}
-            handleKeyDown={handleKeyDown}
-            handleFileChange={handleFileChange}
-            fileInputRef={fileInputRef}
             messagesEndRef={messagesEndRef}
           />
         ) : (
