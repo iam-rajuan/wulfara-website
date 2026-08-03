@@ -94,7 +94,7 @@ export default function Header() {
           {/* Right Action Controls */}
           <div className="hidden md:flex items-center space-x-5">
             {/* Language Switcher */}
-            <LanguageSelector />
+            {/* <LanguageSelector /> */}
 
             {/* Auth Links */}
             {!isLoggedIn ? (
