@@ -5,6 +5,7 @@ import { Search, MapPin, ExternalLink, X, SlidersHorizontal, Maximize2, Map as M
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
+import DynamicMap from "@/components/home/DynamicMap";
 
 const initialTags = ['Verified Suppliers', 'Premium Listings'];
 
@@ -17,6 +18,7 @@ function SearchContent() {
   
   const [query, setQuery] = useState(urlQuery);
   const [activeTags, setActiveTags] = useState(initialTags);
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
 
   // Fetch real suppliers from backend
   const { data, isLoading } = useGetSuppliersQuery(
@@ -192,32 +194,23 @@ function SearchContent() {
           </div>
 
           {/* Right Column: Map */}
-          <div className="lg:col-span-1">
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col h-[600px] sticky top-24">
+          <div className={isMapExpanded ? "fixed inset-0 z-50 p-4 sm:p-8 bg-black/50 backdrop-blur-sm flex items-center justify-center" : "lg:col-span-1"}>
+            <div className={`bg-white border border-slate-200 overflow-hidden flex flex-col transition-all duration-300 ${isMapExpanded ? "w-full h-full max-w-6xl max-h-[90vh] rounded-2xl shadow-2xl" : "h-[600px] sticky top-24 rounded-lg"}`}>
               <div className="flex items-center justify-between p-3 border-b border-slate-200 bg-white">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
                   <MapIcon size={16} />
                   Nearby Suppliers Map
                 </div>
-                <button className="text-slate-400 hover:text-slate-600">
-                  <Maximize2 size={16} />
+                <button 
+                  onClick={() => setIsMapExpanded(!isMapExpanded)}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors"
+                  title={isMapExpanded ? "Minimize Map" : "Maximize Map"}
+                >
+                  {isMapExpanded ? <X size={16} /> : <Maximize2 size={16} />}
                 </button>
               </div>
-              <div className="flex-1 bg-slate-100 relative">
-                {/* Map Placeholder Image */}
-                <img 
-                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600&auto=format&fit=crop" 
-                  alt="Map" 
-                  className="w-full h-full object-cover opacity-80 mix-blend-multiply"
-                />
-                
-                {/* Simulated map pins */}
-                <div className="absolute top-1/4 left-1/3 p-1 bg-white rounded-full shadow-lg">
-                  <CheckCircle2 size={16} className="text-[#10B981] fill-[#10B981]/20" />
-                </div>
-                <div className="absolute top-1/2 left-2/3 p-1 bg-white rounded-full shadow-lg">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white" />
-                </div>
+              <div className="flex-1 bg-slate-100 relative overflow-hidden">
+                <DynamicMap />
               </div>
             </div>
           </div>

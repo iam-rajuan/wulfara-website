@@ -16,7 +16,8 @@ import {
   ChevronLeft,
   Settings,
   ExternalLink,
-  Heart
+  Heart,
+  Star
 } from "lucide-react";
 
 import { useSelector } from "react-redux";
@@ -24,6 +25,7 @@ import toast from "react-hot-toast";
 import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
 
 import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
+import { useGetSupplierReviewsQuery } from "@/store/api/reviewApi";
 import { useParams } from "next/navigation";
 
 export default function SupplierProfilePage() {
@@ -37,6 +39,9 @@ export default function SupplierProfilePage() {
   const [addFavorite] = useAddFavoriteMutation();
   const [removeFavorite] = useRemoveFavoriteMutation();
   const favorites = favoritesData?.data || [];
+  
+  const { data: reviewsData } = useGetSupplierReviewsQuery(id, { skip: !id });
+  const reviews = reviewsData?.data || [];
 
   const handleFavoriteToggle = async () => {
     if (!user) {
@@ -121,6 +126,10 @@ export default function SupplierProfilePage() {
                 )}
               </div>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-slate-500 font-medium">
+                <span className="flex items-center gap-1 font-bold text-slate-800">
+                  <Star size={16} className="text-yellow-500 fill-yellow-500" /> 
+                  {supplier.averageRating ? `${supplier.averageRating} (${supplier.totalReviews} reviews)` : "No reviews yet"}
+                </span>
                 <span className="flex items-center gap-1"><MapPin size={14} /> {displayLocation}</span>
                 <span className="flex items-center gap-1"><Clock size={14} /> {displayReplyTime}</span>
               </div>
@@ -280,6 +289,38 @@ export default function SupplierProfilePage() {
 
           </div>
         </div>
+        
+        {/* Reviews Section */}
+        {reviews.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 mb-12">
+            <h2 className="text-xl font-black text-[#1b2b3a] mb-6 flex items-center gap-2">
+              <Star size={24} className="text-yellow-500 fill-yellow-500" /> Supplier Reviews ({supplier.totalReviews})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {reviews.map((review: any) => (
+                <div key={review._id} className="bg-slate-50 border border-slate-100 rounded-xl p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">
+                        {review.buyer?.name?.charAt(0) || "B"}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-[#1b2b3a] text-sm">{review.buyer?.name || "Verified Buyer"}</h4>
+                        <p className="text-xs text-slate-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} className={i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-slate-300"} />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed italic">"{review.comment}"</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bottom CTA Banner */}
         <div className="w-full bg-[#dca12f] rounded-2xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-lg shadow-[#dca12f]/20">

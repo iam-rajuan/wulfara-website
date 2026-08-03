@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,7 +18,9 @@ import {
   Menu,
   X,
   Bell,
+  Check
 } from "lucide-react";
+import { io } from "socket.io-client";
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -37,6 +39,99 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Click outside to close notifications
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!user || !user._id) return;
+    
+    // Fetch initial notifications
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("token") || (typeof window !== 'undefined' ? (window.localStorage.getItem('token') || '') : '');
+        const res = await fetch("http://localhost:5000/api/v1/notifications", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setNotifications(data.data);
+          setUnreadCount(data.data.filter((n: any) => !n.isRead).length);
+        }
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+      }
+    };
+    
+    fetchNotifications();
+
+    // Socket.io connection
+    const socket = io("http://localhost:5000");
+    
+    socket.emit("join_room", user._id);
+    
+    socket.on("new_notification", (newNotification) => {
+      setNotifications(prev => [newNotification, ...prev]);
+      setUnreadCount(prev => prev + 1);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user]);
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem("token") || '';
+      const res = await fetch("http://localhost:5000/api/v1/notifications/read-all", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setUnreadCount(0);
+      }
+    } catch (err) {
+      console.error("Error marking all as read:", err);
+    }
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token") || '';
+      const res = await fetch(`http://localhost:5000/api/v1/notifications/${id}/read`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error("Error marking as read:", err);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#F8F9FB] overflow-hidden">
@@ -153,10 +248,73 @@ export default function DashboardLayout({
             </button>
 
             {/* Icons */}
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <Bell size={20} className="text-gray-500" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D4AF37] rounded-full" />
-            </button>
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <Bell size={20} className="text-gray-500" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] flex items-center justify-center font-bold h-[14px] min-w-[14px] px-1 rounded-full border border-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                  <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <h3 className="font-bold text-[#0B172E] text-[15px]">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button 
+                        onClick={markAllAsRead}
+                        className="text-[12px] text-blue-600 font-semibold hover:text-blue-800"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="max-h-[350px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-sm text-gray-500">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      notifications.map((item) => (
+                        <div 
+                          key={item._id} 
+                          onClick={() => !item.isRead && markAsRead(item._id)}
+                          className={`p-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex gap-3 transition-colors ${!item.isRead ? 'bg-blue-50/30' : ''}`}
+                        >
+                          <div className={`mt-0.5 p-2 rounded-full shrink-0 h-fit ${!item.isRead ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                            <Bell size={16} />
+                          </div>
+                          <div>
+                            <p className={`text-[13px] ${!item.isRead ? 'font-bold text-gray-900' : 'font-semibold text-gray-700'}`}>
+                              {item.title}
+                            </p>
+                            <p className={`text-[12px] mt-0.5 ${!item.isRead ? 'text-gray-700' : 'text-gray-500'}`}>
+                              {item.message}
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-1">
+                              {new Date(item.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                          {!item.isRead && (
+                            <div className="shrink-0 mt-1.5">
+                              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
               <Mail size={20} className="text-gray-500" />
             </button>

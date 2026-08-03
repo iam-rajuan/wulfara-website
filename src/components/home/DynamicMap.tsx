@@ -19,31 +19,7 @@ interface MapNode {
   pos: LatLng;
 }
 
-const mapStyles = [
-  {
-    elementType: "geometry",
-    stylers: [{ color: "#0b1322" }]
-  },
-  {
-    elementType: "labels",
-    stylers: [{ visibility: "off" }]
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#1c3247" }, { weight: 1.2 }]
-  },
-  {
-    featureType: "landscape",
-    elementType: "geometry",
-    stylers: [{ color: "#11202e" }]
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#070c14" }]
-  }
-];
+const mapStyles = [];
 
 const nodes: MapNode[] = [
   { name: "New York", pos: { lat: 40.7128, lng: -74.0060 } },
@@ -81,10 +57,8 @@ export default function DynamicMap(): React.JSX.Element {
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: 25, lng: 10 },
         zoom: 2,
-        styles: mapStyles,
-        disableDefaultUI: true,
-        zoomControl: false,
-        backgroundColor: "#0b1322",
+        disableDefaultUI: false,
+        zoomControl: true,
         minZoom: 1.5,
         maxZoom: 6
       });
@@ -96,9 +70,9 @@ export default function DynamicMap(): React.JSX.Element {
           map: map,
           icon: {
             path: window.google.maps.SymbolPath.CIRCLE,
-            fillColor: "#00f0ff",
+            fillColor: "#EA4335",
             fillOpacity: 1,
-            strokeColor: "#00f0ff",
+            strokeColor: "#EA4335",
             strokeOpacity: 0.35,
             strokeWeight: 6,
             scale: 5
@@ -112,7 +86,7 @@ export default function DynamicMap(): React.JSX.Element {
         new window.google.maps.Polyline({
           path: path,
           geodesic: true,
-          strokeColor: "#00f0ff",
+          strokeColor: "#4285F4",
           strokeOpacity: 0.5,
           strokeWeight: 1.5,
           map: map
@@ -129,7 +103,7 @@ export default function DynamicMap(): React.JSX.Element {
       if (!script) {
         script = document.createElement("script");
         script.id = scriptId;
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDummyKey_MgirmayeMap2026`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
@@ -146,8 +120,7 @@ export default function DynamicMap(): React.JSX.Element {
   return (
     <div 
       ref={mapRef} 
-      className="w-full h-full min-h-[300px]" 
-      style={{ background: "#0b1322" }}
+      className="w-full h-full min-h-[300px] bg-slate-100" 
     />
   );
 }
