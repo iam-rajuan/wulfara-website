@@ -28,7 +28,9 @@ export default function FaqPage() {
     { qKey: "q7", aKey: "a7", topic: "General Questions" }
   ];
 
-  const topics = [
+  // Extract unique topics from CMS or use static defaults
+  const dynamicTopics = Array.from(new Set(cmsFaqs.map((f: any) => f.topic).filter(Boolean))) as string[];
+  const topics = dynamicTopics.length > 0 ? dynamicTopics : [
     "General Questions",
     "Suppliers",
     "RFQ Protocols",
@@ -58,7 +60,7 @@ export default function FaqPage() {
   const activeFaqs = cmsFaqs.length > 0 ? cmsFaqs.map((f: any, i: number) => ({
     qKey: f.question, // Reusing keys for dynamic data
     aKey: f.answer,
-    topic: "General Questions", // Map all to General for now or read from f.topic if added later
+    topic: f.topic || "General Questions", // Map to dynamic topic
     isDynamic: true
   })) : staticFaqs.map(f => ({ ...f, isDynamic: false }));
 

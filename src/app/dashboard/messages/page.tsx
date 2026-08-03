@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import MessageSidebar from "@/components/dashboard/messages/MessageSidebar";
@@ -13,21 +12,21 @@ export default function MessagesPage() {
   const newSupplierName = searchParams.get('name');
 
   const [activeTab, setActiveTab] = useState("inbox");
-  const [activeMessage, setActiveMessage] = useState<string | null>(newSupplierId ? `new-${newSupplierId}` : null); 
+  const [activeMessage, setActiveMessage] = useState<string | null>(newSupplierId ? `new-${newSupplierId}` : null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: conversationsResponse, isLoading } = useGetConversationsQuery(undefined, { pollingInterval: 30000 });
-  
+
   const rawConversations = conversationsResponse?.data || [];
-  
+
   const formattedConversations = rawConversations.map((conv: any, idx: number) => {
     const otherUser = conv.participants?.find((p: any) => p.role === 'supplier' || p.role === 'admin') || conv.participants?.[0] || {};
-    
+
     return {
       id: conv._id, // string id from mongo
       sender: otherUser.name || "Unknown Supplier",
       isVerified: idx % 2 === 0, // Mock verification
-      isNew: !conv.hasUnread, 
+      isNew: !conv.hasUnread,
       tag: conv.rfq ? `RFQ #${conv.rfq.rfqNumber || '...'}` : 'Sourcing',
       tagType: conv.rfq ? "warning" : "primary",
       timeEstimate: "Replies in 2 hours",
@@ -39,7 +38,7 @@ export default function MessagesPage() {
 
   const messages = useMemo(() => {
     let list = [...formattedConversations];
-    
+
     // Check if we are starting a new conversation that isn't in the list
     if (newSupplierId && newSupplierName) {
       // Check if we already have a conversation with this supplier
@@ -85,8 +84,8 @@ export default function MessagesPage() {
 
       {/* Main Content Layout */}
       <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
-        
-        <MessageSidebar 
+
+        <MessageSidebar
           messages={messages}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -96,7 +95,7 @@ export default function MessagesPage() {
 
         {/* Right Area */}
         {activeChat ? (
-          <MessageChat 
+          <MessageChat
             activeChat={activeChat}
             messagesEndRef={messagesEndRef}
           />
