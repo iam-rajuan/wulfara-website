@@ -25,7 +25,7 @@ export default function MessagesPage() {
     
     return {
       id: conv._id, // string id from mongo
-      sender: otherUser.firstName ? `${otherUser.firstName} ${otherUser.lastName}` : "Unknown Supplier",
+      sender: otherUser.name || "Unknown Supplier",
       isVerified: idx % 2 === 0, // Mock verification
       isNew: !conv.hasUnread, 
       tag: conv.rfq ? `RFQ #${conv.rfq.rfqNumber || '...'}` : 'Sourcing',
