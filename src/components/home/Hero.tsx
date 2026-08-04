@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
   const cmsHero = pagesResponse?.data?.find((p: any) => p.slug === 'homepage')?.htmlContent
     ? JSON.parse(pagesResponse.data.find((p: any) => p.slug === 'homepage').htmlContent)
     : null;
@@ -35,6 +35,17 @@ export default function Hero() {
     { key: "globalSuppliers" },
     { key: "matchmaking" },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[699px] lg:h-[699px] bg-[#1b2b3a] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-[#dca12f] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-300 font-medium">Loading Content...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="relative min-h-[699px] lg:h-[699px] flex items-center bg-[#1b2b3a] text-white py-16 lg:py-0 overflow-hidden">

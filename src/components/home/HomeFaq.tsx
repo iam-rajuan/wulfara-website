@@ -8,7 +8,7 @@ import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function HomeFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
   const faqPage = pagesResponse?.data?.find((p: any) => p.slug === 'faq');
   const cmsFaqs = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
   const { t } = useTranslation();
@@ -32,6 +32,10 @@ export default function HomeFaq() {
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  if (isLoading) {
+    return <section className="bg-slate-50 py-16 text-center min-h-[400px] flex items-center justify-center"></section>;
+  }
 
   return (
     <section id="faq" className="bg-[#f8fafc] py-16 sm:py-24 border-y border-slate-200/50">
@@ -66,17 +70,15 @@ export default function HomeFaq() {
                     </span>
                   </div>
                   <ChevronDown
-                    className={`h-5 w-5 text-[#dca12f]/80 transition-transform duration-300 ${
-                      isOpen ? "rotate-180 text-[#dca12f]" : ""
-                    }`}
+                    className={`h-5 w-5 text-[#dca12f]/80 transition-transform duration-300 ${isOpen ? "rotate-180 text-[#dca12f]" : ""
+                      }`}
                   />
                 </button>
 
                 {/* Smooth Expand/Collapse Container */}
                 <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    isOpen ? "max-h-[500px] border-t border-slate-100" : "max-h-0"
-                  }`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? "max-h-[500px] border-t border-slate-100" : "max-h-0"
+                    }`}
                 >
                   <div className="px-6 py-5 text-xs sm:text-sm text-slate-600 leading-relaxed bg-[#fbfcfd]">
                     {faq.isDynamic ? (

@@ -17,7 +17,7 @@ import { TermsIcon, SupplierListingIcon, PolicyShieldIcon } from "@/components/i
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function PoliciesPage() {
-  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
   const policyPage = pagesResponse?.data?.find((p: any) => p.slug === 'policies');
   const cmsPolicies = policyPage?.htmlContent ? JSON.parse(policyPage.htmlContent) : null;
 
@@ -209,8 +209,16 @@ export default function PoliciesPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#DFB63E] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-[#f8fafc] pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans pb-20">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Header Section */}
         <div className="mb-8">

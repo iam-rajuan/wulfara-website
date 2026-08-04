@@ -3,20 +3,15 @@ import { FileText, ArrowRight, ChevronRight } from "lucide-react";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function HelpCenterArticles() {
-  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
   const helpCenterPage = pagesResponse?.data?.find((p: any) => p.slug === 'help-center');
   const cmsArticles = helpCenterPage?.htmlContent ? JSON.parse(helpCenterPage.htmlContent) : [];
 
-  const staticArticles = [
-    "What is WULFARA?",
-    "How do I search for verified suppliers?",
-    "Creating an effective RFQ",
-    "Resetting your account password",
-    "Understanding supplier trust badges",
-    "How to upgrade your supplier tier",
-  ];
+  const articlesToRender = cmsArticles.map((a: any) => a.title);
 
-  const articlesToRender = cmsArticles.length > 0 ? cmsArticles.map((a: any) => a.title) : staticArticles;
+  if (isLoading) {
+    return <div className="py-12 px-4 flex justify-center"><div className="w-8 h-8 border-4 border-[#DFB63E] border-t-transparent rounded-full animate-spin"></div></div>;
+  }
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto ">

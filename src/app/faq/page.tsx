@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import FaqHeader from "@/components/faq/FaqHeader";
@@ -9,35 +8,18 @@ import FaqFooterCta from "@/components/faq/FaqFooterCta";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 export default function FaqPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0); // Default open the first item
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [activeTopic, setActiveTopic] = useState<string>("General Questions");
   const [searchInput, setSearchInput] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const { data: pagesResponse } = useGetPagesQuery(undefined);
+  const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
   const faqPage = pagesResponse?.data?.find((p: any) => p.slug === 'faq');
   const cmsFaqs = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
   const { t } = useTranslation();
 
-  const staticFaqs = [
-    { qKey: "q1", aKey: "a1", topic: "General Questions" },
-    { qKey: "q2", aKey: "a2", topic: "Suppliers" },
-    { qKey: "q3", aKey: "a3", topic: "General Questions" },
-    { qKey: "q4", aKey: "a4", topic: "Suppliers" },
-    { qKey: "q5", aKey: "a5", topic: "Suppliers" },
-    { qKey: "q6", aKey: "a6", topic: "RFQ Protocols" },
-    { qKey: "q7", aKey: "a7", topic: "General Questions" }
-  ];
-
-  // Extract unique topics from CMS or use static defaults
+  // Extract unique topics from CMS or use static defaults if empty
   const dynamicTopics = Array.from(new Set(cmsFaqs.map((f: any) => f.topic).filter(Boolean))) as string[];
-  const topics = dynamicTopics.length > 0 ? dynamicTopics : [
-    "General Questions",
-    "Suppliers",
-    "RFQ Protocols",
-    "Financial Systems",
-    "Regulatory Policies",
-    "Elite Support"
-  ];
+  const topics = dynamicTopics.length > 0 ? dynamicTopics : ["General Questions"];
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -56,13 +38,13 @@ export default function FaqPage() {
     setOpenIndex(searchInput ? 0 : null);
   };
 
-  // Use CMS FAQs if available, otherwise fallback to static FAQs
-  const activeFaqs = cmsFaqs.length > 0 ? cmsFaqs.map((f: any, i: number) => ({
+  // Use only CMS FAQs
+  const activeFaqs = cmsFaqs.map((f: any, i: number) => ({
     qKey: f.question, // Reusing keys for dynamic data
     aKey: f.answer,
     topic: f.topic || "General Questions", // Map to dynamic topic
     isDynamic: true
-  })) : staticFaqs.map(f => ({ ...f, isDynamic: false }));
+  }));
 
   // Filter FAQs based on search or active topic
   const filteredFaqs = activeFaqs.filter((faq: any) => {
@@ -74,6 +56,17 @@ export default function FaqPage() {
     }
     return faq.topic === activeTopic;
   });
+
+  if (isLoading) {
+    return (
+      <section className="bg-[#f8fafc] min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-[#DFB63E] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 font-medium">Loading FAQs...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="faq" className="bg-[#f8fafc] overflow-hidden">
