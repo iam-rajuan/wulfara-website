@@ -23,7 +23,7 @@ export default function MessageChat({
   const rawMessages = messagesResponse?.data || [];
 
   useEffect(() => {
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
     socketRef.current.emit('join_room', activeChat.id);
 
     socketRef.current.on('receive_message', (newMsg: any) => {
