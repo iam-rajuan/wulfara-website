@@ -12,58 +12,74 @@ const initialTags = ['Verified Suppliers', 'Premium Listings'];
 function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
-  // Initialize query from URL parameter, fallback to empty
+
+  // Initialize query from URL parameters
   const urlQuery = searchParams.get("q") || "";
-  
+  const urlTypesParam = searchParams.get("type");
+  const urlTypes = urlTypesParam ? urlTypesParam.split(',') : ['Manufacturer', 'Distributor', 'Service Provider'];
+  const urlLocation = searchParams.get("loc") || "";
+
   const [query, setQuery] = useState(urlQuery);
   const [activeTags, setActiveTags] = useState(initialTags);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
 
-  // Sync query state when URL changes
+  // State for filters
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(urlTypes);
+  const [locationSearch, setLocationSearch] = useState(urlLocation);
+
+  // Sync local state when URL changes (e.g. browser back/forward)
   React.useEffect(() => {
     setQuery(urlQuery);
-  }, [urlQuery]);
+    setSelectedTypes(urlTypesParam ? urlTypesParam.split(',') : ['Manufacturer', 'Distributor', 'Service Provider']);
+    setLocationSearch(urlLocation);
+  }, [urlQuery, urlTypesParam, urlLocation]);
 
-  // State for filters
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Manufacturer', 'Distributor', 'Service Provider']);
-  const [locationSearch, setLocationSearch] = useState('');
+  // Debounce user input and push to URL automatically
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (query) params.set("q", query);
+      if (selectedTypes.length > 0) params.set("type", selectedTypes.join(','));
+      if (locationSearch) params.set("loc", locationSearch);
+      
+      const currentQuery = searchParams.toString();
+      const newQuery = params.toString();
+      
+      if (currentQuery !== newQuery) {
+        router.push(`/search?${newQuery}`);
+      }
+    }, 400); // 400ms debounce
+    return () => clearTimeout(timeoutId);
+  }, [query, selectedTypes, locationSearch, router, searchParams]);
+
+  // Build query string for API
+  const queryParts = [];
+  if (urlQuery) queryParts.push(`keyword=${encodeURIComponent(urlQuery)}`);
+  if (urlTypes && urlTypes.length > 0) queryParts.push(`supplierType=${encodeURIComponent(urlTypes.join(','))}`);
+  if (urlLocation) queryParts.push(`location=${encodeURIComponent(urlLocation)}`);
+  
+  const queryString = queryParts.join('&');
 
   // Fetch real suppliers from backend
-  const { data, isLoading } = useGetSuppliersQuery(
-    urlQuery ? `keyword=${encodeURIComponent(urlQuery)}` : ''
-  );
-  const allSuppliers = data?.data || [];
+  const { data, isLoading } = useGetSuppliersQuery(queryString);
+  const suppliers = data?.data || [];
 
-  // Apply frontend filters
-  const suppliers = allSuppliers.filter((sup: any) => {
-    // Supplier Type Filter
-    const typeMatch = selectedTypes.includes(sup.supplierType || 'Manufacturer');
-    
-    // Location Filter (simple text match on formattedAddress)
-    const locMatch = locationSearch 
-      ? (sup.location?.formattedAddress || '').toLowerCase().includes(locationSearch.toLowerCase())
-      : true;
-      
-    return typeMatch && locMatch;
-  });
-
-  // Calculate counts for categories
+  // Temporarily disable counts as we are now fully dynamically fetching from backend. 
+  // For accurate counts, a dedicated aggregation endpoint would be needed.
   const counts = {
-    Manufacturer: allSuppliers.filter((s: any) => (s.supplierType || 'Manufacturer') === 'Manufacturer').length,
-    Distributor: allSuppliers.filter((s: any) => s.supplierType === 'Distributor').length,
-    ServiceProvider: allSuppliers.filter((s: any) => s.supplierType === 'Service Provider').length,
+    Manufacturer: suppliers.filter((s: any) => (s.supplierType || 'Manufacturer') === 'Manufacturer').length,
+    Distributor: suppliers.filter((s: any) => s.supplierType === 'Distributor').length,
+    ServiceProvider: suppliers.filter((s: any) => s.supplierType === 'Service Provider').length,
   };
 
   const handleTypeToggle = (type: string) => {
-    setSelectedTypes(prev => 
+    setSelectedTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push(`/search?q=${encodeURIComponent(query)}`);
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -73,7 +89,7 @@ function SearchContent() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
           <Link href="/" className="hover:text-slate-900">Home</Link>
@@ -92,11 +108,11 @@ function SearchContent() {
           <div className="flex items-center pl-4 pr-2 text-slate-400">
             <Search size={20} />
           </div>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 py-3 focus:outline-none text-slate-700 font-medium" 
+            className="flex-1 py-3 focus:outline-none text-slate-700 font-medium"
           />
           <button type="submit" className="bg-[#DFB63E] hover:bg-[#cba433] transition-colors text-slate-900 font-bold px-8 py-3">
             Search
@@ -119,7 +135,7 @@ function SearchContent() {
 
         {/* Main Grid Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
+
           {/* Left Column: Filters */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-slate-200 rounded-lg p-5">
@@ -133,29 +149,29 @@ function SearchContent() {
                 <h3 className="text-sm font-bold text-slate-900 mb-3">Supplier Category</h3>
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedTypes.includes('Manufacturer')} 
+                    <input
+                      type="checkbox"
+                      checked={selectedTypes.includes('Manufacturer')}
                       onChange={() => handleTypeToggle('Manufacturer')}
-                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" 
+                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]"
                     />
                     <span className="text-sm text-slate-600">Manufacturer ({counts.Manufacturer})</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedTypes.includes('Distributor')}
                       onChange={() => handleTypeToggle('Distributor')}
-                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" 
+                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]"
                     />
                     <span className="text-sm text-slate-600">Distributor ({counts.Distributor})</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={selectedTypes.includes('Service Provider')}
                       onChange={() => handleTypeToggle('Service Provider')}
-                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" 
+                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]"
                     />
                     <span className="text-sm text-slate-600">Service Provider ({counts.ServiceProvider})</span>
                   </label>
@@ -167,24 +183,22 @@ function SearchContent() {
               {/* Location */}
               <div className="mb-6">
                 <h3 className="text-sm font-bold text-slate-900 mb-3">Location</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs text-slate-500 mb-1">Search Location</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={locationSearch}
                       onChange={(e) => setLocationSearch(e.target.value)}
-                      placeholder="e.g. New York, NY" 
-                      className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]" 
+                      placeholder="e.g. New York, NY"
+                      className="w-full text-black border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]"
                     />
                   </div>
                 </div>
               </div>
 
-              <button className="w-full py-2.5 bg-[#DFB63E] hover:bg-[#cba433] text-slate-900 font-bold rounded-md transition-colors text-sm">
-                Apply Filters
-              </button>
+              {/* Apply Filters button removed since filtering is now real-time dynamic */}
             </div>
           </div>
 
@@ -253,7 +267,7 @@ function SearchContent() {
                   <MapIcon size={16} />
                   Nearby Suppliers Map
                 </div>
-                <button 
+                <button
                   onClick={() => setIsMapExpanded(!isMapExpanded)}
                   className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors"
                   title={isMapExpanded ? "Minimize Map" : "Maximize Map"}
