@@ -21,42 +21,32 @@ interface MapNode {
 
 const mapStyles = [];
 
-const nodes: MapNode[] = [
-  { name: "New York", pos: { lat: 40.7128, lng: -74.0060 } },
-  { name: "Los Angeles", pos: { lat: 34.0522, lng: -118.2437 } },
-  { name: "London", pos: { lat: 51.5074, lng: -0.1278 } },
-  { name: "Amsterdam", pos: { lat: 52.3676, lng: 4.9041 } },
-  { name: "Cairo", pos: { lat: 30.0444, lng: 31.2357 } },
-  { name: "Dubai", pos: { lat: 25.2048, lng: 55.2708 } },
-  { name: "Shanghai", pos: { lat: 31.2304, lng: 121.4737 } },
-  { name: "Tokyo", pos: { lat: 35.6762, lng: 139.6503 } },
-  { name: "Sydney", pos: { lat: -33.8688, lng: 151.2093 } },
-  { name: "Sao Paulo", pos: { lat: -23.5505, lng: -46.6333 } }
-];
-
-const connections: LatLng[][] = [
-  [nodes[0].pos, nodes[2].pos], // NY - London
-  [nodes[1].pos, nodes[7].pos], // LA - Tokyo
-  [nodes[2].pos, nodes[3].pos], // London - Amsterdam
-  [nodes[3].pos, nodes[4].pos], // Amsterdam - Cairo
-  [nodes[4].pos, nodes[5].pos], // Cairo - Dubai
-  [nodes[5].pos, nodes[6].pos], // Dubai - Shanghai
-  [nodes[6].pos, nodes[7].pos], // Shanghai - Tokyo
-  [nodes[7].pos, nodes[8].pos], // Tokyo - Sydney
-  [nodes[0].pos, nodes[9].pos], // NY - Sao Paulo
-  [nodes[9].pos, nodes[8].pos]  // Sao Paulo - Sydney
-];
-
-export default function DynamicMap(): React.JSX.Element {
+export default function DynamicMap({ suppliers = [] }: { suppliers?: any[] }): React.JSX.Element {
   const mapRef = useRef<HTMLDivElement>(null);
+
+  // Map real suppliers to map nodes
+  const dynamicNodes = suppliers
+    .filter(s => s.location && s.location.coordinates && s.location.coordinates.length === 2 && (s.location.coordinates[0] !== 0 || s.location.coordinates[1] !== 0))
+    .map(s => ({
+      name: s.companyName || 'Supplier',
+      pos: { lat: s.location.coordinates[1], lng: s.location.coordinates[0] } // MongoDB is [lng, lat]
+    }));
+
+  // Fallback to empty if no dynamic nodes
+  const nodesToRender = dynamicNodes;
 
   useEffect(() => {
     const initMap = () => {
       if (!mapRef.current || !window.google) return;
 
+      // Center map based on nodes, or default to world view
+      const defaultCenter = nodesToRender.length > 0 
+        ? nodesToRender[0].pos 
+        : { lat: 25, lng: 10 };
+
       const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 25, lng: 10 },
-        zoom: 2,
+        center: defaultCenter,
+        zoom: nodesToRender.length > 0 ? 4 : 2,
         disableDefaultUI: false,
         zoomControl: true,
         minZoom: 1.5,
@@ -64,7 +54,7 @@ export default function DynamicMap(): React.JSX.Element {
       });
 
       // Add Glowing Node Markers
-      nodes.forEach((node) => {
+      nodesToRender.forEach((node) => {
         new window.google.maps.Marker({
           position: node.pos,
           map: map,
@@ -81,17 +71,19 @@ export default function DynamicMap(): React.JSX.Element {
         });
       });
 
-      // Add Connection Lines
-      connections.forEach((path) => {
-        new window.google.maps.Polyline({
-          path: path,
-          geodesic: true,
-          strokeColor: "#4285F4",
-          strokeOpacity: 0.5,
-          strokeWeight: 1.5,
-          map: map
-        });
-      });
+      // Add Connection Lines (only if we have more than 1 node)
+      if (nodesToRender.length > 1) {
+        for (let i = 0; i < nodesToRender.length - 1; i++) {
+          new window.google.maps.Polyline({
+            path: [nodesToRender[i].pos, nodesToRender[i + 1].pos],
+            geodesic: true,
+            strokeColor: "#4285F4",
+            strokeOpacity: 0.5,
+            strokeWeight: 1.5,
+            map: map
+          });
+        }
+      }
     };
 
     if (window.google) {

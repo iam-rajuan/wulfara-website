@@ -27,6 +27,7 @@ import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation
 import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
 import { useGetSupplierReviewsQuery } from "@/store/api/reviewApi";
 import { useParams } from "next/navigation";
+import DynamicMap from "@/components/home/DynamicMap";
 
 export default function SupplierProfilePage() {
   const params = useParams();
@@ -102,8 +103,8 @@ export default function SupplierProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full md:w-auto text-center sm:text-left">
             {/* Logo */}
             <div className="w-24 h-24 rounded bg-linear-to-tr from-slate-800 to-[#1b2b3a] shrink-0 flex items-center justify-center relative overflow-hidden shadow-inner">
-              {supplier.logo?.url ? (
-                <img src={supplier.logo.url} alt="Logo" className="w-full h-full object-cover" />
+              {(supplier.logo && supplier.logo !== 'no-logo.jpg') ? (
+                <img src={supplier.logo} alt="Logo" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-12 h-12 border-4 border-white/20 rounded-full flex items-center justify-center relative z-10">
                   <Building2 className="text-white/80" size={24} />
@@ -220,7 +221,7 @@ export default function SupplierProfilePage() {
                   <div className="text-[#dca12f] mt-0.5"><Phone size={18} /></div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Phone</p>
-                    <p className="text-sm font-medium text-slate-800">{supplier.contactInfo?.phone || "N/A"}</p>
+                    <p className="text-sm font-medium text-slate-800">{supplier.contactPhone || "N/A"}</p>
                   </div>
                 </div>
 
@@ -228,7 +229,7 @@ export default function SupplierProfilePage() {
                   <div className="text-[#dca12f] mt-0.5"><Mail size={18} /></div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Email</p>
-                    <p className="text-sm font-medium text-[#1b2b3a] hover:underline cursor-pointer">{supplier.contactInfo?.email || "N/A"}</p>
+                    <p className="text-sm font-medium text-[#1b2b3a] hover:underline cursor-pointer">{supplier.contactEmail || "N/A"}</p>
                   </div>
                 </div>
 
@@ -240,6 +241,13 @@ export default function SupplierProfilePage() {
                   </div>
                 </div>
               </div>
+
+              {/* Map View */}
+              {supplier.location?.coordinates && (supplier.location.coordinates[0] !== 0 || supplier.location.coordinates[1] !== 0) && (
+                <div className="mt-6 rounded-lg overflow-hidden border border-slate-200 h-[250px] relative">
+                  <DynamicMap suppliers={[supplier]} />
+                </div>
+              )}
             </div>
 
             {/* Business Details */}
@@ -249,23 +257,23 @@ export default function SupplierProfilePage() {
               <div className="flex flex-col gap-4 text-sm">
                 <div className="flex justify-between items-center py-2 border-b border-slate-50">
                   <span className="text-slate-500">Established</span>
-                  <span className="font-bold text-slate-800">{supplier.businessDetails?.establishedYear || "N/A"}</span>
+                  <span className="font-bold text-slate-800">{supplier.establishedYear || "N/A"}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-50">
                   <span className="text-slate-500">Employees</span>
-                  <span className="font-bold text-slate-800">{supplier.businessDetails?.employeeCount || "N/A"}</span>
+                  <span className="font-bold text-slate-800">{supplier.employeeCount || "N/A"}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-slate-500">Annual Turnover</span>
-                  <span className="font-bold text-slate-800">{supplier.businessDetails?.annualTurnover || "N/A"}</span>
+                  <span className="font-bold text-slate-800">{supplier.annualTurnover || "N/A"}</span>
                 </div>
               </div>
 
-              {supplier.businessDetails?.certifications && supplier.businessDetails.certifications.length > 0 && (
+              {supplier.certifications && supplier.certifications.length > 0 && (
                 <div className="mt-6">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Certifications</p>
                   <div className="flex flex-wrap gap-2">
-                    {supplier.businessDetails.certifications.map((cert: string) => (
+                    {supplier.certifications.map((cert: string) => (
                       <span key={cert} className="px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-[11px] rounded-md flex items-center gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#dca12f]"></div> {cert}
                       </span>

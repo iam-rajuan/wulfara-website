@@ -20,11 +20,46 @@ function SearchContent() {
   const [activeTags, setActiveTags] = useState(initialTags);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
 
+  // Sync query state when URL changes
+  React.useEffect(() => {
+    setQuery(urlQuery);
+  }, [urlQuery]);
+
+  // State for filters
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Manufacturer', 'Distributor', 'Service Provider']);
+  const [locationSearch, setLocationSearch] = useState('');
+
   // Fetch real suppliers from backend
   const { data, isLoading } = useGetSuppliersQuery(
     urlQuery ? `keyword=${encodeURIComponent(urlQuery)}` : ''
   );
-  const suppliers = data?.data || [];
+  const allSuppliers = data?.data || [];
+
+  // Apply frontend filters
+  const suppliers = allSuppliers.filter((sup: any) => {
+    // Supplier Type Filter
+    const typeMatch = selectedTypes.includes(sup.supplierType || 'Manufacturer');
+    
+    // Location Filter (simple text match on formattedAddress)
+    const locMatch = locationSearch 
+      ? (sup.location?.formattedAddress || '').toLowerCase().includes(locationSearch.toLowerCase())
+      : true;
+      
+    return typeMatch && locMatch;
+  });
+
+  // Calculate counts for categories
+  const counts = {
+    Manufacturer: allSuppliers.filter((s: any) => (s.supplierType || 'Manufacturer') === 'Manufacturer').length,
+    Distributor: allSuppliers.filter((s: any) => s.supplierType === 'Distributor').length,
+    ServiceProvider: allSuppliers.filter((s: any) => s.supplierType === 'Service Provider').length,
+  };
+
+  const handleTypeToggle = (type: string) => {
+    setSelectedTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,16 +133,31 @@ function SearchContent() {
                 <h3 className="text-sm font-bold text-slate-900 mb-3">Supplier Category</h3>
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" />
-                    <span className="text-sm text-slate-600">Manufacturer (12)</span>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedTypes.includes('Manufacturer')} 
+                      onChange={() => handleTypeToggle('Manufacturer')}
+                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" 
+                    />
+                    <span className="text-sm text-slate-600">Manufacturer ({counts.Manufacturer})</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" />
-                    <span className="text-sm text-slate-600">Distributor (8)</span>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedTypes.includes('Distributor')}
+                      onChange={() => handleTypeToggle('Distributor')}
+                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" 
+                    />
+                    <span className="text-sm text-slate-600">Distributor ({counts.Distributor})</span>
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" />
-                    <span className="text-sm text-slate-600">Service Provider (4)</span>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedTypes.includes('Service Provider')}
+                      onChange={() => handleTypeToggle('Service Provider')}
+                      className="w-4 h-4 text-[#0F172A] rounded border-slate-300 focus:ring-[#0F172A]" 
+                    />
+                    <span className="text-sm text-slate-600">Service Provider ({counts.ServiceProvider})</span>
                   </label>
                 </div>
               </div>
@@ -120,12 +170,14 @@ function SearchContent() {
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">City/State</label>
-                    <input type="text" placeholder="e.g. New York, NY" className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">ZIP Code</label>
-                    <input type="text" placeholder="e.g. 10001" className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]" />
+                    <label className="block text-xs text-slate-500 mb-1">Search Location</label>
+                    <input 
+                      type="text" 
+                      value={locationSearch}
+                      onChange={(e) => setLocationSearch(e.target.value)}
+                      placeholder="e.g. New York, NY" 
+                      className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#DFB63E] focus:ring-1 focus:ring-[#DFB63E]" 
+                    />
                   </div>
                 </div>
               </div>
@@ -165,7 +217,7 @@ function SearchContent() {
 
                   <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
                     <MapPin size={14} />
-                    <span>Global • Verified</span>
+                    <span className="truncate">{supplier.location?.formattedAddress || supplier.address || 'Location not specified'} {supplier.isVerified && '• Verified'}</span>
                   </div>
 
                   <div className="mb-4 space-y-1">
@@ -210,7 +262,7 @@ function SearchContent() {
                 </button>
               </div>
               <div className="flex-1 bg-slate-100 relative overflow-hidden">
-                <DynamicMap />
+                <DynamicMap suppliers={suppliers} />
               </div>
             </div>
           </div>
