@@ -159,7 +159,10 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
-      if (typeof window !== 'undefined') localStorage.removeItem('token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('guestMode');
+      }
     },
     clearError: (state) => {
       state.error = null;
@@ -188,7 +191,10 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
         state.token = action.payload.token;
-        if (typeof window !== 'undefined') localStorage.setItem('token', action.payload.token);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', action.payload.token);
+          localStorage.removeItem('guestMode');
+        }
       })
       .addCase(loginUser.rejected, (state, action: PayloadAction<any>) => {
         state.isLoading = false;

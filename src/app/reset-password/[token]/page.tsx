@@ -220,7 +220,7 @@ export default function ResetPasswordPage() {
 
       {/* ───── Right Panel: Showcase (Same as Forgot Password) ───── */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#0f1b2d] relative overflow-hidden flex-col justify-center px-12 xl:px-20">
-        <Image src={authBg} alt="" fill className="object-cover opacity-20" priority />
+        <Image src={authBg} alt="" fill sizes="50vw" className="object-cover opacity-20" priority />
         <div className="absolute inset-0 bg-[#0f1b2d]/70" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#dca12f]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#1e3a5f]/30 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />

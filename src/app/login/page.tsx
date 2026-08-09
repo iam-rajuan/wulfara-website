@@ -57,6 +57,12 @@ export default function LoginPage() {
     dispatch(loginUser({ email: formData.email, password: formData.password }));
   };
 
+  const handleContinueAsGuest = () => {
+    localStorage.setItem("guestMode", "true");
+    localStorage.removeItem("token");
+    router.push("/dashboard");
+  };
+
   return (
     <div className="flex min-h-screen">
       {/* ───── Left Panel: Login Form ───── */}
@@ -198,13 +204,14 @@ export default function LoginPage() {
 
           {/* Continue as Guest */}
           <p className="text-sm text-gray-500 mt-8 text-center">
-            <Link
-              href="/dashboard"
+            <button
+              type="button"
+              onClick={handleContinueAsGuest}
               className="text-[#1b2b3a] font-semibold hover:text-[#dca12f] transition-colors inline-flex items-center gap-1"
             >
               Continue as Guest
               <ArrowRight size={14} strokeWidth={2.5} />
-            </Link>
+            </button>
           </p>
         </div>
       </div>
@@ -216,6 +223,7 @@ export default function LoginPage() {
           src={authBg}
           alt=""
           fill
+          sizes="50vw"
           className="object-cover opacity-20"
           priority
         />

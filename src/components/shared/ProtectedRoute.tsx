@@ -16,6 +16,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     const verifyAuth = async () => {
+      const isGuestMode = localStorage.getItem('guestMode') === 'true';
+
+      if (isGuestMode) {
+        setIsChecking(false);
+        return;
+      }
+
       if (!token) {
         router.push(`/login`);
         return;

@@ -189,6 +189,7 @@ export default function ForgotPasswordPage() {
           src={authBg}
           alt=""
           fill
+          sizes="50vw"
           className="object-cover opacity-20"
           priority
         />

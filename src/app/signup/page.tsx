@@ -82,6 +82,12 @@ export default function SignUpPage() {
       });
   };
 
+  const handleContinueAsGuest = () => {
+    localStorage.setItem("guestMode", "true");
+    localStorage.removeItem("token");
+    router.push("/dashboard");
+  };
+
   const handleVerifyEmail = (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode) {
@@ -276,6 +282,7 @@ export default function SignUpPage() {
             <button
               type="button"
               id="continue-as-guest-btn"
+              onClick={handleContinueAsGuest}
               className="w-full rounded-lg border border-gray-200 bg-white py-3.5 text-sm font-semibold text-[#1b2b3a] transition-all duration-200 hover:bg-gray-50 hover:border-gray-300 cursor-pointer active:scale-[0.98]"
             >
               Continue as Guest
@@ -302,6 +309,7 @@ export default function SignUpPage() {
           src={authBg}
           alt=""
           fill
+          sizes="50vw"
           className="object-cover opacity-20"
           priority
         />

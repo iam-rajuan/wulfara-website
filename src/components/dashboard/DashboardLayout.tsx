@@ -39,6 +39,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -46,6 +47,8 @@ export default function DashboardLayout({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setIsGuestMode(localStorage.getItem("guestMode") === "true");
+
     // Click outside to close notifications
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -96,6 +99,8 @@ export default function DashboardLayout({
   }, [user]);
 
   const markAllAsRead = async () => {
+    if (isGuestMode) return;
+
     try {
       const token = localStorage.getItem("token") || '';
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/notifications/read-all`, {
@@ -115,6 +120,8 @@ export default function DashboardLayout({
   };
 
   const markAsRead = async (id: string) => {
+    if (isGuestMode) return;
+
     try {
       const token = localStorage.getItem("token") || '';
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/notifications/${id}/read`, {
@@ -167,12 +174,12 @@ export default function DashboardLayout({
         {/* User info */}
         <div className="px-6 pb-6">
           <div className="flex items-center gap-3">
-            <img src={`https://ui-avatars.com/api/?name=${user?.name || "User"}&background=212E46&color=fff`} alt={user?.name || "User"} className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200" />
+            <img src={`https://ui-avatars.com/api/?name=${user?.name || "Guest Buyer"}&background=212E46&color=fff`} alt={user?.name || "Guest Buyer"} className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200" />
             <div>
               <p className="text-[14px] font-bold text-[#0B172E] leading-tight truncate w-[150px]">
-                {user?.name || "Loading..."}
+                {user?.name || (isGuestMode ? "Guest Buyer" : "Loading...")}
               </p>
-              <p className="text-[12px] font-bold text-gray-500 capitalize">{user?.role || "buyer"} Account</p>
+              <p className="text-[12px] font-bold text-gray-500 capitalize">{isGuestMode ? "Guest" : user?.role || "buyer"} Account</p>
             </div>
           </div>
         </div>
