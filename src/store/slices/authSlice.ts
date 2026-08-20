@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { API_BASE_URL } from '@/config/urls';
 
 // Define the shape of our User and AuthState
 export interface User {
@@ -25,7 +26,7 @@ const initialState: AuthState = {
   error: null,
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const BASE_URL = API_BASE_URL;
 const API_URL = `${BASE_URL}/auth`;
 
 // Async Thunks

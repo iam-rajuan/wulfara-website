@@ -11,14 +11,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { logout } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
+import { DASHBOARD_SIGN_IN_URL } from "@/config/urls";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
-  const dashboardUrl =
-    process.env.NEXT_PUBLIC_DASHBOARD_URL || "http://localhost:5173";
-
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -142,7 +140,7 @@ export default function Header() {
             {/* CTA Button */}
             {!isLoggedIn && (
               <a
-                href={`${dashboardUrl}/sign-in`}
+                href={DASHBOARD_SIGN_IN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-2 text-xs font-bold text-slate-950 transition-all shadow-sm"
@@ -246,7 +244,7 @@ export default function Header() {
           {/* Mobile CTA Full Width */}
           {!isLoggedIn && (
             <a
-              href={`${dashboardUrl}/sign-in`}
+              href={DASHBOARD_SIGN_IN_URL}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}

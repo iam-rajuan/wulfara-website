@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   ArrowLeft,
 } from "lucide-react";
+import { API_BASE_URL } from "@/config/urls";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -39,8 +40,7 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-      const response = await fetch(`${apiUrl}/auth/forgot-password`, {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

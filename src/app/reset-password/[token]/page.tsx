@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Mail,
 } from "lucide-react";
+import { API_BASE_URL } from "@/config/urls";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -49,8 +50,7 @@ export default function ResetPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-      const response = await fetch(`${apiUrl}/auth/reset-password/${token}`, {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password/${token}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),

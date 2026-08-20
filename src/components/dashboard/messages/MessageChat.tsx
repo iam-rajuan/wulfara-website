@@ -3,6 +3,7 @@ import { CheckCircle, Paperclip, Send } from "lucide-react";
 import { io } from "socket.io-client";
 import { useGetMessagesQuery, useSendMessageMutation } from "@/store/features/messages/messagesApi";
 import { useSelector } from "react-redux";
+import { SOCKET_BASE_URL } from "@/config/urls";
 
 export default function MessageChat({
   activeChat,
@@ -23,7 +24,7 @@ export default function MessageChat({
   const rawMessages = messagesResponse?.data || [];
 
   useEffect(() => {
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
+    socketRef.current = io(SOCKET_BASE_URL);
     socketRef.current.emit('join_room', activeChat.id);
 
     socketRef.current.on('receive_message', (newMsg: any) => {

@@ -21,6 +21,7 @@ import {
   Check
 } from "lucide-react";
 import { io } from "socket.io-client";
+import { API_BASE_URL, SOCKET_BASE_URL } from "@/config/urls";
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -66,7 +67,7 @@ export default function DashboardLayout({
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem("token") || (typeof window !== 'undefined' ? (window.localStorage.getItem('token') || '') : '');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/notifications`, {
+        const res = await fetch(`${API_BASE_URL}/notifications`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -84,7 +85,7 @@ export default function DashboardLayout({
     fetchNotifications();
 
     // Socket.io connection
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000");
+    const socket = io(SOCKET_BASE_URL);
     
     socket.emit("join_room", user._id);
     
@@ -103,7 +104,7 @@ export default function DashboardLayout({
 
     try {
       const token = localStorage.getItem("token") || '';
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/notifications/read-all`, {
+      const res = await fetch(`${API_BASE_URL}/notifications/read-all`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`
@@ -124,7 +125,7 @@ export default function DashboardLayout({
 
     try {
       const token = localStorage.getItem("token") || '';
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/notifications/${id}/read`, {
+      const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`
