@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   MapPin,
@@ -11,10 +12,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Wrench,
-  Box,
-  Layers,
   ChevronLeft,
-  Settings,
   ExternalLink,
   Heart,
   Star
@@ -28,6 +26,40 @@ import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
 import { useGetSupplierReviewsQuery } from "@/store/api/reviewApi";
 import { useParams } from "next/navigation";
 import DynamicMap from "@/components/home/DynamicMap";
+import type { Favorite, Review } from "@/types/api";
+import type { RootState } from "@/store/store";
+
+interface SupplierServiceCard {
+  title: string;
+  desc: string;
+  icon: React.JSX.Element;
+}
+
+const imageLoader = ({ src }: { src: string }) => src;
+
+const getFavoriteSupplierId = (favorite: Favorite) => {
+  if (!favorite.supplier) {
+    return null;
+  }
+
+  return typeof favorite.supplier === "string" ? favorite.supplier : favorite.supplier._id;
+};
+
+const getApiErrorMessage = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "data" in error &&
+    typeof error.data === "object" &&
+    error.data !== null &&
+    "message" in error.data &&
+    typeof error.data.message === "string"
+  ) {
+    return error.data.message;
+  }
+
+  return "Failed to update favorites";
+};
 
 export default function SupplierProfilePage() {
   const params = useParams();
@@ -35,7 +67,7 @@ export default function SupplierProfilePage() {
   const { data, isLoading } = useGetSupplierByIdQuery(id, { skip: !id });
   const supplier = data?.data;
 
-  const user = useSelector((state: any) => state.auth.user);
+  const user = useSelector((state: RootState) => state.auth.user);
   const { data: favoritesData } = useGetFavoritesQuery(undefined, { skip: !user });
   const [addFavorite] = useAddFavoriteMutation();
   const [removeFavorite] = useRemoveFavoriteMutation();
@@ -49,7 +81,7 @@ export default function SupplierProfilePage() {
       toast.error("Please login to save favorites");
       return;
     }
-    const existingFav = favorites.find((f: any) => f.supplier?._id === id || f.supplier === id);
+    const existingFav = favorites.find((favorite) => getFavoriteSupplierId(favorite) === id);
     try {
       if (existingFav) {
         await removeFavorite(existingFav._id).unwrap();
@@ -58,8 +90,8 @@ export default function SupplierProfilePage() {
         await addFavorite({ supplierId: id }).unwrap();
         toast.success("Added to favorites");
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to update favorites");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error));
     }
   };
 
@@ -77,16 +109,16 @@ export default function SupplierProfilePage() {
   const displayAbout = supplier.description || "No description provided.";
 
   // Dynamically map core products/services
-  const displayServices = supplier.coreProducts && supplier.coreProducts.length > 0
-    ? supplier.coreProducts.map((prod: string) => ({
-      title: prod,
+  const displayServices: SupplierServiceCard[] = supplier.coreProducts && supplier.coreProducts.length > 0
+    ? supplier.coreProducts.map((product: string) => ({
+      title: product,
       desc: "Core product/service offered by the supplier.",
       icon: <Wrench size={16} />
     }))
     : [{ title: "Core Services", desc: "Industrial sourcing and supply.", icon: <Wrench size={16} /> }];
 
   const displayGallery = supplier.gallery && supplier.gallery.length > 0
-    ? supplier.gallery.map((g: any) => g.url)
+    ? supplier.gallery.map((galleryItem) => galleryItem.url)
     : [];
 
   return (
@@ -104,7 +136,14 @@ export default function SupplierProfilePage() {
             {/* Logo */}
             <div className="w-24 h-24 rounded bg-linear-to-tr from-slate-800 to-[#1b2b3a] shrink-0 flex items-center justify-center relative overflow-hidden shadow-inner">
               {(supplier.logo && supplier.logo !== 'no-logo.jpg') ? (
-                <img src={supplier.logo} alt="Logo" className="w-full h-full object-cover" />
+                <Image
+                  src={supplier.logo}
+                  alt={`${supplier.companyName} logo`}
+                  fill
+                  unoptimized
+                  loader={imageLoader}
+                  className="object-cover"
+                />
               ) : (
                 <div className="w-12 h-12 border-4 border-white/20 rounded-full flex items-center justify-center relative z-10">
                   <Building2 className="text-white/80" size={24} />
@@ -142,8 +181,8 @@ export default function SupplierProfilePage() {
               onClick={handleFavoriteToggle}
               className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2"
             >
-              <Heart size={16} className={favorites.some((f: any) => f.supplier?._id === id || f.supplier === id) ? "fill-red-500 text-red-500" : ""} />
-              {favorites.some((f: any) => f.supplier?._id === id || f.supplier === id) ? "Saved" : "Save"}
+              <Heart size={16} className={favorites.some((favorite) => getFavoriteSupplierId(favorite) === id) ? "fill-red-500 text-red-500" : ""} />
+              {favorites.some((favorite) => getFavoriteSupplierId(favorite) === id) ? "Saved" : "Save"}
             </button>
             {supplier.contactInfo?.website && (
               <a href={supplier.contactInfo.website} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2">
@@ -174,7 +213,7 @@ export default function SupplierProfilePage() {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Products & Services</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {displayServices.map((service: any, idx: number) => (
+                {displayServices.map((service, idx: number) => (
                   <div key={idx} className="bg-slate-50 border border-slate-100 rounded-lg p-5 flex gap-4 hover:border-slate-200 transition-colors">
                     <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center shrink-0 text-slate-700">
                       {service.icon}
@@ -195,10 +234,13 @@ export default function SupplierProfilePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {displayGallery.map((img: string, idx: number) => (
                     <div key={idx} className="rounded-lg overflow-hidden h-[200px] bg-slate-100 group relative border border-slate-100">
-                      <img
+                      <Image
                         src={img}
                         alt={`Gallery image ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        unoptimized
+                        loader={imageLoader}
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
                     </div>
@@ -287,7 +329,7 @@ export default function SupplierProfilePage() {
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Categories</h2>
               <div className="flex flex-wrap gap-2">
-                {supplier.categories?.map((cat: any) => (
+                {supplier.categories?.map((cat) => (
                   <span key={cat._id} className="px-3 py-1.5 bg-blue-50/50 border border-blue-100 text-blue-800 font-medium text-[12px] rounded-lg">
                     {cat.name}
                   </span>
@@ -305,7 +347,7 @@ export default function SupplierProfilePage() {
               <Star size={24} className="text-yellow-500 fill-yellow-500" /> Supplier Reviews ({supplier.totalReviews})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {reviews.map((review: any) => (
+              {reviews.map((review: Review) => (
                 <div key={review._id} className="bg-slate-50 border border-slate-100 rounded-xl p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
@@ -323,7 +365,7 @@ export default function SupplierProfilePage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-sm text-slate-700 leading-relaxed italic">"{review.comment}"</p>
+                  <p className="text-sm text-slate-700 leading-relaxed italic">{`"${review.comment}"`}</p>
                 </div>
               ))}
             </div>

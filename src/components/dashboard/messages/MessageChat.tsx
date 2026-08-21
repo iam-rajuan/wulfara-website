@@ -1,54 +1,79 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { CheckCircle, Paperclip, Send } from "lucide-react";
 import { io } from "socket.io-client";
 import { useGetMessagesQuery, useSendMessageMutation } from "@/store/features/messages/messagesApi";
 import { useSelector } from "react-redux";
 import { SOCKET_BASE_URL } from "@/config/urls";
+import type { RootState } from "@/store/store";
+import type { ChatMessage as ApiChatMessage } from "@/types/api";
+import type { DashboardConversationPreview } from "@/app/dashboard/messages/page";
+
+interface RenderedMessage {
+  id: string | number;
+  text: string;
+  sender: "me" | "them";
+  time: string;
+  isFile: boolean;
+  fileName: string;
+}
+
+interface MessageChatProps {
+  activeChat: DashboardConversationPreview;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+}
 
 export default function MessageChat({
   activeChat,
   messagesEndRef
-}: any) {
+}: MessageChatProps) {
   const [inputText, setInputText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const isNewChat = activeChat.id?.startsWith('new-');
   const queryId = isNewChat ? "skip" : activeChat.id;
-  const { data: messagesResponse, isLoading } = useGetMessagesQuery(queryId, { skip: !activeChat.id || isNewChat });
+  const { data: messagesResponse } = useGetMessagesQuery(queryId, { skip: !activeChat.id || isNewChat });
   const [sendMessageApi] = useSendMessageMutation();
-  const user = useSelector((state: any) => state.auth?.user || { _id: 'temp_user_id' });
+  const user = useSelector((state: RootState) => state.auth.user);
 
-  const [socketMessages, setSocketMessages] = useState<any[]>([]);
-  const socketRef = useRef<any>(null);
+  const [socketMessages, setSocketMessages] = useState<ApiChatMessage[]>([]);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
-  const rawMessages = messagesResponse?.data || [];
+  const rawMessages = useMemo(() => messagesResponse?.data ?? [], [messagesResponse?.data]);
 
   useEffect(() => {
     socketRef.current = io(SOCKET_BASE_URL);
     socketRef.current.emit('join_room', activeChat.id);
 
-    socketRef.current.on('receive_message', (newMsg: any) => {
+    socketRef.current.on('receive_message', (newMsg: ApiChatMessage) => {
       setSocketMessages((prev) => [...prev, newMsg]);
     });
 
     return () => {
-      socketRef.current.disconnect();
+      socketRef.current?.disconnect();
     };
   }, [activeChat.id]);
 
-  const allMessages = [...rawMessages, ...socketMessages].map((msg, index) => {
-    // Determine sender (me vs them) based on role or fallback
-    const isMe = msg.sender?.role === 'buyer' || msg.sender === 'me';
-    
-    return {
-      id: msg._id || msg.id || index,
-      text: msg.text,
-      sender: isMe ? "me" : "them",
-      time: new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isFile: msg.isFile || false,
-      fileName: msg.fileName || ""
-    };
-  });
+  const allMessages = useMemo(
+    () =>
+      [...rawMessages, ...socketMessages].map((message, index) => {
+        const isMe =
+          (typeof message.sender === "object" && message.sender?.role === "buyer") ||
+          (typeof message.sender === "object" && message.sender?._id === user?._id) ||
+          message.sender === "me";
+
+        return {
+          id: message._id || message.id || index,
+          text: message.text || "",
+          sender: isMe ? "me" : "them",
+          time: message.createdAt
+            ? new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "",
+          isFile: message.isFile || false,
+          fileName: message.fileName || "",
+        } satisfies RenderedMessage;
+      }),
+    [rawMessages, socketMessages, user?._id]
+  );
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -66,13 +91,13 @@ export default function MessageChat({
       const savedMsg = res.data;
 
       // Broadcast to socket
-      socketRef.current.emit('send_message', { roomId: savedMsg.conversation || activeChat.id, message: savedMsg });
+      socketRef.current?.emit('send_message', { roomId: savedMsg.conversation || activeChat.id, message: savedMsg });
 
       // Add to local state instantly
-      setSocketMessages(prev => [...prev, savedMsg]);
+      setSocketMessages((prev) => [...prev, savedMsg]);
       setInputText("");
-    } catch (err) {
-      console.error("Failed to send message", err);
+    } catch (error: unknown) {
+      console.error("Failed to send message", error);
     }
   };
 
@@ -82,7 +107,7 @@ export default function MessageChat({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = () => {
     // File logic omitted for brevity, would similarly upload and call handleSendMessage with isFile=true
   };
 
@@ -121,7 +146,7 @@ export default function MessageChat({
           </span>
         </div>
 
-        {allMessages.map((msg: any) => (
+        {allMessages.map((msg) => (
           <div key={msg.id} className={`flex flex-col max-w-[80%] ${msg.sender === "me" ? "self-end items-end" : "self-start items-start"}`}>
             <div className="flex items-end gap-2">
               {msg.sender === "them" && (

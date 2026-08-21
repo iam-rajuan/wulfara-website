@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import type { Supplier } from "@/types/api";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -14,26 +15,28 @@ interface LatLng {
   lng: number;
 }
 
-interface MapNode {
-  name: string;
-  pos: LatLng;
-}
-
-const mapStyles = [];
-
-export default function DynamicMap({ suppliers = [] }: { suppliers?: any[] }): React.JSX.Element {
+export default function DynamicMap({ suppliers = [] }: { suppliers?: Supplier[] }): React.JSX.Element {
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Map real suppliers to map nodes
-  const dynamicNodes = suppliers
-    .filter(s => s.location && s.location.coordinates && s.location.coordinates.length === 2 && (s.location.coordinates[0] !== 0 || s.location.coordinates[1] !== 0))
-    .map(s => ({
-      name: s.companyName || 'Supplier',
-      pos: { lat: s.location.coordinates[1], lng: s.location.coordinates[0] } // MongoDB is [lng, lat]
-    }));
-
-  // Fallback to empty if no dynamic nodes
-  const nodesToRender = dynamicNodes;
+  const nodesToRender = useMemo(
+    () =>
+      suppliers
+        .filter(
+          (supplier) =>
+            supplier.location?.coordinates &&
+            supplier.location.coordinates.length === 2 &&
+            (supplier.location.coordinates[0] !== 0 || supplier.location.coordinates[1] !== 0)
+        )
+        .map((supplier) => ({
+          name: supplier.companyName || "Supplier",
+          pos: {
+            lat: supplier.location!.coordinates![1],
+            lng: supplier.location!.coordinates![0],
+          } satisfies LatLng,
+        })),
+    [suppliers]
+  );
 
   useEffect(() => {
     const initMap = () => {
@@ -107,7 +110,7 @@ export default function DynamicMap({ suppliers = [] }: { suppliers?: any[] }): R
         script.removeEventListener("load", initMap);
       };
     }
-  }, []);
+  }, [nodesToRender]);
 
   return (
     <div 

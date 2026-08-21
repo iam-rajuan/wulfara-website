@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import { Search } from "lucide-react";
+import Link from "next/link";
 import { ListCompanyIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import heroBg from "../../../public/assets/rfq-background.png";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
 
 export default function RfqHero() {
   const { t } = useTranslation();
@@ -42,15 +44,15 @@ export default function RfqHero() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="#browse"
+            <Link
+              href="/suppliers"
               className="inline-flex items-center gap-2.5 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-7 py-3 text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transition-all uppercase tracking-wide"
             >
               <Search className="h-4 w-4" />
               <span>{t("browseSuppliers")}</span>
-            </a>
+            </Link>
             <a
-              href="#list-company"
+              href={SUPPLIER_ONBOARDING_URL}
               className="inline-flex items-center gap-2.5 rounded border-2 border-[#dca12f]/80 bg-transparent hover:bg-[#dca12f]/10 text-[#dca12f] px-7 py-3 text-xs sm:text-sm font-bold transition-all uppercase tracking-wide"
             >
               <ListCompanyIcon className="h-4 w-4" />

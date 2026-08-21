@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,23 +11,21 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { logout } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
-import { DASHBOARD_SIGN_IN_URL } from "@/config/urls";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
+
+const emptySubscribe = () => () => undefined;
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
 
   const token = useSelector((state: RootState) => state.auth.token);
   const user = useSelector((state: RootState) => state.auth.user);
-  const isLoggedIn = mounted && !!token;
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isLoggedIn = isClient && !!token;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#1b2b3a] border-b border-[#dca12f]/80 shadow-lg">
@@ -140,7 +138,7 @@ export default function Header() {
             {/* CTA Button */}
             {!isLoggedIn && (
               <a
-                href={DASHBOARD_SIGN_IN_URL}
+                href={SUPPLIER_ONBOARDING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded bg-[#dca12f] hover:bg-[#c99126] px-5 py-2 text-xs font-bold text-slate-950 transition-all shadow-sm"
@@ -244,7 +242,7 @@ export default function Header() {
           {/* Mobile CTA Full Width */}
           {!isLoggedIn && (
             <a
-              href={DASHBOARD_SIGN_IN_URL}
+              href={SUPPLIER_ONBOARDING_URL}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}

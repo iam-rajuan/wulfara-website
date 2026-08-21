@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Rocket, Search, FileText, BadgeCheck, CreditCard, CircleDollarSign, Headset, Hammer } from "lucide-react";
 
 export default function HelpCenterTopics() {
@@ -56,9 +57,9 @@ export default function HelpCenterTopics() {
         {topics.map((topic, index) => {
           const Icon = topic.icon;
           return (
-            <a
+            <Link
               key={index}
-              href="#"
+              href={topic.title === "Policies" ? "/policies" : "/help-center"}
               className="flex flex-col p-6 rounded-lg border border-slate-100 shadow-sm hover:shadow-md hover:border-[#dca12f]/40 transition-all group bg-white"
             >
               <div className="w-10 h-10 rounded bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-[#dca12f]/10 transition-colors">
@@ -68,7 +69,7 @@ export default function HelpCenterTopics() {
               <p className="text-xs text-slate-500 leading-relaxed flex-grow">
                 {topic.description}
               </p>
-            </a>
+            </Link>
           );
         })}
       </div>

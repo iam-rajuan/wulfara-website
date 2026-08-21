@@ -2,7 +2,6 @@
 
 import {
   FileText,
-  MessageSquare,
   Bookmark,
   CalendarCheck,
   Search,

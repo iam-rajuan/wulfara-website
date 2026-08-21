@@ -4,10 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
-  Wrench, Flame, TreePine, Leaf, Droplets,
-  Search, MapPin, BadgeCheck, ArrowRight, Factory, 
-  ChevronDown, Building2, Map, FileText, CheckCircle2,
-  FileCheck, Heart
+  Flame, TreePine, Leaf, Droplets,
+  Search, MapPin, BadgeCheck, ArrowRight, Factory,
+  ChevronDown, Building2, FileText, Heart
 } from "lucide-react";
 
 import { useSelector } from "react-redux";
@@ -16,6 +15,8 @@ import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation
 
 import { useGetCategoriesQuery } from "@/store/api/categoryApi";
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
+import type { RootState } from "@/store/store";
+import type { Category, Favorite, Supplier } from "@/types/api";
 
 // Hardcoded industries for exact Figma match, but we will bind them to DB categories if found
 const figmaIndustries = [
@@ -26,6 +27,35 @@ const figmaIndustries = [
   { name: 'Rubber', desc: 'Natural latex and synthetic rubber.', icon: <Droplets size={24} /> },
 ];
 
+const getDistanceLabel = (supplierId: string) => {
+  const seed = supplierId.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
+  return `${(seed % 450) + 50} km`;
+};
+
+const getFavoriteSupplierId = (favorite: Favorite) => {
+  if (!favorite.supplier) {
+    return null;
+  }
+
+  return typeof favorite.supplier === "string" ? favorite.supplier : favorite.supplier._id;
+};
+
+const getApiErrorMessage = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "data" in error &&
+    typeof error.data === "object" &&
+    error.data !== null &&
+    "message" in error.data &&
+    typeof error.data.message === "string"
+  ) {
+    return error.data.message;
+  }
+
+  return "Failed to update favorites";
+};
+
 export default function CategoryPage() {
   const [selectedIndustryName, setSelectedIndustryName] = useState<string>('Steel Industry');
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +63,7 @@ export default function CategoryPage() {
   const [distanceFilter, setDistanceFilter] = useState("Distance");
   const [typeFilter, setTypeFilter] = useState("Supplier Type");
 
-  const user = useSelector((state: any) => state.auth.user);
+  const user = useSelector((state: RootState) => state.auth.user);
   const { data: favoritesData } = useGetFavoritesQuery(undefined, { skip: !user });
   const [addFavorite] = useAddFavoriteMutation();
   const [removeFavorite] = useRemoveFavoriteMutation();
@@ -48,7 +78,7 @@ export default function CategoryPage() {
       return;
     }
 
-    const existingFav = favorites.find((f: any) => f.supplier?._id === supplierId || f.supplier === supplierId);
+    const existingFav = favorites.find((favorite) => getFavoriteSupplierId(favorite) === supplierId);
     try {
       if (existingFav) {
         await removeFavorite(existingFav._id).unwrap();
@@ -57,8 +87,8 @@ export default function CategoryPage() {
         await addFavorite({ supplierId }).unwrap();
         toast.success("Added to favorites");
       }
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to update favorites");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error));
     }
   };
 
@@ -67,11 +97,11 @@ export default function CategoryPage() {
   const categories = categoriesResponse?.data || [];
   
   // Find the DB ID for the selected industry to fetch suppliers
-  const matchedCategory = categories.find((c: any) => c.name.toLowerCase() === selectedIndustryName.toLowerCase());
+  const matchedCategory = categories.find((category: Category) => category.name.toLowerCase() === selectedIndustryName.toLowerCase());
   const categoryId = matchedCategory?._id;
 
   // Build query string
-  let queryParams = [];
+  const queryParams: string[] = [];
   if (categoryId) queryParams.push(`categories=${categoryId}`);
   if (searchQuery) queryParams.push(`keyword=${encodeURIComponent(searchQuery)}`);
   if (typeFilter !== "Supplier Type") queryParams.push(`supplierType=${encodeURIComponent(typeFilter)}`);
@@ -81,7 +111,7 @@ export default function CategoryPage() {
   const { data: suppliersResponse, isLoading: suppliersLoading } = useGetSuppliersQuery(
     queryParams.length > 0 ? queryParams.join('&') : ''
   );
-  let suppliers = suppliersResponse?.data || [];
+  const suppliers = suppliersResponse?.data || [];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -300,7 +330,7 @@ export default function CategoryPage() {
                   </div>
                 )}
 
-                {suppliers.map((sup: any) => (
+                {suppliers.map((sup: Supplier) => (
                   <div key={sup._id} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow">
                     <div className="p-5 flex-1">
                       {/* Header */}
@@ -320,7 +350,7 @@ export default function CategoryPage() {
                           >
                             <Heart 
                               size={20} 
-                              className={favorites.some((f: any) => f.supplier?._id === sup._id || f.supplier === sup._id) ? "fill-red-500 text-red-500" : ""} 
+                              className={favorites.some((favorite) => getFavoriteSupplierId(favorite) === sup._id) ? "fill-red-500 text-red-500" : ""} 
                             />
                           </button>
                         </div>
@@ -332,7 +362,7 @@ export default function CategoryPage() {
                         <MapPin size={14} className="text-slate-400" /> 
                         <span className="line-clamp-1 truncate">{sup.location?.formattedAddress || sup.contactAddress || "Global"}</span>
                         <span className="text-slate-300">•</span>
-                        <span>{Math.floor(Math.random() * 500) + 50} km</span>
+                        <span>{getDistanceLabel(sup._id)}</span>
                       </div>
 
                       {/* Stats */}
@@ -349,12 +379,12 @@ export default function CategoryPage() {
 
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2">
-                        {(sup.products || []).slice(0, 3).map((prod: any, idx: number) => (
+                        {(sup.products || []).slice(0, 3).map((prod, idx: number) => (
                           <span key={idx} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-semibold tracking-wide">
-                            {prod.title || prod.name || prod}
+                            {typeof prod === "string" ? prod : prod.title || prod.name || "Product"}
                           </span>
                         ))}
-                        {(!sup.products || sup.products.length === 0) && sup.categories?.map((cat: any) => (
+                        {(!sup.products || sup.products.length === 0) && sup.categories?.map((cat) => (
                           <span key={cat._id} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-semibold tracking-wide">
                             {cat.name}
                           </span>

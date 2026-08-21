@@ -1,13 +1,19 @@
 import React from "react";
+import Link from "next/link";
 import { FileText, ArrowRight, ChevronRight } from "lucide-react";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
+import type { CmsPage } from "@/types/api";
+
+interface CmsArticle {
+  title: string;
+}
 
 export default function HelpCenterArticles() {
   const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
-  const helpCenterPage = pagesResponse?.data?.find((p: any) => p.slug === 'help-center');
-  const cmsArticles = helpCenterPage?.htmlContent ? JSON.parse(helpCenterPage.htmlContent) : [];
+  const helpCenterPage = pagesResponse?.data?.find((page: CmsPage) => page.slug === 'help-center');
+  const cmsArticles: CmsArticle[] = helpCenterPage?.htmlContent ? JSON.parse(helpCenterPage.htmlContent) : [];
 
-  const articlesToRender = cmsArticles.map((a: any) => a.title);
+  const articlesToRender = cmsArticles.map((article) => article.title);
 
   if (isLoading) {
     return <div className="py-12 px-4 flex justify-center"><div className="w-8 h-8 border-4 border-[#DFB63E] border-t-transparent rounded-full animate-spin"></div></div>;
@@ -17,16 +23,16 @@ export default function HelpCenterArticles() {
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-[1280px] mx-auto ">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-xl font-bold text-slate-900">Popular Articles</h2>
-        <a href="#" className="text-[#34d399] hover:text-[#059669] text-xs font-semibold flex items-center gap-1 transition-colors">
+        <Link href="/help-center" className="text-[#34d399] hover:text-[#059669] text-xs font-semibold flex items-center gap-1 transition-colors">
           View all articles <ArrowRight className="h-3 w-3" />
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {articlesToRender.map((article: any, index: number) => (
-          <a
+        {articlesToRender.map((article, index: number) => (
+          <Link
             key={index}
-            href="#"
+            href="/help-center"
             className="flex items-center justify-between p-4 bg-white rounded border border-[#e2e8f0] hover:border-[#dca12f]/30 hover:shadow-sm transition-all group"
           >
             <div className="flex items-center gap-3">
@@ -36,7 +42,7 @@ export default function HelpCenterArticles() {
               </span>
             </div>
             <ChevronRight className="h-4 w-4 text-[#45464D4D] group-hover:text-[#dca12f] transition-colors" />
-          </a>
+          </Link>
         ))}
       </div>
     </div>

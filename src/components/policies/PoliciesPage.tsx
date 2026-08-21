@@ -4,9 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   ChevronRight,
-  Scale,
   Lock,
-  Building2,
   FileText,
   CreditCard,
   CircleX,
@@ -15,11 +13,22 @@ import {
 } from "lucide-react";
 import { TermsIcon, SupplierListingIcon, PolicyShieldIcon } from "@/components/icons";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
+import type { CmsPage } from "@/types/api";
+
+interface CmsPolicies {
+  termsOfService?: string;
+  privacyPolicy?: string;
+  supplierListingPolicy?: string;
+  rfqPolicy?: string;
+  paymentSubscriptionPolicy?: string;
+  cancellationPolicy?: string;
+}
 
 export default function PoliciesPage() {
   const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
-  const policyPage = pagesResponse?.data?.find((p: any) => p.slug === 'policies');
-  const cmsPolicies = policyPage?.htmlContent ? JSON.parse(policyPage.htmlContent) : null;
+  const policyPage = pagesResponse?.data?.find((page: CmsPage) => page.slug === 'policies');
+  const cmsPolicies: CmsPolicies | null = policyPage?.htmlContent ? JSON.parse(policyPage.htmlContent) : null;
 
   const [activeSection, setActiveSection] = useState("terms-of-service");
 
@@ -322,7 +331,7 @@ export default function PoliciesPage() {
                   </div>
 
                   <Link
-                    href="#"
+                    href={`#${policy.id}`}
                     className="inline-flex items-center text-sm font-semibold text-slate-900 hover:text-[#dca12f] transition-colors"
                   >
                     {policy.linkText}
@@ -361,7 +370,7 @@ export default function PoliciesPage() {
                     Go to RFQ
                   </Link>
                   <Link
-                    href="/supplier/register"
+                    href={SUPPLIER_ONBOARDING_URL}
                     className="px-6 py-3 bg-[#eff6ff] text-slate-900 text-sm font-bold rounded hover:bg-[#e0e7ff] transition-colors whitespace-nowrap uppercase tracking-wide"
                   >
                     LIST YOUR COMPANY

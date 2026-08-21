@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 
 import { useGetBuyerRfqsQuery } from "@/store/api/rfqApi";
+import type { Rfq } from "@/types/api";
 
 export interface RFQDataRow {
   id: string;
@@ -31,32 +32,33 @@ export interface RFQDataRow {
 
 export default function MyRFQsPage() {
   const { data: rfqResponse, isLoading } = useGetBuyerRfqsQuery();
-  const apiRfqs = rfqResponse?.data || [];
+  const apiRfqs = useMemo(() => rfqResponse?.data ?? [], [rfqResponse?.data]);
   
   const rfqData: RFQDataRow[] = useMemo(() => {
-    return apiRfqs.map((rfq: any) => {
+    return apiRfqs.map((rfq: Rfq, index: number) => {
       let deadline = "Not set";
       if (rfq.details) {
         const match = rfq.details.match(/Expected Delivery: (.+?)\n/);
         if (match) deadline = match[1];
       }
       
-      const statusFormat = rfq.status.charAt(0).toUpperCase() + rfq.status.slice(1);
+      const status = rfq.status ?? "pending";
+      const statusFormat = status.charAt(0).toUpperCase() + status.slice(1);
       
       let statusColor = "border-[#F97316] text-[#F97316] bg-[#FFF7ED]"; // Pending
-      if (rfq.status === "responded") statusColor = "border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF]";
-      else if (rfq.status === "closed") statusColor = "border-[#6B7280] text-[#4B5563] bg-[#F3F4F6]";
-      else if (rfq.status === "reviewed") statusColor = "border-[#DFB63E] text-[#DFB63E] bg-[#FEF9C3]";
+      if (status === "responded") statusColor = "border-[#3B82F6] text-[#3B82F6] bg-[#EFF6FF]";
+      else if (status === "closed") statusColor = "border-[#6B7280] text-[#4B5563] bg-[#F3F4F6]";
+      else if (status === "reviewed") statusColor = "border-[#DFB63E] text-[#DFB63E] bg-[#FEF9C3]";
       
       return {
-        id: rfq._id,
+        id: rfq._id ?? rfq.rfqNumber ?? `rfq-row-${index + 1}`,
         supplier: rfq.supplier?.companyName || "Unknown Supplier",
         product: rfq.subject?.replace("RFQ: ", "") || "Product",
         quantity: `${rfq.quantity || 1} units`,
         deadline,
         status: statusFormat,
         statusColor,
-        lastUpdated: new Date(rfq.updatedAt).toLocaleDateString()
+        lastUpdated: new Date(rfq.updatedAt ?? new Date().toISOString()).toLocaleDateString()
       };
     });
   }, [apiRfqs]);
@@ -98,7 +100,7 @@ export default function MyRFQsPage() {
       rfq.status,
       `"${rfq.lastUpdated}"`
     ]);
-    const csvContent = [headers.join(","), ...csvRows.map((e: any[]) => e.join(","))].join("\n");
+    const csvContent = [headers.join(","), ...csvRows.map((row: string[]) => row.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -149,27 +151,20 @@ export default function MyRFQsPage() {
   }, [rfqData]);
 
   // Filter the RFQs dynamically based on search query and status filter
-  const filteredRfqs = useMemo(() => {
-    let filtered = rfqData;
-    
-    // Filter by active status
-    if (activeStatusFilter !== "All") {
-      filtered = filtered.filter((rfq: RFQDataRow) => rfq.status === activeStatusFilter);
-    }
+  const filteredByStatus =
+    activeStatusFilter === "All"
+      ? rfqData
+      : rfqData.filter((rfq: RFQDataRow) => rfq.status === activeStatusFilter);
 
-    // Filter by search query
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(
+  const lowerQuery = searchQuery.toLowerCase();
+  const filteredRfqs = searchQuery
+    ? filteredByStatus.filter(
         (rfq: RFQDataRow) =>
           rfq.product.toLowerCase().includes(lowerQuery) ||
           rfq.supplier.toLowerCase().includes(lowerQuery) ||
           rfq.id.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    return filtered;
-  }, [searchQuery, activeStatusFilter, rfqData]);
+      )
+    : filteredByStatus;
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Loading RFQs...</div>;

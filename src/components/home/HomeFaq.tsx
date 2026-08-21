@@ -4,12 +4,24 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
+import type { CmsPage } from "@/types/api";
+
+interface CmsFaqItem {
+  question: string;
+  answer: string;
+}
+
+interface HomeFaqEntry {
+  qKey: string;
+  aKey: string;
+  isDynamic: boolean;
+}
 
 export default function HomeFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
-  const faqPage = pagesResponse?.data?.find((p: any) => p.slug === 'faq');
-  const cmsFaqs = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
+  const faqPage = pagesResponse?.data?.find((page: CmsPage) => page.slug === 'faq');
+  const cmsFaqs: CmsFaqItem[] = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
   const { t } = useTranslation();
 
   const staticFaqs = [
@@ -22,9 +34,9 @@ export default function HomeFaq() {
     { qKey: "q7", aKey: "a7" }
   ];
 
-  const activeFaqs = cmsFaqs.length > 0 ? cmsFaqs.map((f: any) => ({
-    qKey: f.question,
-    aKey: f.answer,
+  const activeFaqs: HomeFaqEntry[] = cmsFaqs.length > 0 ? cmsFaqs.map((faq) => ({
+    qKey: faq.question,
+    aKey: faq.answer,
     isDynamic: true
   })) : staticFaqs.map(f => ({ ...f, isDynamic: false }));
 
@@ -51,7 +63,7 @@ export default function HomeFaq() {
 
         {/* FAQ Accordion List */}
         <div className="space-y-4 mb-12">
-          {activeFaqs.map((faq: any, idx: number) => {
+          {activeFaqs.map((faq, idx: number) => {
             const isOpen = openIndex === idx;
             return (
               <div

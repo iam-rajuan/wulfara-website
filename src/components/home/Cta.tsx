@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
 
 export default function Cta() {
   const { t } = useTranslation();
@@ -13,14 +15,14 @@ export default function Cta() {
         </h2>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="#features"
+          <Link
+            href="/suppliers"
             className="w-full sm:w-auto rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3 text-sm font-bold transition-all text-center"
           >
             {t('browseSuppliers')}
-          </a>
+          </Link>
           <a
-            href="#list-company"
+            href={SUPPLIER_ONBOARDING_URL}
             className="w-full sm:w-auto rounded border border-[#dca12f] bg-transparent text-[#dca12f] hover:bg-slate-800/20 px-8 py-3 text-sm font-bold transition-all text-center"
           >
             {t('listCompany')}

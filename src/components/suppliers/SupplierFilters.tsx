@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Circle, ChevronDown } from "lucide-react";
+import { Circle } from "lucide-react";
 
 interface SupplierFiltersProps {
   onFilterChange: (type: string, value: string) => void;

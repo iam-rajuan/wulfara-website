@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
 
 export default function FaqFooterCta() {
   return (
@@ -9,14 +11,14 @@ export default function FaqFooterCta() {
         INITIATE GLOBAL PROCUREMENT
       </h4>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-        <a
-          href="#features"
+        <Link
+          href="/suppliers"
           className="w-full sm:w-auto bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-12 py-4 text-sm font-bold transition-all text-center uppercase tracking-widest"
         >
           BROWSE SUPPLIERS
-        </a>
+        </Link>
         <a
-          href="#list-company"
+          href={SUPPLIER_ONBOARDING_URL}
           className="w-full sm:w-auto border border-[#dca12f] bg-transparent text-[#dca12f] hover:bg-[#dca12f]/5 px-12 py-4 text-sm font-bold transition-all text-center uppercase tracking-widest"
         >
           LIST YOUR COMPANY

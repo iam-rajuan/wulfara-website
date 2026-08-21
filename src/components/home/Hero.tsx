@@ -1,20 +1,61 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, SlidersHorizontal, CheckCircle2, Compass } from "lucide-react";
 import { ListCompanyIcon } from "@/components/icons";
+import Link from "next/link";
 import Image from "next/image";
 import heroBg from "../../../public/assets/hero-bg.png";
 import { useTranslation } from "react-i18next";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
 
 import { useRouter } from "next/navigation";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
+
+type CmsHeroButton = {
+  id: string;
+  label: string;
+  route: string;
+  style: string;
+};
+
+type CmsHeroContent = {
+  heroSettings?: {
+    bgImage?: string;
+    mainHeading?: string;
+    introParagraph?: string;
+    searchFieldText?: string;
+  };
+  buttonSettings?: {
+    primaryCTA?: string;
+    secondaryCTA?: string;
+    accountLogin?: string;
+  };
+  dynamicButtons?: CmsHeroButton[];
+};
+
+const resolveCtaHref = (btn: CmsHeroButton) => {
+  const label = (btn?.label || "").toLowerCase();
+  const route = btn?.route || "";
+
+  if (label.includes("list") && label.includes("company")) {
+    return SUPPLIER_ONBOARDING_URL;
+  }
+  if (label.includes("login") || route === "#login") {
+    return "/login";
+  }
+  if ((label.includes("browse") && label.includes("supplier")) || route === "#features") {
+    return "/suppliers";
+  }
+  return route || "#";
+};
 
 export default function Hero() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
-  const cmsHero = pagesResponse?.data?.find((p: any) => p.slug === 'homepage')?.htmlContent
-    ? JSON.parse(pagesResponse.data.find((p: any) => p.slug === 'homepage').htmlContent)
+  const homepage = pagesResponse?.data?.find((page: { slug: string; htmlContent?: string }) => page.slug === 'homepage');
+  const cmsHero: CmsHeroContent | null = homepage?.htmlContent
+    ? JSON.parse(homepage.htmlContent)
     : null;
 
   const { t } = useTranslation();
@@ -117,43 +158,43 @@ export default function Hero() {
         {/* Action Buttons Row */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
           {cmsHero?.dynamicButtons ? (
-            cmsHero.dynamicButtons.map((btn: any) => {
+            cmsHero.dynamicButtons.map((btn: CmsHeroButton) => {
               if (btn.style === 'primary') {
                 return (
-                  <a key={btn.id} href={btn.route} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all">
+                  <Link key={btn.id} href={resolveCtaHref(btn)} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all">
                     <Compass className="h-4 w-4 text-slate-950" />
                     <span>{btn.label}</span>
-                  </a>
+                  </Link>
                 );
               }
               if (btn.style === 'secondary') {
                 return (
-                  <a key={btn.id} href={btn.route} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all">
+                  <Link key={btn.id} href={resolveCtaHref(btn)} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all">
                     <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
                     <span>{btn.label}</span>
-                  </a>
+                  </Link>
                 );
               }
               return (
-                <a key={btn.id} href={btn.route} className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center">
+                <Link key={btn.id} href={resolveCtaHref(btn)} className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center">
                   {btn.label}
-                </a>
+                </Link>
               );
             })
           ) : (
             <>
               {/* Fallback backward compatibility */}
-              <a href="#features" className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all">
+              <Link href="/suppliers" className="w-full sm:w-auto flex items-center justify-center gap-2 rounded bg-[#dca12f] hover:bg-[#c99126] text-slate-950 px-8 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all">
                 <Compass className="h-4 w-4 text-slate-950" />
                 <span>{cmsHero?.buttonSettings?.primaryCTA || t('browseSuppliers')}</span>
-              </a>
-              <a href="#list-company" className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all">
+              </Link>
+              <Link href={SUPPLIER_ONBOARDING_URL} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded border border-[#dca12f] bg-transparent hover:bg-slate-800/20 text-[#dca12f] px-8 py-3.5 text-sm font-bold transition-all">
                 <ListCompanyIcon className="h-4 w-4 text-[#dca12f]" />
                 <span>{cmsHero?.buttonSettings?.secondaryCTA || t('listCompany')}</span>
-              </a>
-              <a href="#login" className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center">
+              </Link>
+              <Link href="/login" className="w-full sm:w-auto flex items-center justify-center rounded border border-slate-600 hover:border-slate-400 bg-transparent text-white px-10 py-3.5 text-sm font-bold transition-all hover:bg-slate-800/30 text-center">
                 {cmsHero?.buttonSettings?.accountLogin || t('login')}
-              </a>
+              </Link>
             </>
           )}
         </div>

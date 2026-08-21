@@ -22,6 +22,14 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const getErrorMessage = (error: unknown) => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return "Failed to send reset email";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
@@ -50,8 +58,8 @@ export default function ForgotPasswordPage() {
         throw new Error(data.message || 'Failed to send reset email');
       }
       setIsSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +96,7 @@ export default function ForgotPasswordPage() {
           
           {!isSuccess ? (
             <p className="text-sm text-gray-500 mb-8">
-              Enter your email address and we'll send you instructions to reset your password.
+              Enter your email address and we&apos;ll send you instructions to reset your password.
             </p>
           ) : (
             <p className="text-sm text-gray-500 mb-8">

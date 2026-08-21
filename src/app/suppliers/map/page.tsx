@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Search, MapPin, ChevronDown, BadgeCheck, FileText, ExternalLink, List, Map, X } from "lucide-react";
 
@@ -202,15 +203,13 @@ export default function SuppliersMapPage() {
         <div className="w-full md:w-[40%] lg:w-[50%] h-[400px] md:h-full bg-slate-100 relative border-t md:border-t-0 border-l-0 md:border-l border-slate-200 overflow-hidden">
 
           {/* Simulated Map Background */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <div className="w-full h-full md:h-[120vh]">
-
-            <img
+            <Image
               src="/assets/demomap.png"
               alt="Map view of New York area"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
-
           </div>
 
           {/* Map Overlay Controls */}

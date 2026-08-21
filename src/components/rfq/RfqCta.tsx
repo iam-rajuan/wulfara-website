@@ -1,5 +1,7 @@
 "use client";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
 
 export default function RfqCta() {
   const { t } = useTranslation();
@@ -17,14 +19,14 @@ export default function RfqCta() {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="#browse"
+          <Link
+            href="/suppliers"
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-md bg-[#dca12f] hover:bg-[#c99126] text-black px-8 py-3.5 text-xs sm:text-sm font-bold shadow-sm hover:shadow transition-all uppercase tracking-wide"
           >
             {t("browseSuppliers")}
-          </a>
+          </Link>
           <a
-            href="#list-company"
+            href={SUPPLIER_ONBOARDING_URL}
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-md border border-[#dca12f] bg-transparent text-[#dca12f] hover:bg-[#dca12f]/5 px-8 py-3.5 text-xs sm:text-sm font-bold transition-all uppercase tracking-wide"
           >
             {t("listCompany")}

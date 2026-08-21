@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ChevronRight,
@@ -15,6 +16,8 @@ import {
   TreePine,
   FileText
 } from "lucide-react";
+
+const imageLoader = ({ src }: { src: string }) => src;
 
 export default function RawMaterialsPage() {
   return (
@@ -34,10 +37,13 @@ export default function RawMaterialsPage() {
         <div className="relative rounded-2xl overflow-hidden mb-8 shadow-sm">
           {/* Background Image & Overlay */}
           <div className="absolute inset-0">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1590487988256-9ed24133863e?q=80&w=2000&auto=format&fit=crop"
               alt="Raw Materials Background"
-              className="w-full h-full object-cover"
+              fill
+              unoptimized
+              loader={imageLoader}
+              className="object-cover"
             />
             {/* Dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#1b2b3a]/95 via-[#1b2b3a]/80 to-[#1b2b3a]/60"></div>
@@ -194,9 +200,9 @@ export default function RawMaterialsPage() {
             {/* Recommended Suppliers */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-[#0F172A] tracking-tight">Recommended Steel Suppliers</h2>
-              <a href="#" className="text-sm font-bold text-[#3B82F6] flex items-center gap-1 hover:underline">
+              <Link href="/suppliers" className="text-sm font-bold text-[#3B82F6] flex items-center gap-1 hover:underline">
                 View All <ChevronRight size={14} />
-              </a>
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,5 +1,6 @@
 "use client";
 import { ChevronRight, MessageSquare, Building, Mail } from "lucide-react";
+import Link from "next/link";
 
 interface FaqSidebarProps {
   topics: string[];
@@ -54,12 +55,12 @@ export default function FaqSidebar({
           Our elite support division is available 24/7 for mission-critical assistance.
         </p>
         <div className="flex flex-col gap-3 pt-2">
-          <a href="#help" className="flex items-center gap-2.5 text-xs font-semibold text-[#dca12f] hover:text-[#c99126] transition-colors">
+          <Link href="/help-center" className="flex items-center gap-2.5 text-xs font-semibold text-[#dca12f] hover:text-[#c99126] transition-colors">
             <Building className="h-4 w-4 text-[#dca12f]" /> Visit Help Center
-          </a>
-          <a href="#contact" className="flex items-center gap-2.5 text-xs font-semibold text-[#dca12f] hover:text-[#c99126] transition-colors">
+          </Link>
+          <Link href="/help-center" className="flex items-center gap-2.5 text-xs font-semibold text-[#dca12f] hover:text-[#c99126] transition-colors">
             <Mail className="h-4 w-4 text-[#dca12f]" /> Secure Contact
-          </a>
+          </Link>
         </div>
       </div>
     </div>

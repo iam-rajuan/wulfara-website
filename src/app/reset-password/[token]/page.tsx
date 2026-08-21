@@ -8,12 +8,9 @@ import logoImg from "../../../../public/assets/logo.png";
 import authBg from "../../../../public/assets/auth-bg.png";
 import {
   Lock,
-  ArrowRight,
   Bookmark,
   FileText,
-  LayoutDashboard,
   CheckCircle2,
-  Mail,
 } from "lucide-react";
 import { API_BASE_URL } from "@/config/urls";
 
@@ -28,6 +25,14 @@ export default function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const getErrorMessage = (error: unknown) => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return "Failed to reset password";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,8 +71,8 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,40 +1,35 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { Search, MapPin, ExternalLink, X, SlidersHorizontal, Maximize2, Map as MapIcon, CheckCircle2, Navigation } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
 import DynamicMap from "@/components/home/DynamicMap";
+import type { Supplier } from "@/types/api";
 
 const initialTags = ['Verified Suppliers', 'Premium Listings'];
 
-function SearchContent() {
-  const searchParams = useSearchParams();
+interface SearchContentProps {
+  urlQuery: string;
+  urlTypes: string[];
+  urlLocation: string;
+  currentQuery: string;
+}
+
+function SearchContent({
+  urlQuery,
+  urlTypes,
+  urlLocation,
+  currentQuery,
+}: SearchContentProps) {
   const router = useRouter();
-
-  // Initialize query from URL parameters
-  const urlQuery = searchParams.get("q") || "";
-  const urlTypesParam = searchParams.get("type");
-  const urlTypes = urlTypesParam ? urlTypesParam.split(',') : ['Manufacturer', 'Distributor', 'Service Provider'];
-  const urlLocation = searchParams.get("loc") || "";
-
   const [query, setQuery] = useState(urlQuery);
   const [activeTags, setActiveTags] = useState(initialTags);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
-
-  // State for filters
   const [selectedTypes, setSelectedTypes] = useState<string[]>(urlTypes);
   const [locationSearch, setLocationSearch] = useState(urlLocation);
 
-  // Sync local state when URL changes (e.g. browser back/forward)
-  React.useEffect(() => {
-    setQuery(urlQuery);
-    setSelectedTypes(urlTypesParam ? urlTypesParam.split(',') : ['Manufacturer', 'Distributor', 'Service Provider']);
-    setLocationSearch(urlLocation);
-  }, [urlQuery, urlTypesParam, urlLocation]);
-
-  // Debounce user input and push to URL automatically
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
       const params = new URLSearchParams();
@@ -42,7 +37,6 @@ function SearchContent() {
       if (selectedTypes.length > 0) params.set("type", selectedTypes.join(','));
       if (locationSearch) params.set("loc", locationSearch);
       
-      const currentQuery = searchParams.toString();
       const newQuery = params.toString();
       
       if (currentQuery !== newQuery) {
@@ -50,10 +44,10 @@ function SearchContent() {
       }
     }, 400); // 400ms debounce
     return () => clearTimeout(timeoutId);
-  }, [query, selectedTypes, locationSearch, router, searchParams]);
+  }, [currentQuery, locationSearch, query, router, selectedTypes]);
 
   // Build query string for API
-  const queryParts = [];
+  const queryParts: string[] = [];
   if (urlQuery) queryParts.push(`keyword=${encodeURIComponent(urlQuery)}`);
   if (urlTypes && urlTypes.length > 0) queryParts.push(`supplierType=${encodeURIComponent(urlTypes.join(','))}`);
   if (urlLocation) queryParts.push(`location=${encodeURIComponent(urlLocation)}`);
@@ -62,14 +56,14 @@ function SearchContent() {
 
   // Fetch real suppliers from backend
   const { data, isLoading } = useGetSuppliersQuery(queryString);
-  const suppliers = data?.data || [];
+  const suppliers = useMemo(() => data?.data ?? [], [data?.data]);
 
   // Temporarily disable counts as we are now fully dynamically fetching from backend. 
   // For accurate counts, a dedicated aggregation endpoint would be needed.
   const counts = {
-    Manufacturer: suppliers.filter((s: any) => (s.supplierType || 'Manufacturer') === 'Manufacturer').length,
-    Distributor: suppliers.filter((s: any) => s.supplierType === 'Distributor').length,
-    ServiceProvider: suppliers.filter((s: any) => s.supplierType === 'Service Provider').length,
+    Manufacturer: suppliers.filter((supplier: Supplier) => (supplier.supplierType || 'Manufacturer') === 'Manufacturer').length,
+    Distributor: suppliers.filter((supplier: Supplier) => supplier.supplierType === 'Distributor').length,
+    ServiceProvider: suppliers.filter((supplier: Supplier) => supplier.supplierType === 'Service Provider').length,
   };
 
   const handleTypeToggle = (type: string) => {
@@ -83,7 +77,7 @@ function SearchContent() {
   };
 
   const removeTag = (tagToRemove: string) => {
-    setActiveTags(activeTags.filter(tag => tag !== tagToRemove));
+    setActiveTags((currentTags) => currentTags.filter((tag) => tag !== tagToRemove));
   };
 
   return (
@@ -217,7 +211,7 @@ function SearchContent() {
             </div>
 
             <div className="space-y-4">
-              {suppliers.map((supplier: any) => (
+              {suppliers.map((supplier: Supplier) => (
                 <div key={supplier._id} className="bg-white border border-slate-200 rounded-lg p-5">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
@@ -231,15 +225,15 @@ function SearchContent() {
 
                   <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
                     <MapPin size={14} />
-                    <span className="truncate">{supplier.location?.formattedAddress || supplier.address || 'Location not specified'} {supplier.isVerified && '• Verified'}</span>
-                  </div>
+                        <span className="truncate">{supplier.location?.formattedAddress || supplier.address || 'Location not specified'} {supplier.isVerified && '• Verified'}</span>
+                      </div>
 
                   <div className="mb-4 space-y-1">
-                    <p className="text-sm"><span className="font-semibold text-slate-700">Description:</span> <span className="text-slate-900 font-medium">{supplier.description?.substring(0, 100)}...</span></p>
+                    <p className="text-sm"><span className="font-semibold text-slate-700">Description:</span> <span className="text-slate-900 font-medium">{supplier.description ? `${supplier.description.substring(0, 100)}...` : 'No description available.'}</span></p>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {supplier.categories?.map((cat: any) => (
+                    {supplier.categories?.map((cat) => (
                       <span key={cat._id} className="bg-[#E2E8F0] text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                         {cat.name}
                       </span>
@@ -287,10 +281,31 @@ function SearchContent() {
   );
 }
 
+function SearchScreenContent() {
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q") || "";
+  const urlTypesParam = searchParams.get("type");
+  const urlTypes = urlTypesParam ? urlTypesParam.split(",") : ["Manufacturer", "Distributor", "Service Provider"];
+  const urlLocation = searchParams.get("loc") || "";
+  const currentQuery = searchParams.toString();
+
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">Loading...</div>}>
+      <SearchContent
+        key={currentQuery}
+        currentQuery={currentQuery}
+        urlLocation={urlLocation}
+        urlQuery={urlQuery}
+        urlTypes={urlTypes}
+      />
+    </Suspense>
+  );
+}
+
 export default function SearchScreen() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">Loading...</div>}>
-      <SearchContent />
+      <SearchScreenContent />
     </Suspense>
   );
 }

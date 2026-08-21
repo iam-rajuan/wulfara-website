@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile, logout } from "@/store/slices/authSlice";
@@ -30,6 +30,16 @@ export default function SettingsPage() {
   
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+  const profileFromUser = useMemo(() => {
+    const nameParts = user?.name ? user.name.split(" ") : [""];
+
+    return {
+      firstName: nameParts[0] || "",
+      lastName: nameParts.slice(1).join(" ") || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+    };
+  }, [user]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -37,24 +47,13 @@ export default function SettingsPage() {
   };
 
   // Profile State
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: ""
-  });
-
-  useEffect(() => {
-    if (user) {
-      const nameParts = user.name ? user.name.split(" ") : [""];
-      setProfile({
-        firstName: nameParts[0] || "",
-        lastName: nameParts.slice(1).join(" ") || "",
-        email: user.email || "",
-        phone: (user as any).phone || "" // Note: phone might not be in the TS type yet
-      });
-    }
-  }, [user]);
+  const [profileDraft, setProfileDraft] = useState<Partial<typeof profileFromUser>>({});
+  const profile = {
+    firstName: profileDraft.firstName ?? profileFromUser.firstName,
+    lastName: profileDraft.lastName ?? profileFromUser.lastName,
+    email: profileDraft.email ?? profileFromUser.email,
+    phone: profileDraft.phone ?? profileFromUser.phone,
+  };
 
   // Company State
   const [company, setCompany] = useState({
@@ -85,11 +84,12 @@ export default function SettingsPage() {
         .unwrap()
         .then(() => {
           setIsSaving(false);
+          setProfileDraft({});
           toast.success("Profile updated successfully");
         })
-        .catch((err) => {
+        .catch((error: unknown) => {
           setIsSaving(false);
-          toast.error(err || "Failed to update profile");
+          toast.error(typeof error === "string" ? error : "Failed to update profile");
         });
     } else {
       setIsSaving(true);
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                     <input 
                       type="text" 
                       value={profile.firstName} 
-                      onChange={(e) => setProfile({...profile, firstName: e.target.value})}
+                      onChange={(e) => setProfileDraft((current) => ({ ...current, firstName: e.target.value }))}
                       className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                     />
                   </div>
@@ -185,7 +185,7 @@ export default function SettingsPage() {
                     <input 
                       type="text" 
                       value={profile.lastName} 
-                      onChange={(e) => setProfile({...profile, lastName: e.target.value})}
+                      onChange={(e) => setProfileDraft((current) => ({ ...current, lastName: e.target.value }))}
                       className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                     />
                   </div>
@@ -198,7 +198,7 @@ export default function SettingsPage() {
                        <input 
                          type="email" 
                          value={profile.email} 
-                         onChange={(e) => setProfile({...profile, email: e.target.value})}
+                         onChange={(e) => setProfileDraft((current) => ({ ...current, email: e.target.value }))}
                          className="w-full bg-white border border-gray-300 rounded-md pl-10 pr-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                        />
                     </div>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
                     <input 
                       type="tel" 
                       value={profile.phone} 
-                      onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                      onChange={(e) => setProfileDraft((current) => ({ ...current, phone: e.target.value }))}
                       className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-black text-[14px] focus:outline-none focus:ring-1 focus:ring-[#DFB63E] focus:border-[#DFB63E]" 
                     />
                   </div>

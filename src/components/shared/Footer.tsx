@@ -1,16 +1,17 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
 import { Globe, ChevronDown } from "lucide-react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
+
+const emptySubscribe = () => () => undefined;
 
 export default function Footer() {
-  const { t } = useTranslation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
-  }, []);
+  const token = useSelector((state: RootState) => state.auth.token);
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isLoggedIn = isClient && Boolean(token);
 
   if (isLoggedIn) {
     return (
@@ -29,16 +30,16 @@ export default function Footer() {
 
             {/* Middle: Company Links */}
             <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-xs">
-              <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
-              <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-              <Link href="/careers" className="hover:text-white transition-colors">Careers</Link>
+              <Link href="/suppliers" className="hover:text-white transition-colors">Suppliers</Link>
+              <Link href="/rfq" className="hover:text-white transition-colors">RFQ</Link>
+              <Link href="/help-center" className="hover:text-white transition-colors">Contact</Link>
             </div>
 
             {/* Right: Legal & Global */}
             <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-xs">
               <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="/supply-chain" className="hover:text-white transition-colors">Global Supply Chain</Link>
+              <Link href="/suppliers" className="hover:text-white transition-colors">Global Supply Chain</Link>
             </div>
           </div>
         </div>
@@ -81,7 +82,7 @@ export default function Footer() {
             <h3 className="text-xs font-bold text-white tracking-widest uppercase">Platform</h3>
             <ul className="space-y-4 text-sm text-slate-400">
               <li><Link href="/rfq" className="hover:text-white transition-colors">RFQ</Link></li>
-              <li><Link href="/list-company" className="hover:text-white transition-colors">List Your Company</Link></li>
+              <li><a href={SUPPLIER_ONBOARDING_URL} className="hover:text-white transition-colors">List Your Company</a></li>
               <li><Link href="/login" className="hover:text-white transition-colors">Login</Link></li>
             </ul>
           </div>

@@ -1,16 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown, SearchX } from "lucide-react";
 
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
+import type { Supplier } from "@/types/api";
+
+interface SearchSupplierCard {
+  id: string;
+  name: string;
+  categories: string[];
+  location: string;
+  rating: number;
+  reviews: number;
+  description: string;
+  image: string;
+  isFavorite: boolean;
+}
+
+const imageLoader = ({ src }: { src: string }) => src;
 
 export default function SearchSuppliersPage() {
   const router = useRouter();
-  const { data: response, isLoading } = useGetSuppliersQuery("");
+  const { data: response } = useGetSuppliersQuery("");
 
-  const [suppliersList, setSuppliersList] = useState<any[]>([]);
+  const [favoriteSupplierIds, setFavoriteSupplierIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeLocation, setActiveLocation] = useState("");
@@ -20,34 +36,28 @@ export default function SearchSuppliersPage() {
 
   const categories = ["All", "Raw Materials", "Machinery", "Electronics", "Logistics", "Plastics"];
 
-  useEffect(() => {
-    if (response?.data) {
-      const formatted = response.data.map((sup: any) => ({
-        id: sup.user, // Using user ID for messaging
-        name: sup.companyName,
-        categories: sup.categories?.map((c: any) => c.name) || sup.coreProducts || ["Supplier"],
-        location: sup.location?.formattedAddress || "Global",
-        rating: 4.8, // Fallback mock
-        reviews: 120, // Fallback mock
-        description: sup.description,
-        image: sup.logo !== 'no-logo.jpg' ? sup.logo : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop",
-        isFavorite: false,
-      }));
-      setSuppliersList(formatted);
-    }
-  }, [response]);
+  const suppliersList = useMemo(
+    () =>
+      (response?.data ?? []).map((supplier: Supplier) => ({
+        id: supplier.user,
+        name: supplier.companyName,
+        categories: supplier.categories?.map((category) => category.name) || supplier.coreProducts || ["Supplier"],
+        location: supplier.location?.formattedAddress || "Global",
+        rating: 4.8,
+        reviews: 120,
+        description: supplier.description || "No supplier description available yet.",
+        image:
+          supplier.logo && supplier.logo !== "no-logo.jpg"
+            ? supplier.logo
+            : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop",
+        isFavorite: favoriteSupplierIds.includes(supplier.user),
+      } satisfies SearchSupplierCard)),
+    [favoriteSupplierIds, response?.data]
+  );
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, activeCategory, activeLocation, sortBy]);
-
-  const toggleFavorite = (id: number) => {
-    setSuppliersList((current) =>
-      current.map((supplier) =>
-        supplier.id === id
-          ? { ...supplier, isFavorite: !supplier.isFavorite }
-          : supplier
-      )
+  const toggleFavorite = (id: string) => {
+    setFavoriteSupplierIds((current) =>
+      current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id]
     );
   };
 
@@ -115,7 +125,10 @@ export default function SearchSuppliersPage() {
               type="text"
               placeholder="Search by supplier name, product, or keyword..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full h-[48px] pl-12 pr-4 text-black text-[15px] rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] placeholder:text-gray-400 transition-all shadow-sm"
             />
           </div>
@@ -125,7 +138,10 @@ export default function SearchSuppliersPage() {
             <MapPin size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <select
               value={activeLocation}
-              onChange={(e) => setActiveLocation(e.target.value)}
+              onChange={(e) => {
+                setActiveLocation(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full h-[48px] pl-12 pr-10 text-[15px] text-[#0B172E] font-medium rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] appearance-none shadow-sm cursor-pointer"
             >
               <option value="">Any Location</option>
@@ -147,7 +163,10 @@ export default function SearchSuppliersPage() {
           {categories.map(category => (
             <button
               key={category}
-              onClick={() => setActiveCategory(category)}
+              onClick={() => {
+                setActiveCategory(category);
+                setCurrentPage(1);
+              }}
               className={`px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors ${activeCategory === category
                   ? "bg-[#DFB63E] text-[#0B172E]"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -169,7 +188,10 @@ export default function SearchSuppliersPage() {
           <span className="text-[13px] font-bold text-gray-500">Sort by:</span>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setCurrentPage(1);
+            }}
             className="text-[13px] font-bold text-[#0B172E] bg-transparent focus:outline-none cursor-pointer"
           >
             <option>Best Match</option>
@@ -187,10 +209,13 @@ export default function SearchSuppliersPage() {
             <div key={supplier.id} className="bg-white border border-gray-200 flex flex-col group hover:shadow-md transition-shadow">
               {/* Image Header */}
               <div className="h-45 relative overflow-hidden bg-gray-100">
-                <img
+                <Image
                   src={supplier.image}
                   alt={supplier.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  fill
+                  unoptimized
+                  loader={imageLoader}
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <button
                   onClick={() => toggleFavorite(supplier.id)}
@@ -263,7 +288,7 @@ export default function SearchSuppliersPage() {
           </div>
           <h3 className="text-[26px] font-bold text-[#0B172E] mb-3 relative z-10">No Suppliers Found</h3>
           <p className="text-[16px] text-gray-600 text-center max-w-md mb-8 leading-relaxed relative z-10">
-            We couldn't find any suppliers matching your current search or filter criteria. Try adjusting your filters or search terms to discover more options.
+            We couldn&apos;t find any suppliers matching your current search or filter criteria. Try adjusting your filters or search terms to discover more options.
           </p>
           <button
             onClick={() => {

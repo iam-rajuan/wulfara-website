@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { SUPPLIER_ONBOARDING_URL } from "@/config/urls";
 
 export default function Features() {
   const { t } = useTranslation();
@@ -20,13 +21,13 @@ export default function Features() {
       titleKey: "rfq",
       descKey: "rfqDesc",
       icon: FileText,
-      link: "#rfq",
+      link: "/rfq",
     },
     {
       titleKey: "helpCenter",
       descKey: "helpCenterDesc",
       icon: HelpCircle,
-      link: "#help",
+      link: "/help-center",
     },
     {
       titleKey: "policies",
@@ -38,19 +39,19 @@ export default function Features() {
       titleKey: "listCompany",
       descKey: "listCompanyDesc",
       icon: PlusCircle,
-      link: "#list-company",
+      link: SUPPLIER_ONBOARDING_URL,
     },
     {
       titleKey: "faq",
       descKey: "faqDesc",
       icon: MessageSquare,
-      link: "#faq",
+      link: "/faq",
     },
     {
       titleKey: "login",
       descKey: "loginDesc",
       icon: LogIn,
-      link: "#login",
+      link: "/login",
     },
   ];
 

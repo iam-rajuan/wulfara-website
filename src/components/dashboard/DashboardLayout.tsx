@@ -18,10 +18,10 @@ import {
   Menu,
   X,
   Bell,
-  Check
 } from "lucide-react";
 import { io } from "socket.io-client";
 import { API_BASE_URL, SOCKET_BASE_URL } from "@/config/urls";
+import type { Notification } from "@/types/api";
 
 const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -40,16 +40,17 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
-  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [isGuestMode] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem("guestMode") === "true"
+  );
 
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const userInitial = (user?.name || "Guest Buyer").charAt(0).toUpperCase();
 
   useEffect(() => {
-    setIsGuestMode(localStorage.getItem("guestMode") === "true");
-
     // Click outside to close notifications
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -75,10 +76,10 @@ export default function DashboardLayout({
         const data = await res.json();
         if (data.success) {
           setNotifications(data.data);
-          setUnreadCount(data.data.filter((n: any) => !n.isRead).length);
+          setUnreadCount(data.data.filter((notification: Notification) => !notification.isRead).length);
         }
-      } catch (err) {
-        console.error("Error fetching notifications:", err);
+      } catch (error: unknown) {
+        console.error("Error fetching notifications:", error);
       }
     };
     
@@ -86,12 +87,12 @@ export default function DashboardLayout({
 
     // Socket.io connection
     const socket = io(SOCKET_BASE_URL);
-    
+
     socket.emit("join_room", user._id);
     
-    socket.on("new_notification", (newNotification) => {
-      setNotifications(prev => [newNotification, ...prev]);
-      setUnreadCount(prev => prev + 1);
+    socket.on("new_notification", (newNotification: Notification) => {
+      setNotifications((prev) => [newNotification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
     });
 
     return () => {
@@ -112,11 +113,11 @@ export default function DashboardLayout({
       });
       const data = await res.json();
       if (data.success) {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
         setUnreadCount(0);
       }
-    } catch (err) {
-      console.error("Error marking all as read:", err);
+    } catch (error: unknown) {
+      console.error("Error marking all as read:", error);
     }
   };
 
@@ -133,11 +134,13 @@ export default function DashboardLayout({
       });
       const data = await res.json();
       if (data.success) {
-        setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setNotifications((prev) =>
+          prev.map((notification) => (notification._id === id ? { ...notification, isRead: true } : notification))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
-    } catch (err) {
-      console.error("Error marking as read:", err);
+    } catch (error: unknown) {
+      console.error("Error marking as read:", error);
     }
   };
 
@@ -175,7 +178,9 @@ export default function DashboardLayout({
         {/* User info */}
         <div className="px-6 pb-6">
           <div className="flex items-center gap-3">
-            <img src={`https://ui-avatars.com/api/?name=${user?.name || "Guest Buyer"}&background=212E46&color=fff`} alt={user?.name || "Guest Buyer"} className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200" />
+            <div className="w-10 h-10 rounded-lg bg-[#212E46] text-white flex items-center justify-center text-sm font-bold shadow-sm border border-gray-200">
+              {userInitial}
+            </div>
             <div>
               <p className="text-[14px] font-bold text-[#0B172E] leading-tight truncate w-[150px]">
                 {user?.name || (isGuestMode ? "Guest Buyer" : "Loading...")}

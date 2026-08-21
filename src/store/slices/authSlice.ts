@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_BASE_URL } from '@/config/urls';
 
 // Define the shape of our User and AuthState
@@ -6,6 +6,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
   isActive: boolean;
   isVerified: boolean;
@@ -17,6 +18,44 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
 }
+
+interface AuthResponse {
+  success?: boolean;
+  message?: string;
+  token?: string;
+  data?: User;
+}
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface VerifyEmailPayload {
+  email: string;
+  verifyCode: string;
+}
+
+interface ResendVerificationPayload {
+  email: string;
+}
+
+type AuthThunkState = {
+  auth: AuthState;
+};
+
+type AuthThunkConfig = {
+  state: AuthThunkState;
+  rejectValue: string;
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Something went wrong';
+};
 
 // Initial state, checking localStorage for an existing token
 const initialState: AuthState = {
@@ -30,9 +69,9 @@ const BASE_URL = API_BASE_URL;
 const API_URL = `${BASE_URL}/auth`;
 
 // Async Thunks
-export const registerUser = createAsyncThunk(
+export const registerUser = createAsyncThunk<AuthResponse, Record<string, unknown>, AuthThunkConfig>(
   'auth/register',
-  async (userData: any, thunkAPI) => {
+  async (userData: Record<string, unknown>, thunkAPI) => {
     try {
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -40,20 +79,20 @@ export const registerUser = createAsyncThunk(
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AuthResponse;
       if (!response.ok) {
         return thunkAPI.rejectWithValue(data.message || 'Failed to register');
       }
       return data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<AuthResponse, LoginCredentials, AuthThunkConfig>(
   'auth/login',
-  async (credentials: any, thunkAPI) => {
+  async (credentials: LoginCredentials, thunkAPI) => {
     try {
       const normalizedCredentials = {
         ...credentials,
@@ -67,21 +106,21 @@ export const loginUser = createAsyncThunk(
         body: JSON.stringify(normalizedCredentials),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AuthResponse;
       if (!response.ok) {
         return thunkAPI.rejectWithValue(data.message || 'Failed to login');
       }
       return data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
-export const fetchMe = createAsyncThunk(
+export const fetchMe = createAsyncThunk<AuthResponse, void, AuthThunkConfig>(
   'auth/me',
   async (_, thunkAPI) => {
-    const state: any = thunkAPI.getState();
+    const state = thunkAPI.getState();
     const token = state.auth.token;
     
     if (!token) return thunkAPI.rejectWithValue('No token found');
@@ -91,20 +130,20 @@ export const fetchMe = createAsyncThunk(
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AuthResponse;
       if (!response.ok) {
         return thunkAPI.rejectWithValue(data.message || 'Failed to fetch user');
       }
       return data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
-export const verifyEmailUser = createAsyncThunk(
+export const verifyEmailUser = createAsyncThunk<AuthResponse, VerifyEmailPayload, AuthThunkConfig>(
   'auth/verifyEmail',
-  async (verifyData: { email: string, verifyCode: string }, thunkAPI) => {
+  async (verifyData, thunkAPI) => {
     try {
       const response = await fetch(`${API_URL}/verify-email`, {
         method: 'POST',
@@ -112,21 +151,42 @@ export const verifyEmailUser = createAsyncThunk(
         body: JSON.stringify(verifyData),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AuthResponse;
       if (!response.ok) {
         return thunkAPI.rejectWithValue(data.message || 'Failed to verify email');
       }
       return data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
 
-export const updateUserProfile = createAsyncThunk(
+export const resendVerificationUser = createAsyncThunk<AuthResponse, ResendVerificationPayload, AuthThunkConfig>(
+  'auth/resendVerification',
+  async (resendData, thunkAPI) => {
+    try {
+      const response = await fetch(`${API_URL}/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resendData),
+      });
+
+      const data = (await response.json()) as AuthResponse;
+      if (!response.ok) {
+        return thunkAPI.rejectWithValue(data.message || 'Failed to resend verification email');
+      }
+      return data;
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
+    }
+  }
+);
+
+export const updateUserProfile = createAsyncThunk<AuthResponse, Record<string, unknown>, AuthThunkConfig>(
   'auth/updateProfile',
-  async (profileData: any, thunkAPI) => {
-    const state: any = thunkAPI.getState();
+  async (profileData, thunkAPI) => {
+    const state = thunkAPI.getState();
     const token = state.auth.token;
     
     if (!token) return thunkAPI.rejectWithValue('No token found');
@@ -142,13 +202,13 @@ export const updateUserProfile = createAsyncThunk(
         body: JSON.stringify(profileData),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as AuthResponse;
       if (!response.ok) {
         return thunkAPI.rejectWithValue(data.message || 'Failed to update profile');
       }
       return data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
 );
@@ -176,40 +236,42 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.isLoading = false;
         // Do not auto-login on registration. Let the user manually login.
       })
-      .addCase(registerUser.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ?? 'Failed to register';
       })
       // Login
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.token = action.payload.token;
+        state.token = action.payload.token ?? null;
         if (typeof window !== 'undefined') {
-          localStorage.setItem('token', action.payload.token);
+          if (action.payload.token) {
+            localStorage.setItem('token', action.payload.token);
+          }
           localStorage.removeItem('guestMode');
         }
       })
-      .addCase(loginUser.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ?? 'Failed to login';
       })
       // Fetch Me
       .addCase(fetchMe.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(fetchMe.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(fetchMe.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.data;
+        state.user = action.payload.data ?? null;
       })
-      .addCase(fetchMe.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(fetchMe.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.token = null;
@@ -224,22 +286,34 @@ const authSlice = createSlice({
         state.isLoading = false;
         if (state.user) state.user.isVerified = true;
       })
-      .addCase(verifyEmailUser.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(verifyEmailUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ?? 'Failed to verify email';
+      })
+      // Resend Verification Code
+      .addCase(resendVerificationUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendVerificationUser.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(resendVerificationUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload ?? 'Failed to resend verification email';
       })
       // Update Profile
       .addCase(updateUserProfile.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(updateUserProfile.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.data;
+        state.user = action.payload.data ?? null;
       })
-      .addCase(updateUserProfile.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(updateUserProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ?? 'Failed to update profile';
       });
   },
 });

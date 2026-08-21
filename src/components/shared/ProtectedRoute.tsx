@@ -32,7 +32,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         try {
           await dispatch(fetchMe()).unwrap();
           setIsChecking(false);
-        } catch (error) {
+        } catch {
           router.push('/login');
         }
       } else {

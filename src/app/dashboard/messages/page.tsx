@@ -5,6 +5,21 @@ import MessageSidebar from "@/components/dashboard/messages/MessageSidebar";
 import MessageChat from "@/components/dashboard/messages/MessageChat";
 import MessageEmptyState from "@/components/dashboard/messages/MessageEmptyState";
 import { useGetConversationsQuery } from "@/store/features/messages/messagesApi";
+import type { Conversation } from "@/types/api";
+
+export interface DashboardConversationPreview {
+  id: string;
+  recipientId?: string;
+  sender: string;
+  isVerified: boolean;
+  isNew: boolean;
+  tag: string;
+  tagType: "warning" | "primary";
+  timeEstimate: string;
+  excerpt: string;
+  timestamp: string;
+  history: string[];
+}
 
 export default function MessagesPage() {
   const searchParams = useSearchParams();
@@ -17,34 +32,42 @@ export default function MessagesPage() {
 
   const { data: conversationsResponse, isLoading } = useGetConversationsQuery(undefined, { pollingInterval: 30000 });
 
-  const rawConversations = conversationsResponse?.data || [];
+  const rawConversations = useMemo(() => conversationsResponse?.data || [], [conversationsResponse?.data]);
 
-  const formattedConversations = rawConversations.map((conv: any, idx: number) => {
-    const otherUser = conv.participants?.find((p: any) => p.role === 'supplier' || p.role === 'admin') || conv.participants?.[0] || {};
+  const formattedConversations = useMemo(
+    () =>
+      rawConversations.map((conversation: Conversation, index: number) => {
+        const otherUser =
+          conversation.participants?.find((participant) => participant.role === "supplier" || participant.role === "admin") ||
+          conversation.participants?.[0];
 
-    return {
-      id: conv._id, // string id from mongo
-      sender: otherUser.name || "Unknown Supplier",
-      isVerified: idx % 2 === 0, // Mock verification
-      isNew: !conv.hasUnread,
-      tag: conv.rfq ? `RFQ #${conv.rfq.rfqNumber || '...'}` : 'Sourcing',
-      tagType: conv.rfq ? "warning" : "primary",
-      timeEstimate: "Replies in 2 hours",
-      excerpt: conv.lastMessage?.text || "Started a new conversation...",
-      timestamp: new Date(conv.lastMessageAt || Date.now()).toLocaleDateString(),
-      history: [] // We'll fetch this in MessageChat
-    };
-  });
+        return {
+          id: conversation._id,
+          sender: otherUser?.name || "Unknown Supplier",
+          isVerified: index % 2 === 0,
+          isNew: !conversation.hasUnread,
+          tag: conversation.rfq ? `RFQ #${conversation.rfq.rfqNumber || "..."}` : "Sourcing",
+          tagType: conversation.rfq ? "warning" : "primary",
+          timeEstimate: "Replies in 2 hours",
+          excerpt: conversation.lastMessage?.text || "Started a new conversation...",
+          timestamp: conversation.lastMessageAt ? new Date(conversation.lastMessageAt).toLocaleDateString() : "Recently",
+          history: [],
+        } satisfies DashboardConversationPreview;
+      }),
+    [rawConversations]
+  );
 
   const messages = useMemo(() => {
-    let list = [...formattedConversations];
+    const list: DashboardConversationPreview[] = [...formattedConversations];
 
     // Check if we are starting a new conversation that isn't in the list
     if (newSupplierId && newSupplierName) {
       // Check if we already have a conversation with this supplier
       // Note: this is a simple mock matching since we don't map supplier IDs strictly in this UI
       // but if it's a completely new one, we add a placeholder.
-      const exists = rawConversations.some((c: any) => c.participants?.some((p: any) => p._id === newSupplierId));
+      const exists = rawConversations.some((conversation) =>
+        conversation.participants?.some((participant) => participant._id === newSupplierId)
+      );
       if (!exists) {
         list.unshift({
           id: `new-${newSupplierId}`,
@@ -57,14 +80,14 @@ export default function MessagesPage() {
           timeEstimate: "Replies typically in 2 hours",
           excerpt: "Start a conversation...",
           timestamp: "New",
-          history: []
+          history: [],
         });
       }
     }
     return list;
   }, [formattedConversations, newSupplierId, newSupplierName, rawConversations]);
 
-  const activeChat = activeMessage ? messages.find((m: any) => m.id === activeMessage) : null;
+  const activeChat = activeMessage ? messages.find((message) => message.id === activeMessage) ?? null : null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,6 +110,7 @@ export default function MessagesPage() {
 
         <MessageSidebar
           messages={messages}
+          isLoading={isLoading}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           activeMessage={activeMessage}

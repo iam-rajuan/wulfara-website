@@ -1,12 +1,13 @@
 import { apiSlice } from './apiSlice';
+import type { ApiMessageResponse, ApiResponse, Favorite } from '@/types/api';
 
 export const favoriteApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getFavorites: builder.query<any, void>({
+    getFavorites: builder.query<ApiResponse<Favorite[]>, void>({
       query: () => '/favorites',
       providesTags: ['Favorite'],
     }),
-    addFavorite: builder.mutation<any, { supplierId: string }>({
+    addFavorite: builder.mutation<ApiResponse<Favorite>, { supplierId: string }>({
       query: (data) => ({
         url: '/favorites',
         method: 'POST',
@@ -14,7 +15,7 @@ export const favoriteApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Favorite'],
     }),
-    removeFavorite: builder.mutation<any, string>({
+    removeFavorite: builder.mutation<ApiMessageResponse, string>({
       query: (id) => ({
         url: `/favorites/${id}`,
         method: 'DELETE',

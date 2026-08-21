@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, verifyEmailUser, clearError } from "@/store/slices/authSlice";
+import { registerUser, verifyEmailUser, resendVerificationUser, clearError } from "@/store/slices/authSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
 import logoImg from "../../../public/assets/logo.png";
@@ -17,11 +17,11 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  BookmarkCheck,
   FileText,
-  MessageSquare,
   LayoutDashboard,
   Bookmark,
+  Loader2,
+  RefreshCcw,
 } from "lucide-react";
 
 export default function SignUpPage() {
@@ -36,7 +36,16 @@ export default function SignUpPage() {
 
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(""));
+  const [timer, setTimer] = useState(60);
+  const [isResending, setIsResending] = useState(false);
+  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
   const [error, setError] = useState("");
+  const resetOtpState = React.useCallback(() => {
+    setTimer(60);
+    setOtpValues(Array(6).fill(""));
+    setOtpCode("");
+  }, []);
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, error: reduxError, token } = useSelector((state: RootState) => state.auth);
@@ -50,6 +59,102 @@ export default function SignUpPage() {
       router.push("/dashboard");
     }
   }, [token, router]);
+
+  // Timer Countdown Effect
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showOtpModal && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showOtpModal, timer]);
+
+  // Modal Open Trigger: reset values & autofocus first field
+  React.useEffect(() => {
+    if (showOtpModal) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [showOtpModal]);
+
+  const handleOtpChange = (value: string, index: number) => {
+    // Keep only last char (in case they type multiple)
+    const char = value.slice(-1);
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = char;
+    setOtpValues(newOtpValues);
+    
+    // Update parent string representation
+    const newCode = newOtpValues.join("");
+    setOtpCode(newCode);
+    
+    // Automatically focus next input if we typed a character
+    if (char && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === "Backspace") {
+      if (!otpValues[index] && index > 0) {
+        // Focus previous input and clear it
+        const newOtpValues = [...otpValues];
+        newOtpValues[index - 1] = "";
+        setOtpValues(newOtpValues);
+        setOtpCode(newOtpValues.join(""));
+        inputRefs.current[index - 1]?.focus();
+      } else {
+        // Clear current input
+        const newOtpValues = [...otpValues];
+        newOtpValues[index] = "";
+        setOtpValues(newOtpValues);
+        setOtpCode(newOtpValues.join(""));
+      }
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim().slice(0, 6);
+    
+    if (pastedData) {
+      const newOtpValues = Array(6).fill("");
+      for (let i = 0; i < Math.min(pastedData.length, 6); i++) {
+        newOtpValues[i] = pastedData[i];
+      }
+      setOtpValues(newOtpValues);
+      setOtpCode(newOtpValues.join(""));
+      
+      // Focus the last filled input or the first empty input
+      const focusIndex = Math.min(pastedData.length, 5);
+      inputRefs.current[focusIndex]?.focus();
+    }
+  };
+
+  const handleResendCode = () => {
+    if (timer > 0 || isResending) return;
+    setIsResending(true);
+    dispatch(resendVerificationUser({ email: formData.workEmail }))
+      .unwrap()
+      .then(() => {
+        toast.success("Verification code resent successfully!");
+        resetOtpState();
+        setTimeout(() => {
+          inputRefs.current[0]?.focus();
+        }, 100);
+      })
+      .catch((err) => {
+        toast.error(err || "Failed to resend code");
+      })
+      .finally(() => {
+        setIsResending(false);
+      });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,6 +180,7 @@ export default function SignUpPage() {
       .unwrap()
       .then(() => {
         toast.success("Registration successful! Please check your email for the verification code.");
+        resetOtpState();
         setShowOtpModal(true);
       })
       .catch((err) => {
@@ -420,40 +526,71 @@ export default function SignUpPage() {
 
       {/* ───── OTP Verification Modal ───── */}
       {showOtpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/70 backdrop-blur-md transition-all duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center relative overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
             {/* Top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#D4AF37]"></div>
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#D4AF37]"></div>
             
-            <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-              <Mail className="text-[#1b2b3a] w-8 h-8" />
+            {/* Close Button / Go Back */}
+            <button 
+              onClick={() => setShowOtpModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 hover:bg-slate-100 rounded-full"
+              type="button"
+              aria-label="Close modal"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="mx-auto w-16 h-16 bg-[#FAF6E9] rounded-full flex items-center justify-center mb-6 shadow-inner">
+              <Mail className="text-[#D4AF37] w-8 h-8" />
             </div>
             
-            <h2 className="text-2xl font-bold text-[#1b2b3a] mb-2">Check your email</h2>
-            <p className="text-gray-500 mb-8">
-              We&apos;ve sent a verification code to <br />
-              <span className="font-semibold text-gray-800">{formData.workEmail}</span>
+            <h2 className="text-2xl font-bold text-[#1b2b3a] mb-2 tracking-tight">Check your email</h2>
+            <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+              We&apos;ve sent a 6-digit verification code to <br />
+              <span className="inline-block mt-2 px-3 py-1 bg-slate-100 text-slate-800 font-semibold text-xs rounded-full border border-slate-200/50">
+                {formData.workEmail}
+              </span>
             </p>
 
             <form onSubmit={handleVerifyEmail}>
-              <div className="mb-6">
-                <input
-                  type="text"
-                  placeholder="Enter 6-digit code"
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                  className="w-full text-center text-black text-2xl tracking-[0.5em] font-mono py-4 border-2 border-gray-200 rounded-xl focus:border-[#dca12f] focus:ring-0 transition-colors outline-none"
-                  maxLength={6}
-                />
+              {/* 6 individual OTP boxes */}
+              <div className="flex justify-between gap-2.5 max-w-sm mx-auto mb-8">
+                {otpValues.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => {
+                      inputRefs.current[idx] = el;
+                    }}
+                    type="text"
+                    pattern="[a-zA-Z0-9]*"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(e.target.value, idx)}
+                    onKeyDown={(e) => handleOtpKeyDown(e, idx)}
+                    onPaste={handleOtpPaste}
+                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold text-[#1b2b3a] bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-[#D4AF37] focus:bg-white focus:ring-4 focus:ring-[#D4AF37]/10 transition-all outline-none"
+                  />
+                ))}
               </div>
 
+              {/* Error Message */}
+              {(error || reduxError) && (
+                <div className="p-3 mb-6 rounded-xl bg-red-50 border border-red-150 text-red-600 text-xs font-semibold text-center animate-pulse">
+                  {error || reduxError}
+                </div>
+              )}
+
+              {/* Submit button */}
               <button
                 type="submit"
                 disabled={isLoading || otpCode.length < 6}
-                className="w-full bg-[#1b2b3a] hover:bg-[#14202b] text-white font-medium py-3.5 px-4 rounded-xl transition-all flex justify-center items-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full bg-[#1b2b3a] hover:bg-[#14202b] text-white font-semibold py-4 px-4 rounded-xl shadow-lg shadow-[#1b2b3a]/10 hover:shadow-[#1b2b3a]/25 transition-all flex justify-center items-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
                 ) : (
                   <>
                     Verify Email
@@ -461,6 +598,45 @@ export default function SignUpPage() {
                   </>
                 )}
               </button>
+
+              {/* Resend Code Section */}
+              <div className="mt-8 text-center">
+                {timer > 0 ? (
+                  <p className="text-xs text-slate-400 font-medium">
+                    Didn&apos;t receive the code? Resend in <span className="font-semibold text-slate-600">{timer}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={isResending}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4AF37] hover:text-[#bca032] transition-colors focus:outline-none disabled:opacity-50"
+                  >
+                    {isResending ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4AF37]" />
+                        Resending code...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCcw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                        Resend verification code
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Change email option */}
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowOtpModal(false)}
+                  className="text-xs font-semibold text-slate-400 hover:text-slate-600 hover:underline transition-colors focus:outline-none"
+                >
+                  Change email address
+                </button>
+              </div>
             </form>
           </div>
         </div>

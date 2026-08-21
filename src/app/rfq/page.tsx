@@ -9,7 +9,7 @@ import RfqWorkflow from "@/components/rfq/RfqWorkflow";
 import RfqCta from "@/components/rfq/RfqCta";
 
 export default function RfqPage() {
-  const { t } = useTranslation();
+  useTranslation();
 
   const features = [
     {

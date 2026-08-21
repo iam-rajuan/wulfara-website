@@ -6,6 +6,20 @@ import FaqSidebar from "@/components/faq/FaqSidebar";
 import FaqAccordions from "@/components/faq/FaqAccordions";
 import FaqFooterCta from "@/components/faq/FaqFooterCta";
 import { useGetPagesQuery } from "@/store/features/cms/cmsApi";
+import type { CmsPage } from "@/types/api";
+
+interface CmsFaqItem {
+  topic?: string;
+  question: string;
+  answer: string;
+}
+
+interface FaqEntry {
+  qKey: string;
+  aKey: string;
+  topic: string;
+  isDynamic: true;
+}
 
 export default function FaqPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -13,12 +27,12 @@ export default function FaqPage() {
   const [searchInput, setSearchInput] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: pagesResponse, isLoading } = useGetPagesQuery(undefined);
-  const faqPage = pagesResponse?.data?.find((p: any) => p.slug === 'faq');
-  const cmsFaqs = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
+  const faqPage = pagesResponse?.data?.find((page: CmsPage) => page.slug === 'faq');
+  const cmsFaqs: CmsFaqItem[] = faqPage?.htmlContent ? JSON.parse(faqPage.htmlContent) : [];
   const { t } = useTranslation();
 
   // Extract unique topics from CMS or use static defaults if empty
-  const dynamicTopics = Array.from(new Set(cmsFaqs.map((f: any) => f.topic).filter(Boolean))) as string[];
+  const dynamicTopics = Array.from(new Set(cmsFaqs.map((faq) => faq.topic).filter(Boolean))) as string[];
   const topics = dynamicTopics.length > 0 ? dynamicTopics : ["General Questions"];
 
   const toggleFaq = (index: number) => {
@@ -39,15 +53,15 @@ export default function FaqPage() {
   };
 
   // Use only CMS FAQs
-  const activeFaqs = cmsFaqs.map((f: any, i: number) => ({
-    qKey: f.question, // Reusing keys for dynamic data
-    aKey: f.answer,
-    topic: f.topic || "General Questions", // Map to dynamic topic
+  const activeFaqs: FaqEntry[] = cmsFaqs.map((faq) => ({
+    qKey: faq.question,
+    aKey: faq.answer,
+    topic: faq.topic || "General Questions",
     isDynamic: true
   }));
 
   // Filter FAQs based on search or active topic
-  const filteredFaqs = activeFaqs.filter((faq: any) => {
+  const filteredFaqs = activeFaqs.filter((faq) => {
     if (searchQuery) {
       const questionText = faq.isDynamic ? faq.qKey.toLowerCase() : t(faq.qKey).toLowerCase();
       const answerText = faq.isDynamic ? faq.aKey.toLowerCase() : t(faq.aKey).toLowerCase();

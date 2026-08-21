@@ -1,12 +1,24 @@
 import { Search, Filter, CheckCircle, Clock } from "lucide-react";
+import type { Dispatch, SetStateAction } from "react";
+import type { DashboardConversationPreview } from "@/app/dashboard/messages/page";
+
+interface MessageSidebarProps {
+  messages: DashboardConversationPreview[];
+  isLoading: boolean;
+  activeTab: string;
+  setActiveTab: Dispatch<SetStateAction<string>>;
+  activeMessage: string | null;
+  setActiveMessage: Dispatch<SetStateAction<string | null>>;
+}
 
 export default function MessageSidebar({
   messages,
+  isLoading,
   activeTab,
   setActiveTab,
   activeMessage,
   setActiveMessage
-}: any) {
+}: MessageSidebarProps) {
   return (
     <div className="w-full md:w-[380px] bg-white border border-gray-200 rounded-md shadow-sm flex flex-col overflow-hidden h-full">
       {/* Tabs */}
@@ -59,7 +71,10 @@ export default function MessageSidebar({
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">
-        {messages.map((msg: any) => (
+        {isLoading && messages.length === 0 ? (
+          <div className="p-4 text-sm text-gray-500">Loading conversations...</div>
+        ) : null}
+        {messages.map((msg) => (
           <button
             key={msg.id}
             onClick={() => setActiveMessage(msg.id)}

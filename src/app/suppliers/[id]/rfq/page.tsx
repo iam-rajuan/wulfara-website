@@ -13,7 +13,6 @@ import {
   UploadCloud,
   FileText,
   ChevronLeft,
-  Check,
   Eye,
   GitBranch,
   X
@@ -44,6 +43,22 @@ const mockSupplier = {
 import { useCreateRfqMutation, useGetRfqUploadUrlMutation } from "@/store/api/rfqApi";
 import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
 import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+
+interface RfqSupplierSummary {
+  id: string;
+  name: string;
+  verified: boolean;
+  isGold: boolean;
+  location: string;
+  distance: string;
+  replyTime: string;
+  responseAvg: string;
+  businessType: string;
+  coreServices: string;
+  categories: string[];
+  services: Array<{ title: string }>;
+}
 
 export default function SendRFQPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
@@ -52,19 +67,19 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
   const backendSupplier = data?.data;
 
   // Combine real supplier with fallbacks for UI
-  const supplier = backendSupplier ? {
+  const supplier: RfqSupplierSummary = backendSupplier ? {
     ...mockSupplier,
     id: backendSupplier._id,
     name: backendSupplier.companyName,
-    businessType: backendSupplier.categories?.map((c: any) => c.name).join(", ") || mockSupplier.businessType,
-    coreServices: backendSupplier.services?.map((s: any) => s.name || s.title).join(", ") || mockSupplier.coreServices,
+    businessType: backendSupplier.categories?.map((category) => category.name).join(", ") || mockSupplier.businessType,
+    coreServices: backendSupplier.services?.map((service) => service.name || service.title).join(", ") || mockSupplier.coreServices,
     responseAvg: "Replies in 24 hours",
-    verified: backendSupplier.isApproved,
+    verified: Boolean(backendSupplier.isApproved),
     location: backendSupplier.contactInfo?.address || "Global",
     distance: ""
   } : mockSupplier;
 
-  const { user } = useSelector((state: any) => state.auth || {});
+  const { user } = useSelector((state: RootState) => state.auth);
   
   const [formData, setFormData] = useState({
     buyerName: user?.name || "",
@@ -88,12 +103,12 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
     e.preventDefault();
     try {
       setIsUploading(true);
-      let attachmentUrls: string[] = [];
+      const attachmentUrls: string[] = [];
       
       // Upload files sequentially
       for (const file of attachments) {
         const res = await getRfqUploadUrl({ contentType: file.type }).unwrap();
-        const { uploadUrl, fileUrl } = res.data;
+        const { uploadUrl, url: fileUrl } = res.data;
         
         await fetch(uploadUrl, {
           method: "PUT",
@@ -101,7 +116,9 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
           headers: { "Content-Type": file.type }
         });
         
-        attachmentUrls.push(fileUrl);
+        if (fileUrl) {
+          attachmentUrls.push(fileUrl);
+        }
       }
       setIsUploading(false);
 
@@ -116,8 +133,8 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
         attachments: attachmentUrls
       }).unwrap();
       setIsSuccess(true);
-    } catch (err) {
-      console.error("Failed to send RFQ", err);
+    } catch (error: unknown) {
+      console.error("Failed to send RFQ", error);
       setIsUploading(false);
       alert("Failed to send RFQ. Please try again.");
     }
