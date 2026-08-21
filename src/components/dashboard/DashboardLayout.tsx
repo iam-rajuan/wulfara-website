@@ -178,9 +178,17 @@ export default function DashboardLayout({
         {/* User info */}
         <div className="px-6 pb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#212E46] text-white flex items-center justify-center text-sm font-bold shadow-sm border border-gray-200">
-              {userInitial}
-            </div>
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || "User"}
+                className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-200 shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-lg bg-[#212E46] text-white flex items-center justify-center text-sm font-bold shadow-sm border border-gray-200 shrink-0">
+                {userInitial}
+              </div>
+            )}
             <div>
               <p className="text-[14px] font-bold text-[#0B172E] leading-tight truncate w-[150px]">
                 {user?.name || (isGuestMode ? "Guest Buyer" : "Loading...")}

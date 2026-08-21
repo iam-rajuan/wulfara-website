@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile, logout } from "@/store/slices/authSlice";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "@/config/urls";
 import { 
   User, 
   Building, 
@@ -27,9 +28,12 @@ export default function SettingsPage() {
   
   // State for loading
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<string | null>(null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
   
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+
   const profileFromUser = useMemo(() => {
     const nameParts = user?.name ? user.name.split(" ") : [""];
 
@@ -80,11 +84,13 @@ export default function SettingsPage() {
     if (section === "profile") {
       setIsSaving(true);
       const fullName = `${profile.firstName} ${profile.lastName}`.trim();
-      dispatch(updateUserProfile({ name: fullName, phone: profile.phone }))
+      const finalAvatar = uploadedAvatarUrl || user?.avatar || "";
+      dispatch(updateUserProfile({ name: fullName, email: profile.email, phone: profile.phone, avatar: finalAvatar }))
         .unwrap()
         .then(() => {
           setIsSaving(false);
           setProfileDraft({});
+          setUploadedAvatarUrl(null);
           toast.success("Profile updated successfully");
         })
         .catch((error: unknown) => {
@@ -98,6 +104,59 @@ export default function SettingsPage() {
         setIsSaving(false);
         toast.success(`Saved ${section} data`);
       }, 800);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 800 * 1024) {
+      toast.error("Avatar size must be less than 800KB");
+      return;
+    }
+
+    setAvatarLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      
+      // 1. Get Presigned S3 upload URL
+      const presignRes = await fetch(`${API_BASE_URL}/users/upload-url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ contentType: file.type })
+      });
+
+      const presignData = await presignRes.json();
+      if (!presignRes.ok || !presignData.success) {
+        throw new Error(presignData.message || "Failed to get upload URL");
+      }
+
+      const { uploadUrl, fileUrl } = presignData.data;
+
+      // 2. Upload file to S3
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type
+        },
+        body: file
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Failed to upload file to storage");
+      }
+
+      setUploadedAvatarUrl(fileUrl);
+      toast.success("Avatar uploaded successfully! Click 'Save Changes' to apply.");
+    } catch (error: unknown) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Failed to upload avatar");
+    } finally {
+      setAvatarLoading(false);
     }
   };
 
@@ -158,15 +217,42 @@ export default function SettingsPage() {
                 <h2 className="text-[18px] font-bold text-[#0B172E] mb-6">Personal Information</h2>
                 
                 <div className="flex items-center gap-6 mb-8">
-                  <div className="w-20 h-20 bg-[#E0E7FF] rounded-full flex items-center justify-center text-[#3730A3] text-2xl font-bold border-4 border-white shadow-sm">
-                    {profile.firstName[0]}{profile.lastName[0]}
-                  </div>
+                  <input
+                    type="file"
+                    id="avatar-input"
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleAvatarChange}
+                  />
+                  {avatarLoading ? (
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm shrink-0">
+                      <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+                    </div>
+                  ) : (uploadedAvatarUrl || user?.avatar) ? (
+                    <img
+                      src={uploadedAvatarUrl || user?.avatar}
+                      alt="Avatar"
+                      className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-sm shrink-0"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-[#E0E7FF] rounded-full flex items-center justify-center text-[#3730A3] text-2xl font-bold border-4 border-white shadow-sm shrink-0">
+                      {profile.firstName[0] || 'U'}{profile.lastName[0] || 'S'}
+                    </div>
+                  )}
                   <div>
-                    <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors mb-2 cursor-pointer">
-                      <Upload size={14} />
+                    <button 
+                      onClick={() => document.getElementById('avatar-input')?.click()}
+                      disabled={avatarLoading}
+                      className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-md text-[13px] font-bold text-gray-700 hover:bg-gray-50 transition-colors mb-2 cursor-pointer disabled:opacity-60"
+                    >
+                      {avatarLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Upload size={14} />
+                      )}
                       Change Avatar
                     </button>
-                    <p className="text-[11px] text-gray-500">JPG, GIF or PNG. Max size of 800K</p>
+                    <p className="text-[11px] text-gray-500">JPG, GIF or PNG. Max size of 800KB</p>
                   </div>
                 </div>
 

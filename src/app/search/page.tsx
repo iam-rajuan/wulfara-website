@@ -217,6 +217,11 @@ function SearchContent({
                     <div className="flex items-center gap-2">
                       <h3 className="text-xl font-bold text-slate-900">{supplier.companyName}</h3>
                       {supplier.isApproved && <CheckCircle2 size={18} className="text-[#10B981] fill-[#10B981]/10" />}
+                      {supplier.featuredHeroPlacement?.enabled && (
+                        <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700">
+                          Featured Supplier
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       {supplier.subscriptionPlan !== 'basic' && <span className="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-bold px-2 py-1 rounded capitalize">{supplier.subscriptionPlan}</span>}

@@ -19,6 +19,10 @@ export const rfqApi = apiSlice.injectEndpoints({
       query: () => '/rfqs/buyer',
       providesTags: ['RFQ'],
     }),
+    getRfqById: builder.query<ApiResponse<Rfq>, string>({
+      query: (id) => `/rfqs/${id}`,
+      providesTags: (result, error, id) => [{ type: 'RFQ', id }],
+    }),
     getRfqUploadUrl: builder.mutation<ApiResponse<UploadUrlData>, { contentType: string }>({
       query: (data) => ({
         url: '/rfqs/upload-url',
@@ -26,11 +30,21 @@ export const rfqApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getRfqMessages: builder.query<ApiResponse<unknown[]>, string>({
+      query: (id) => `/rfqs/${id}/messages`,
+      providesTags: (result, error, id) => [{ type: 'RFQ', id }],
+    }),
+    getRfqAttachmentDownloadUrl: builder.query<ApiResponse<{ downloadUrl: string }>, string>({
+      query: (url) => `/rfqs/download?url=${encodeURIComponent(url)}`,
+    }),
   }),
 });
 
 export const { 
   useCreateRfqMutation, 
   useGetBuyerRfqsQuery, 
-  useGetRfqUploadUrlMutation 
+  useGetRfqByIdQuery,
+  useGetRfqUploadUrlMutation,
+  useGetRfqMessagesQuery,
+  useLazyGetRfqAttachmentDownloadUrlQuery
 } = rfqApi;

@@ -106,9 +106,20 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-8 h-8 rounded-full bg-[#dca12f] text-slate-900 font-bold flex items-center justify-center hover:bg-[#c99126] transition-colors shadow-sm"
+                  className="w-8 h-8 rounded-full overflow-hidden bg-[#dca12f] text-slate-900 font-bold flex items-center justify-center hover:bg-[#c99126] transition-colors shadow-sm relative cursor-pointer"
                 >
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  {user?.avatar ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={user.avatar} 
+                        alt={user.name || "User Avatar"} 
+                        className="w-full h-full object-cover"
+                      />
+                    </>
+                  ) : (
+                    <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
+                  )}
                 </button>
 
                 {isDropdownOpen && (

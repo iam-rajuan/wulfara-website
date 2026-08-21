@@ -54,8 +54,13 @@ export default function MessageChat({
   }, [activeChat.id]);
 
   const allMessages = useMemo(
-    () =>
-      [...rawMessages, ...socketMessages].map((message, index) => {
+    () => {
+      // Filter out socket messages that are now fetched and present in database messages to prevent duplicate rendering
+      const uniqueSocketMessages = socketMessages.filter(
+        (sockMsg) => !rawMessages.some((dbMsg) => dbMsg._id === sockMsg._id || dbMsg.id === sockMsg._id || dbMsg._id === sockMsg.id || dbMsg.id === sockMsg.id)
+      );
+
+      return [...rawMessages, ...uniqueSocketMessages].map((message, index) => {
         const isMe =
           (typeof message.sender === "object" && message.sender?.role === "buyer") ||
           (typeof message.sender === "object" && message.sender?._id === user?._id) ||
@@ -71,7 +76,8 @@ export default function MessageChat({
           isFile: message.isFile || false,
           fileName: message.fileName || "",
         } satisfies RenderedMessage;
-      }),
+      });
+    },
     [rawMessages, socketMessages, user?._id]
   );
 

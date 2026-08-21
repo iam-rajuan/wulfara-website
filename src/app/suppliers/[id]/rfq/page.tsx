@@ -108,7 +108,7 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
       // Upload files sequentially
       for (const file of attachments) {
         const res = await getRfqUploadUrl({ contentType: file.type }).unwrap();
-        const { uploadUrl, url: fileUrl } = res.data;
+        const { uploadUrl, fileUrl } = res.data;
         
         await fetch(uploadUrl, {
           method: "PUT",
@@ -232,12 +232,12 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
             >
               <Eye size={18} /> View RFQ Status
             </Link>
-            <button 
-              onClick={() => setIsMessageModalOpen(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+            <Link 
+              href={`/dashboard/messages?new=${supplier.id}&name=${encodeURIComponent(supplier.name)}`}
+              className="w-full sm:w-auto px-6 py-3 bg-[#dca12f] hover:bg-[#c99126] text-[#1b2b3a] text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <MessageSquare size={18} /> Message Supplier
-            </button>
+            </Link>
             <Link 
               href="/suppliers"
               className="w-full sm:w-auto px-6 py-3 bg-white border border-slate-300 text-[#1b2b3a] hover:bg-slate-50 text-sm font-bold rounded-lg transition-colors flex items-center justify-center shadow-sm"
@@ -514,12 +514,12 @@ export default function SendRFQPage({ params }: { params: Promise<{ id: string }
                 <button className="w-full py-2.5 bg-white border border-slate-300 text-[#1b2b3a] text-sm font-bold rounded hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                   <ExternalLink size={16} /> Visit Company Website
                 </button>
-                <button 
-                  onClick={() => setIsMessageModalOpen(true)}
+                <Link 
+                  href={`/dashboard/messages?new=${supplier.id}&name=${encodeURIComponent(supplier.name)}`}
                   className="w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm font-bold rounded transition-colors flex items-center justify-center gap-2"
                 >
                   <MessageSquare size={16} /> Message Supplier
-                </button>
+                </Link>
               </div>
             </div>
 

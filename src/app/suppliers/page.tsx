@@ -49,6 +49,7 @@ export default function ServiceSuppliersPage() {
         id: supplier._id,
         name: supplier.companyName,
         verified: Boolean(supplier.isApproved),
+        featured: Boolean(supplier.featuredHeroPlacement?.enabled),
         location: supplier.location?.formattedAddress || "Location not specified",
         distance: supplier.serviceAreas?.[0] || "Global coverage",
         response: supplier.avgResponseTime || "Replies in ~24 Hours",

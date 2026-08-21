@@ -344,6 +344,11 @@ export default function CategoryPage() {
                               <BadgeCheck size={14} className="text-[#15803D]" /> Verified
                             </div>
                           )}
+                          {sup.featuredHeroPlacement?.enabled && (
+                            <div className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-[11px] font-bold border border-amber-200">
+                              Featured Supplier
+                            </div>
+                          )}
                           <button 
                             onClick={(e) => handleFavoriteToggle(sup._id, e)}
                             className="text-slate-400 hover:text-red-500 transition-colors p-1"

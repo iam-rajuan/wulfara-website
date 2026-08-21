@@ -6,6 +6,7 @@ export interface SupplierData {
   id: string | number;
   name: string;
   verified: boolean;
+  featured?: boolean;
   location: string;
   distance: string;
   response: string;
@@ -38,6 +39,11 @@ export default function SupplierCard({ sup }: SupplierCardProps) {
               <h3 className="text-lg font-bold text-[#1b2b3a]">{sup.name}</h3>
               {sup.verified && (
                 <BadgeCheck size={16} className="text-emerald-500" />
+              )}
+              {sup.featured && (
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 border border-amber-200">
+                  Featured Supplier
+                </span>
               )}
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-slate-500 mb-3">

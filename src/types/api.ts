@@ -33,6 +33,11 @@ export interface SupplierContactInfo {
   website?: string;
 }
 
+export interface FeaturedHeroPlacement {
+  enabled?: boolean;
+  activatedAt?: string;
+}
+
 export interface Supplier {
   _id: string;
   user: string;
@@ -54,6 +59,8 @@ export interface Supplier {
   subscriptionPlan?: string;
   isApproved?: boolean;
   isVerified?: boolean;
+  isFeatured?: boolean;
+  featuredHeroPlacement?: FeaturedHeroPlacement;
   serviceAreas?: string[];
   averageRating?: number;
   totalReviews?: number;

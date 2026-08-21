@@ -8,11 +8,12 @@ import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown, SearchX } fr
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
 import type { Supplier } from "@/types/api";
 
-interface SearchSupplierCard {
-  id: string;
-  name: string;
-  categories: string[];
-  location: string;
+  interface SearchSupplierCard {
+    id: string;
+    userId: string;
+    name: string;
+    categories: string[];
+    location: string;
   rating: number;
   reviews: number;
   description: string;
@@ -39,7 +40,8 @@ export default function SearchSuppliersPage() {
   const suppliersList = useMemo(
     () =>
       (response?.data ?? []).map((supplier: Supplier) => ({
-        id: supplier.user,
+        id: supplier._id,
+        userId: supplier.user,
         name: supplier.companyName,
         categories: supplier.categories?.map((category) => category.name) || supplier.coreProducts || ["Supplier"],
         location: supplier.location?.formattedAddress || "Global",
@@ -50,7 +52,7 @@ export default function SearchSuppliersPage() {
           supplier.logo && supplier.logo !== "no-logo.jpg"
             ? supplier.logo
             : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop",
-        isFavorite: favoriteSupplierIds.includes(supplier.user),
+        isFavorite: favoriteSupplierIds.includes(supplier._id),
       } satisfies SearchSupplierCard)),
     [favoriteSupplierIds, response?.data]
   );
@@ -259,7 +261,7 @@ export default function SearchSuppliersPage() {
 
                 <div className="grid grid-cols-2 gap-3 mt-auto">
                   <button
-                    onClick={() => router.push(`/dashboard/messages?new=${supplier.id}&name=${encodeURIComponent(supplier.name)}`)}
+                    onClick={() => router.push(`/dashboard/messages?new=${supplier.userId}&name=${encodeURIComponent(supplier.name)}`)}
                     className="flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-[#0B172E] text-[14px] font-bold rounded hover:bg-gray-50 transition-colors">
                     <Mail size={16} />
                     Contact
