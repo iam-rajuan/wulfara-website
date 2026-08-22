@@ -34,8 +34,8 @@ export const rfqApi = apiSlice.injectEndpoints({
       query: (id) => `/rfqs/${id}/messages`,
       providesTags: (result, error, id) => [{ type: 'RFQ', id }],
     }),
-    getRfqAttachmentDownloadUrl: builder.query<ApiResponse<{ downloadUrl: string }>, string>({
-      query: (url) => `/rfqs/download?url=${encodeURIComponent(url)}`,
+    getRfqAttachmentDownloadUrl: builder.query<ApiResponse<{ downloadUrl: string }>, { url: string; type?: 'view' | 'download' }>({
+      query: ({ url, type }) => `/rfqs/download?url=${encodeURIComponent(url)}${type ? `&type=${type}` : ''}`,
     }),
   }),
 });

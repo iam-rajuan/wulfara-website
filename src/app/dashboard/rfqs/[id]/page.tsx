@@ -29,9 +29,9 @@ export default function RfqDetailsPage({ params }: { params: Promise<{ id: strin
   const rfq = rfqResponse?.data;
   const messages = messagesResponse?.data || [];
 
-  const handleDownload = async (url: string) => {
+  const handleDownload = async (url: string, type: 'view' | 'download' = 'view') => {
     try {
-      const res = await triggerDownload(url).unwrap();
+      const res = await triggerDownload({ url, type }).unwrap();
       if (res.data?.downloadUrl) {
         window.open(res.data.downloadUrl, '_blank');
       }
@@ -297,17 +297,24 @@ ${additionalNotes}`;
               {rfq.attachments.map((attachmentUrl: string, idx: number) => {
                 const fileName = getFilenameFromUrl(attachmentUrl);
                 return (
-                  <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <FileText size={24} className="text-red-500" />
-                      <div>
-                        <p className="text-[13px] font-bold text-[#0B172E] truncate max-w-[280px] sm:max-w-md">{fileName}</p>
-                        <p className="text-[11px] text-gray-400">Attached File</p>
+                  <div 
+                    key={idx} 
+                    className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors group"
+                  >
+                    <div 
+                      onClick={() => handleDownload(attachmentUrl, 'view')}
+                      className="flex-1 flex items-center gap-3 cursor-pointer"
+                    >
+                      <FileText size={24} className="text-red-500 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-bold text-[#0B172E] group-hover:text-[#DFB63E] transition-colors truncate max-w-[280px] sm:max-w-md">{fileName}</p>
+                        <p className="text-[11px] text-gray-400">Attached File (Click to view)</p>
                       </div>
                     </div>
                     <button 
-                      onClick={() => handleDownload(attachmentUrl)}
-                      className="text-gray-400 hover:text-[#DFB63E] transition-colors p-2 cursor-pointer focus:outline-none"
+                      onClick={() => handleDownload(attachmentUrl, 'download')}
+                      title="Download attachment"
+                      className="text-gray-400 hover:text-[#DFB63E] transition-colors p-2 cursor-pointer focus:outline-none shrink-0"
                     >
                       <Download size={18} />
                     </button>
@@ -402,16 +409,23 @@ ${additionalNotes}`;
                     <div className="space-y-2">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Quote Document</p>
                       {quote.attachments.map((url, uidx) => (
-                        <div key={uidx} className="flex items-center justify-between p-3 bg-white border border-gray-150 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <FileText size={16} className="text-red-500" />
-                            <span className="text-xs font-bold text-[#0B172E] truncate max-w-[200px] sm:max-w-md">
-                              {getFilenameFromUrl(url)}
+                        <div 
+                          key={uidx} 
+                          className="w-full flex items-center justify-between p-3 bg-white border border-gray-155 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <div 
+                            onClick={() => handleDownload(url, 'view')}
+                            className="flex-1 flex items-center gap-2 cursor-pointer"
+                          >
+                            <FileText size={16} className="text-red-500 shrink-0" />
+                            <span className="text-xs font-bold text-[#0B172E] group-hover:text-[#DFB63E] transition-colors truncate max-w-[200px] sm:max-w-md">
+                              {getFilenameFromUrl(url)} (Click to view)
                             </span>
                           </div>
                           <button 
-                            onClick={() => handleDownload(url)}
-                            className="text-gray-400 hover:text-[#DFB63E] transition-colors p-1.5 focus:outline-none cursor-pointer"
+                            onClick={() => handleDownload(url, 'download')}
+                            title="Download document"
+                            className="text-gray-400 hover:text-[#DFB63E] transition-colors p-1.5 focus:outline-none cursor-pointer shrink-0"
                           >
                             <Download size={14} />
                           </button>
