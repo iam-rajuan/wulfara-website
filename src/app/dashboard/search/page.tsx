@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown, SearchX, Loader2 } from "lucide-react";
+import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown, SearchX, Loader2, Factory } from "lucide-react";
 
 import { useAddFavoriteMutation, useGetFavoritesQuery, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
@@ -98,7 +98,7 @@ export default function SearchSuppliersPage() {
         image:
           supplier.logo && supplier.logo !== "no-logo.jpg"
             ? supplier.logo
-            : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop",
+            : "",
         isFavorite: favoriteSupplierIds.includes(supplier._id),
       } satisfies SearchSupplierCard)),
     [favoriteSupplierIds, response?.data]
@@ -278,16 +278,22 @@ export default function SearchSuppliersPage() {
           {paginatedSuppliers.map((supplier, idx) => (
             <div key={supplier.id} className="bg-white border border-gray-200 flex flex-col group hover:shadow-md transition-shadow">
               {/* Image Header */}
-              <div className="h-45 relative overflow-hidden bg-gray-100">
-                <Image
-                  src={supplier.image}
-                  alt={supplier.name}
-                  fill
-                  unoptimized
-                  loader={imageLoader}
-                  priority={idx < 3}
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="h-45 relative overflow-hidden bg-gray-100 flex items-center justify-center">
+                {supplier.image ? (
+                  <Image
+                    src={supplier.image}
+                    alt={supplier.name}
+                    fill
+                    unoptimized
+                    loader={imageLoader}
+                    priority={idx < 3}
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-50 flex items-center justify-center">
+                    <Factory className="text-slate-300 animate-pulse-subtle" size={48} />
+                  </div>
+                )}
                 <button
                   onClick={() => toggleFavorite(supplier.id)}
                   className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white text-gray-400 hover:text-[#D4AF37] transition-colors shadow-sm"
