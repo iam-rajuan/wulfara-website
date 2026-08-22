@@ -144,6 +144,31 @@ export default function DashboardLayout({
     }
   };
 
+  const clearAllNotifications = async () => {
+    if (isGuestMode) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token") || '';
+      const res = await fetch(`${API_BASE_URL}/notifications/clear-all`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    } catch (error: unknown) {
+      console.error("Error clearing notifications:", error);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-[#F8F9FB] overflow-hidden">
       {/* ── Mobile Sidebar Overlay ── */}
@@ -285,12 +310,22 @@ export default function DashboardLayout({
               {/* Notification Dropdown */}
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
-                  <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                    <h3 className="font-bold text-[#0B172E] text-[15px]">Notifications</h3>
+                  <div className="p-3 border-b border-gray-100 flex flex-col bg-gray-50/50">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-[#0B172E] text-[15px]">Notifications</h3>
+                      {notifications.length > 0 && (
+                        <button 
+                          onClick={clearAllNotifications}
+                          className="text-[12px] text-red-600 font-semibold hover:text-red-800 cursor-pointer"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
                     {unreadCount > 0 && (
                       <button 
                         onClick={markAllAsRead}
-                        className="text-[12px] text-blue-600 font-semibold hover:text-blue-800"
+                        className="text-[12px] text-blue-600 font-semibold hover:text-blue-800 text-left mt-1 cursor-pointer"
                       >
                         Mark all as read
                       </button>

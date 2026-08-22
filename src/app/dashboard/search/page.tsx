@@ -3,17 +3,21 @@
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown, SearchX } from "lucide-react";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { Search, Filter, MapPin, Star, Bookmark, Mail, ChevronDown, SearchX, Loader2 } from "lucide-react";
 
+import { useAddFavoriteMutation, useGetFavoritesQuery, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
 import { useGetSuppliersQuery } from "@/store/api/supplierApi";
-import type { Supplier } from "@/types/api";
+import type { Favorite, Supplier } from "@/types/api";
+import type { RootState } from "@/store/store";
 
-  interface SearchSupplierCard {
-    id: string;
-    userId: string;
-    name: string;
-    categories: string[];
-    location: string;
+interface SearchSupplierCard {
+  id: string;
+  userId: string;
+  name: string;
+  categories: string[];
+  location: string;
   rating: number;
   reviews: number;
   description: string;
@@ -23,19 +27,62 @@ import type { Supplier } from "@/types/api";
 
 const imageLoader = ({ src }: { src: string }) => src;
 
+const getFavoriteSupplierId = (favorite: Favorite) => {
+  if (!favorite.supplier) {
+    return null;
+  }
+
+  return typeof favorite.supplier === "string" ? favorite.supplier : favorite.supplier._id;
+};
+
+const getApiErrorMessage = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "data" in error &&
+    typeof error.data === "object" &&
+    error.data !== null &&
+    "message" in error.data &&
+    typeof error.data.message === "string"
+  ) {
+    return error.data.message;
+  }
+
+  return "Failed to update favorites";
+};
+
 export default function SearchSuppliersPage() {
   const router = useRouter();
-  const { data: response } = useGetSuppliersQuery("");
-
-  const [favoriteSupplierIds, setFavoriteSupplierIds] = useState<string[]>([]);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const { data: response, isLoading } = useGetSuppliersQuery("");
+  const { data: favoritesData } = useGetFavoritesQuery(undefined, { skip: !user });
+  const [addFavorite] = useAddFavoriteMutation();
+  const [removeFavorite] = useRemoveFavoriteMutation();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeLocation, setActiveLocation] = useState("");
   const [sortBy, setSortBy] = useState("Best Match");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
+  const favorites = favoritesData?.data || [];
+  const favoriteSupplierIds = useMemo(
+    () => favorites.map((favorite) => getFavoriteSupplierId(favorite)).filter(Boolean) as string[],
+    [favorites]
+  );
 
-  const categories = ["All", "Raw Materials", "Machinery", "Electronics", "Logistics", "Plastics"];
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+
+    (response?.data ?? []).forEach((supplier) => {
+      supplier.categories?.forEach((category) => {
+        if (category?.name) {
+          uniqueCategories.add(category.name);
+        }
+      });
+    });
+
+    return ["All", ...Array.from(uniqueCategories)];
+  }, [response?.data]);
 
   const suppliersList = useMemo(
     () =>
@@ -45,8 +92,8 @@ export default function SearchSuppliersPage() {
         name: supplier.companyName,
         categories: supplier.categories?.map((category) => category.name) || supplier.coreProducts || ["Supplier"],
         location: supplier.location?.formattedAddress || "Global",
-        rating: 4.8,
-        reviews: 120,
+        rating: supplier.averageRating || 0,
+        reviews: supplier.totalReviews || 0,
         description: supplier.description || "No supplier description available yet.",
         image:
           supplier.logo && supplier.logo !== "no-logo.jpg"
@@ -57,18 +104,34 @@ export default function SearchSuppliersPage() {
     [favoriteSupplierIds, response?.data]
   );
 
-  const toggleFavorite = (id: string) => {
-    setFavoriteSupplierIds((current) =>
-      current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id]
-    );
+  const toggleFavorite = async (id: string) => {
+    if (!user) {
+      toast.error("Please login to save favorites");
+      return;
+    }
+
+    const existingFavorite = favorites.find((favorite) => getFavoriteSupplierId(favorite) === id);
+
+    try {
+      if (existingFavorite) {
+        await removeFavorite(existingFavorite._id).unwrap();
+        toast.success("Removed from favorites");
+      } else {
+        await addFavorite({ supplierId: id }).unwrap();
+        toast.success("Added to favorites");
+      }
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error));
+    }
   };
 
   const filteredSuppliers = suppliersList.filter((supplier) => {
     if (activeCategory !== "All" && !supplier.categories.includes(activeCategory)) return false;
 
-    if (activeLocation === "europe" && !supplier.location.includes("Germany") && !supplier.location.includes("UK")) return false;
-    if (activeLocation === "asia" && !supplier.location.includes("Japan") && !supplier.location.includes("South Korea")) return false;
-    if (activeLocation === "na" && !supplier.location.includes("USA") && !supplier.location.includes("Canada")) return false;
+    const normalizedLocation = supplier.location.toLowerCase();
+    if (activeLocation === "europe" && !["germany", "uk", "united kingdom", "france", "italy", "spain", "netherlands", "poland"].some((term) => normalizedLocation.includes(term))) return false;
+    if (activeLocation === "asia" && !["japan", "south korea", "china", "bangladesh", "india", "singapore", "malaysia", "thailand", "vietnam"].some((term) => normalizedLocation.includes(term))) return false;
+    if (activeLocation === "na" && !["usa", "united states", "canada", "mexico"].some((term) => normalizedLocation.includes(term))) return false;
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -205,9 +268,14 @@ export default function SearchSuppliersPage() {
       </div>
 
       {/* Supplier Grid or Empty State */}
-      {paginatedSuppliers.length > 0 ? (
+      {isLoading ? (
+        <div className="w-full h-[40vh] flex flex-col items-center justify-center gap-3 bg-white border border-gray-200 rounded-2xl shadow-sm">
+          <Loader2 className="w-8 h-8 animate-spin text-[#137847]" />
+          <p className="text-sm text-gray-400 font-medium">Searching for suppliers...</p>
+        </div>
+      ) : paginatedSuppliers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {paginatedSuppliers.map(supplier => (
+          {paginatedSuppliers.map((supplier, idx) => (
             <div key={supplier.id} className="bg-white border border-gray-200 flex flex-col group hover:shadow-md transition-shadow">
               {/* Image Header */}
               <div className="h-45 relative overflow-hidden bg-gray-100">
@@ -217,6 +285,7 @@ export default function SearchSuppliersPage() {
                   fill
                   unoptimized
                   loader={imageLoader}
+                  priority={idx < 3}
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <button
@@ -245,8 +314,12 @@ export default function SearchSuppliersPage() {
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex items-center gap-1">
                     <Star size={14} className="fill-[#DFB63E] text-[#DFB63E]" />
-                    <span className="text-[13px] font-bold text-[#0B172E]">{supplier.rating}</span>
-                    <span className="text-[13px] text-gray-500">({supplier.reviews})</span>
+                    <span className="text-[13px] font-bold text-[#0B172E]">
+                      {supplier.reviews > 0 ? supplier.rating.toFixed(1) : "0.0"}
+                    </span>
+                    <span className="text-[13px] text-gray-500">
+                      ({supplier.reviews})
+                    </span>
                   </div>
                   <div className="w-1 h-1 rounded-full bg-gray-300" />
                   <div className="flex items-center gap-1 text-gray-500">

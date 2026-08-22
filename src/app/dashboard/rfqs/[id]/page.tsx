@@ -12,7 +12,8 @@ import {
   Calendar, 
   Paperclip, 
   FileText,
-  Loader2
+  Loader2,
+  Eye
 } from "lucide-react";
 import Link from "next/link";
 import { useGetRfqByIdQuery, useGetRfqMessagesQuery, useLazyGetRfqAttachmentDownloadUrlQuery } from "@/store/api/rfqApi";
@@ -311,13 +312,22 @@ ${additionalNotes}`;
                         <p className="text-[11px] text-gray-400">Attached File (Click to view)</p>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => handleDownload(attachmentUrl, 'download')}
-                      title="Download attachment"
-                      className="text-gray-400 hover:text-[#DFB63E] transition-colors p-2 cursor-pointer focus:outline-none shrink-0"
-                    >
-                      <Download size={18} />
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button 
+                        onClick={() => handleDownload(attachmentUrl, 'view')}
+                        title="View attachment"
+                        className="text-gray-400 hover:text-[#DFB63E] transition-colors p-2 cursor-pointer focus:outline-none"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button 
+                        onClick={() => handleDownload(attachmentUrl, 'download')}
+                        title="Download attachment"
+                        className="text-gray-400 hover:text-[#DFB63E] transition-colors p-2 cursor-pointer focus:outline-none"
+                      >
+                        <Download size={18} />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -422,13 +432,22 @@ ${additionalNotes}`;
                               {getFilenameFromUrl(url)} (Click to view)
                             </span>
                           </div>
-                          <button 
-                            onClick={() => handleDownload(url, 'download')}
-                            title="Download document"
-                            className="text-gray-400 hover:text-[#DFB63E] transition-colors p-1.5 focus:outline-none cursor-pointer shrink-0"
-                          >
-                            <Download size={14} />
-                          </button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button 
+                              onClick={() => handleDownload(url, 'view')}
+                              title="View document"
+                              className="text-gray-400 hover:text-[#DFB63E] transition-colors p-1.5 focus:outline-none cursor-pointer"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleDownload(url, 'download')}
+                              title="Download document"
+                              className="text-gray-400 hover:text-[#DFB63E] transition-colors p-1.5 focus:outline-none cursor-pointer"
+                            >
+                              <Download size={14} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>

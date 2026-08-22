@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { BadgeCheck, MapPin, Map, Star, Settings, Factory as FactoryIcon } from "lucide-react";
 
 export interface SupplierData {
@@ -16,19 +17,33 @@ export interface SupplierData {
   tags: string[];
   certifications?: string[];
   companySize?: string;
+  image?: string;
 }
 
 interface SupplierCardProps {
   sup: SupplierData;
 }
 
+const imageLoader = ({ src }: { src: string }) => src;
+
 export default function SupplierCard({ sup }: SupplierCardProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col lg:flex-row gap-6 hover:border-slate-300 transition-colors">
       
-      {/* Logo Placeholder */}
-      <div className="w-[120px] h-[120px] bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center shrink-0 hidden sm:flex">
-        <FactoryIcon className="text-slate-300" size={32} />
+      {/* Logo Section */}
+      <div className="w-[120px] h-[120px] bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center shrink-0 hidden sm:flex relative overflow-hidden">
+        {sup.image ? (
+          <Image
+            src={sup.image}
+            alt={sup.name}
+            fill
+            unoptimized
+            loader={imageLoader}
+            className="object-cover"
+          />
+        ) : (
+          <FactoryIcon className="text-slate-300" size={32} />
+        )}
       </div>
 
       {/* Supplier Info */}

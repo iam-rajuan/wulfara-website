@@ -62,6 +62,7 @@ export default function ServiceSuppliersPage() {
           ["Industrial Supplier"],
         certifications: supplier.certifications || [],
         companySize: supplier.employeeCount || "",
+        image: supplier.logo && supplier.logo !== "no-logo.jpg" ? supplier.logo : undefined,
       })),
     [suppliers]
   );

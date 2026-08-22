@@ -28,7 +28,14 @@ export default function MessagesPage() {
 
   const [activeTab, setActiveTab] = useState("inbox");
   const [activeMessage, setActiveMessage] = useState<string | null>(newSupplierId ? `new-${newSupplierId}` : null);
+  const [readConversations, setReadConversations] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeMessage && !readConversations.includes(activeMessage)) {
+      setReadConversations((current) => [...current, activeMessage]);
+    }
+  }, [activeMessage, readConversations]);
 
   const { data: conversationsResponse, isLoading } = useGetConversationsQuery(undefined, { pollingInterval: 30000 });
 
@@ -41,11 +48,13 @@ export default function MessagesPage() {
           conversation.participants?.find((participant) => participant.role === "supplier" || participant.role === "admin") ||
           conversation.participants?.[0];
 
+        const isReadLocally = readConversations.includes(conversation._id) || activeMessage === conversation._id;
+
         return {
           id: conversation._id,
           sender: otherUser?.name || "Unknown Supplier",
           isVerified: index % 2 === 0,
-          isNew: !conversation.hasUnread,
+          isNew: isReadLocally ? false : !!conversation.hasUnread,
           tag: conversation.rfq ? `RFQ #${conversation.rfq.rfqNumber || "..."}` : "Sourcing",
           tagType: conversation.rfq ? "warning" : "primary",
           timeEstimate: "Replies in 2 hours",
@@ -54,7 +63,7 @@ export default function MessagesPage() {
           history: [],
         } satisfies DashboardConversationPreview;
       }),
-    [rawConversations]
+    [rawConversations, readConversations, activeMessage]
   );
 
   const messages = useMemo(() => {

@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Search,
   ChevronDown,
@@ -30,9 +31,12 @@ interface FavoriteSupplierCard {
   isVerified: boolean;
   isFavorite: boolean;
   logoBg: string;
+  logo?: string;
   tags: SupplierTag[];
   isActive: boolean;
 }
+
+const imageLoader = ({ src }: { src: string }) => src;
 
 export default function FavoriteSuppliersPage() {
   const router = useRouter();
@@ -57,6 +61,7 @@ export default function FavoriteSuppliersPage() {
             isVerified: Boolean(favorite.supplier.isApproved ?? favorite.supplier.isVerified),
             isFavorite: true,
             logoBg: "bg-[#0F172A]",
+            logo: favorite.supplier.logo && favorite.supplier.logo !== "no-logo.jpg" ? favorite.supplier.logo : undefined,
             tags: [
               { label: favorite.supplier.avgResponseTime || "Replies in 24 hours", icon: Clock },
               { label: favorite.supplier.supplierType || "Manufacturer", icon: Building2 },
@@ -93,6 +98,9 @@ export default function FavoriteSuppliersPage() {
   });
   const [isNegotiable, setIsNegotiable] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const filterOptions: Record<string, string[]> = {
     Category: ["All", "Metals", "Electronics"],
     Location: ["All", "New York, USA", "New Jersey, USA", "Shenzhen, China"],
@@ -100,20 +108,29 @@ export default function FavoriteSuppliersPage() {
     "Response Time": ["All", "Replies in 2 hours", "Replies in 12 hours"],
   };
 
-  const filteredAndSortedSuppliers = [...suppliersList]
-    .filter((supplier) => {
-      if (searchQuery && !supplier.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      if (isNegotiable && !supplier.tags.some((tag) => tag.label === "Negotiable Rate")) return false;
-      if (activeFilters.Location !== "All" && supplier.location !== activeFilters.Location) return false;
-      if (activeFilters["Supplier Type"] !== "All" && !supplier.tags.some((tag) => tag.label === activeFilters["Supplier Type"])) return false;
-      if (activeFilters["Response Time"] !== "All" && !supplier.tags.some((tag) => tag.label === activeFilters["Response Time"])) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "Name (A-Z)") return a.name.localeCompare(b.name);
-      if (sortBy === "Name (Z-A)") return b.name.localeCompare(a.name);
-      return 0;
-    });
+  const filteredAndSortedSuppliers = useMemo(() => {
+    return [...suppliersList]
+      .filter((supplier) => {
+        if (searchQuery && !supplier.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        if (isNegotiable && !supplier.tags.some((tag) => tag.label === "Negotiable Rate")) return false;
+        if (activeFilters.Location !== "All" && supplier.location !== activeFilters.Location) return false;
+        if (activeFilters["Supplier Type"] !== "All" && !supplier.tags.some((tag) => tag.label === activeFilters["Supplier Type"])) return false;
+        if (activeFilters["Response Time"] !== "All" && !supplier.tags.some((tag) => tag.label === activeFilters["Response Time"])) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "Name (A-Z)") return a.name.localeCompare(b.name);
+        if (sortBy === "Name (Z-A)") return b.name.localeCompare(a.name);
+        return 0;
+      });
+  }, [suppliersList, searchQuery, isNegotiable, activeFilters, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedSuppliers.length / itemsPerPage));
+
+  const paginatedSuppliers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredAndSortedSuppliers.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, filteredAndSortedSuppliers]);
 
   return (
     <div className="w-auto mx-auto pb-12">
@@ -149,7 +166,10 @@ export default function FavoriteSuppliersPage() {
               type="text"
               placeholder="Search saved suppliers..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full h-11 pl-11 pr-4 text-black border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 transition-all placeholder:text-gray-400"
             />
           </div>
@@ -175,6 +195,7 @@ export default function FavoriteSuppliersPage() {
                     onClick={() => {
                       setSortBy(option);
                       setIsSortDropdownOpen(false);
+                      setCurrentPage(1);
                     }}
                     className={`block w-full text-left px-4 py-2 text-[13px] hover:bg-gray-50 transition-colors ${
                       sortBy === option
@@ -214,6 +235,7 @@ export default function FavoriteSuppliersPage() {
                       onClick={() => {
                         setActiveFilters({ ...activeFilters, [filter]: option });
                         setOpenFilter(null);
+                        setCurrentPage(1);
                       }}
                       className={`block w-full text-left px-4 py-2 text-[13px] hover:bg-gray-50 transition-colors ${
                         activeFilters[filter] === option ? 'font-bold text-[#D4AF37]' : 'text-[#0B172E]'
@@ -227,7 +249,10 @@ export default function FavoriteSuppliersPage() {
             </div>
           ))}
           <button 
-            onClick={() => setIsNegotiable(!isNegotiable)}
+            onClick={() => {
+              setIsNegotiable(!isNegotiable);
+              setCurrentPage(1);
+            }}
             className={`flex items-center gap-2 px-4 py-2 border rounded-full text-[13px] font-bold transition-colors ${
               isNegotiable 
                 ? "bg-[#F8F9FB] border-[#D4AF37] text-[#D4AF37]" 
@@ -241,7 +266,7 @@ export default function FavoriteSuppliersPage() {
 
       {/* Supplier Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        {filteredAndSortedSuppliers.map((supplier) => (
+        {paginatedSuppliers.map((supplier) => (
           <div
             key={supplier.id}
             className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow relative group"
@@ -265,11 +290,22 @@ export default function FavoriteSuppliersPage() {
             <div className="flex gap-4 mb-6">
               {/* Logo Box */}
               <div
-                className={`w-[60px] h-[60px] rounded-lg border border-gray-100 flex items-center justify-center shrink-0 ${supplier.logoBg}`}
+                className={`w-[60px] h-[60px] rounded-lg border border-gray-100 flex items-center justify-center shrink-0 relative overflow-hidden ${supplier.logo ? "" : supplier.logoBg}`}
               >
-                <span className="text-xl font-black text-white">
-                  {supplier.name.charAt(0).toUpperCase()}
-                </span>
+                {supplier.logo ? (
+                  <Image
+                    src={supplier.logo}
+                    alt={supplier.name}
+                    fill
+                    unoptimized
+                    loader={imageLoader}
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="text-xl font-black text-white">
+                    {supplier.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
 
               {/* Title & Location */}
@@ -353,23 +389,39 @@ export default function FavoriteSuppliersPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-center gap-2">
-        <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-400">
-          <ChevronLeft size={18} />
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center bg-[#0B172E] rounded-lg text-white font-bold text-sm">
-          1
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[#0B172E] font-bold text-sm">
-          2
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[#0B172E] font-bold text-sm">
-          3
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[#0B172E]">
-          <ChevronRight size={18} />
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg font-bold text-sm transition-colors ${
+                currentPage === page
+                  ? "bg-[#0B172E] text-white"
+                  : "bg-white border border-gray-200 text-[#0B172E] hover:bg-gray-50"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-[#0B172E] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

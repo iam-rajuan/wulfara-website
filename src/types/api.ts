@@ -73,6 +73,7 @@ export interface Supplier {
 
 export interface Favorite {
   _id: string;
+  createdAt?: string;
   supplier?: Supplier | string | null;
 }
 
@@ -93,6 +94,7 @@ export interface UploadUrlData {
   uploadUrl: string;
   key?: string;
   url?: string;
+  fileUrl?: string;
 }
 
 export interface MessageUser {

@@ -19,6 +19,8 @@ export default function MessageSidebar({
   activeMessage,
   setActiveMessage
 }: MessageSidebarProps) {
+  const unreadCount = messages.filter((msg) => msg.isNew).length;
+
   return (
     <div className="w-full md:w-[380px] bg-white border border-gray-200 rounded-md shadow-sm flex flex-col overflow-hidden h-full">
       {/* Tabs */}
@@ -29,7 +31,9 @@ export default function MessageSidebar({
             }`}
         >
           Inbox
-          <span className="bg-[#D92D20] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
+          {unreadCount > 0 && (
+            <span className="bg-[#D92D20] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unreadCount}</span>
+          )}
           {activeTab === "inbox" && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#DFB63E]"></div>
           )}

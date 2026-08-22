@@ -82,7 +82,7 @@ export default function DashboardOverviewPage() {
   if (deadlineDetails) {
     deadlineTitle = deadlineDetails.title;
     deadlineCloses = deadlineDetails.closesText;
-    deadlineRfqId = deadlineDetails.rfqId;
+    deadlineRfqId = deadlineDetails.rfqId || "";
   }
 
   const isLoading = isLoadingRfqs || isLoadingFavorites || isLoadingConversations;
@@ -121,7 +121,7 @@ export default function DashboardOverviewPage() {
 
   // Recent RFQs List (top 5)
   const recentRfqs = [...rfqs]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => new Date((b as any).createdAt || 0).getTime() - new Date((a as any).createdAt || 0).getTime())
     .slice(0, 5);
 
   const getStatusStyle = (status: string) => {
@@ -141,8 +141,8 @@ export default function DashboardOverviewPage() {
   const lastReplyConversation = [...conversations]
     .sort((a, b) => new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime())[0];
   const lastReplyMsg = lastReplyConversation?.lastMessage;
-  const otherParticipant = lastReplyConversation?.participants?.find((p) => p._id !== user?._id);
-  const supplierName = otherParticipant?.name || lastReplyConversation?.rfq?.supplierName || "Supplier";
+  const otherParticipant = lastReplyConversation?.participants?.find((p) => (p as any)._id !== (user as any)?._id);
+  const supplierName = otherParticipant?.name || (lastReplyConversation?.rfq as any)?.supplierName || "Supplier";
   
   let replyTextSnippet = "No replies received yet.";
   if (lastReplyMsg?.text) {
@@ -234,8 +234,8 @@ export default function DashboardOverviewPage() {
                 <tbody>
                   {recentRfqs.length > 0 ? (
                     recentRfqs.map((rfq, i) => {
-                      const statusStyle = getStatusStyle(rfq.status);
-                      const displayDate = new Date(rfq.createdAt).toLocaleDateString("en-US", {
+                      const statusStyle = getStatusStyle(rfq.status || "");
+                      const displayDate = new Date((rfq as any).createdAt || "").toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -249,7 +249,7 @@ export default function DashboardOverviewPage() {
                           className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50/50 transition-colors"
                         >
                           <td className="px-6 py-5 text-[13px] font-bold text-[#0B172E] w-[20%] truncate max-w-[150px]">
-                            {rfq.supplier?.companyName || rfq.supplierName || "Unknown Supplier"}
+                             {rfq.supplier?.companyName || (rfq as any).supplierName || "Unknown Supplier"}
                           </td>
                           <td className="px-4 py-5 text-[13px] text-gray-600 w-[30%] pr-8 truncate max-w-[200px]">
                             {rfq.subject?.replace("RFQ: ", "") || "Sourcing Request"}
@@ -333,7 +333,7 @@ export default function DashboardOverviewPage() {
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">
                 Next RFQ Deadline
               </p>
-              {nextRfqDeadline ? (
+              {deadlineDetails ? (
                 <div 
                   onClick={() => router.push(`/dashboard/rfqs/${deadlineRfqId}`)}
                   className="flex items-center justify-between pl-3 border-l-2 border-[#DC2626] cursor-pointer group"

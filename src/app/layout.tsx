@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "WULFARA - Industrial Procurement Platform",
   description: "A centralized hub for managing your industrial procurement lifecycle securely.",
+  icons: {
+    icon: "/assets/logo.png",
+  },
 };
 
 export default function RootLayout({
