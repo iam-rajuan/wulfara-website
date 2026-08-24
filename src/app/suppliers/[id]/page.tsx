@@ -103,8 +103,13 @@ export default function SupplierProfilePage() {
     return <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">Supplier not found.</div>;
   }
 
-  // Map real supplier data
-  const displayLocation = supplier.contactInfo?.address || "Location not specified";
+  // Normalize address fields because different endpoints/pages use different shapes.
+  const displayLocation =
+    supplier.location?.formattedAddress ||
+    supplier.contactInfo?.address ||
+    supplier.contactAddress ||
+    supplier.address ||
+    "Location not specified";
   const displayReplyTime = "Replies in 24 hours"; // Could be dynamically calculated if tracked
   const displayAbout = supplier.description || "No description provided.";
 
