@@ -24,7 +24,7 @@ import { useGetFavoritesQuery, useAddFavoriteMutation, useRemoveFavoriteMutation
 
 import { useGetSupplierByIdQuery } from "@/store/api/supplierApi";
 import { useGetSupplierReviewsQuery } from "@/store/api/reviewApi";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import DynamicMap from "@/components/home/DynamicMap";
 import type { Favorite, Review } from "@/types/api";
 import type { RootState } from "@/store/store";
@@ -76,6 +76,7 @@ const getApiErrorMessage = (error: unknown) => {
 
 export default function SupplierProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { data, isLoading } = useGetSupplierByIdQuery(id, { skip: !id });
   const supplier = data?.data;
@@ -126,13 +127,8 @@ export default function SupplierProfilePage() {
   const displayReplyTime = supplier.avgResponseTime || "Replies in 24 hours";
   const displayAbout = supplier.description || "No description provided.";
   const displayWebsite = supplier.website || supplier.contactInfo?.website || "";
-  const avatarFallback =
-    typeof supplier.user === "object" && supplier.user
-      ? supplier.user.avatar
-      : "";
   const displayLogo =
-    [supplier.logo, avatarFallback, ...(supplier.gallery || []).map((galleryItem) => galleryItem.url)]
-      .find((candidate) => isDisplayableImage(candidate)) || "";
+    isDisplayableImage(supplier.logo) ? supplier.logo : "";
 
   // Dynamically map core products/services
   const displayServices: SupplierServiceCard[] = supplier.coreProducts && supplier.coreProducts.length > 0
@@ -154,9 +150,12 @@ export default function SupplierProfilePage() {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
 
         {/* Breadcrumb / Back Navigation */}
-        <Link href="/suppliers" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors">
+        <button 
+          onClick={() => router.back()} 
+          className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors bg-transparent border-0 p-0 cursor-pointer"
+        >
           <ChevronLeft size={16} /> Back to Search Results
-        </Link>
+        </button>
 
         {/* Top Header Card */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 mb-6">

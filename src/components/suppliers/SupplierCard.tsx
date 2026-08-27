@@ -18,6 +18,7 @@ export interface SupplierData {
   certifications?: string[];
   companySize?: string;
   image?: string;
+  website?: string;
 }
 
 interface SupplierCardProps {
@@ -103,9 +104,14 @@ export default function SupplierCard({ sup }: SupplierCardProps) {
         <Link href={`/suppliers/${sup.id}/rfq`} className="w-full py-2 bg-[#dca12f] hover:bg-[#c99126] text-slate-900 text-[11px] font-bold rounded transition-colors shadow-sm text-center block">
           Send RFQ Now
         </Link>
-        <button className="w-full py-2 bg-[#f0f4f8] hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded transition-colors shadow-sm">
+        <Link
+          href={sup.website || `/suppliers/${sup.id}/rfq`}
+          target={sup.website ? "_blank" : undefined}
+          rel={sup.website ? "noreferrer" : undefined}
+          className="w-full py-2 bg-[#f0f4f8] hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded transition-colors shadow-sm text-center block"
+        >
           Request Quote
-        </button>
+        </Link>
       </div>
     </div>
   );

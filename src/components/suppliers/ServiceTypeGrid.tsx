@@ -1,34 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Factory as FactoryIcon, Settings, Wrench } from "lucide-react";
 
-export default function ServiceTypeGrid() {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+export const SERVICE_TYPE_OPTIONS = [
+  {
+    id: "contract",
+    title: "Contract Manufacturing",
+    searchValue: "contract manufacturing",
+    icon: <FactoryIcon size={18} />,
+    desc: "Outsource your entire production process to specialized facilities with scalable capacity.",
+    img: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "assembly",
+    title: "Assembly Services",
+    searchValue: "assembly services",
+    icon: <Settings size={18} />,
+    desc: "Manual and automated assembly lines for sub-assemblies and final product completion.",
+    img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "fabrication",
+    title: "Product Fabrication",
+    searchValue: "product fabrication",
+    icon: <Wrench size={18} />,
+    desc: "Sheet metal fabrication, welding, machining, and custom structural component creation.",
+    img: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+  },
+] as const;
 
-  const services = [
-    {
-      id: "contract",
-      title: "Contract Manufacturing",
-      icon: <FactoryIcon size={18} />,
-      desc: "Outsource your entire production process to specialized facilities with scalable capacity.",
-      img: "https://images.unsplash.com/photo-1565514120036-c65691d575c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "assembly",
-      title: "Assembly Services",
-      icon: <Settings size={18} />,
-      desc: "Manual and automated assembly lines for sub-assemblies and final product completion.",
-      img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "fabrication",
-      title: "Product Fabrication",
-      icon: <Wrench size={18} />,
-      desc: "Sheet metal fabrication, welding, machining, and custom structural component creation.",
-      img: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-    }
-  ];
+interface ServiceTypeGridProps {
+  selectedService: string;
+  onSelectService: (service: string) => void;
+}
+
+export default function ServiceTypeGrid({ selectedService, onSelectService }: ServiceTypeGridProps) {
 
   return (
     <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
@@ -39,7 +46,7 @@ export default function ServiceTypeGrid() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map(svc => (
+          {SERVICE_TYPE_OPTIONS.map((svc) => (
             <div key={svc.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col transition-transform hover:-translate-y-1 hover:shadow-md duration-300">
               <div className="h-48 w-full relative overflow-hidden bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -54,14 +61,15 @@ export default function ServiceTypeGrid() {
                 </div>
                 <p className="text-[13px] text-slate-500 leading-relaxed mb-6 flex-1">{svc.desc}</p>
                 <button 
-                  onClick={() => setSelectedService(svc.id)}
+                  type="button"
+                  onClick={() => onSelectService(selectedService === svc.searchValue ? "" : svc.searchValue)}
                   className={`w-full py-2.5 rounded text-sm font-bold transition-colors ${
-                    selectedService === svc.id 
+                    selectedService === svc.searchValue 
                       ? 'bg-[#1b2b3a] text-white'
                       : 'bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
-                  {selectedService === svc.id ? 'Selected' : 'Select'}
+                  {selectedService === svc.searchValue ? 'Selected' : 'Select'}
                 </button>
               </div>
             </div>
