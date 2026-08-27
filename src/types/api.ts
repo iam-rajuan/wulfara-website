@@ -33,6 +33,12 @@ export interface SupplierContactInfo {
   website?: string;
 }
 
+export interface SupplierUserSummary {
+  _id?: string;
+  name?: string;
+  avatar?: string;
+}
+
 export interface FeaturedHeroPlacement {
   enabled?: boolean;
   activatedAt?: string;
@@ -40,7 +46,7 @@ export interface FeaturedHeroPlacement {
 
 export interface Supplier {
   _id: string;
-  user: string;
+  user: string | SupplierUserSummary;
   companyName: string;
   description?: string;
   logo?: string;
@@ -56,6 +62,7 @@ export interface Supplier {
   avgResponseTime?: string;
   contactAddress?: string;
   address?: string;
+  website?: string;
   subscriptionPlan?: string;
   isApproved?: boolean;
   isVerified?: boolean;

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import { useGetFavoritesQuery, useRemoveFavoriteMutation } from "@/store/api/favoriteApi";
-import type { Favorite } from "@/types/api";
+import type { Favorite, Supplier } from "@/types/api";
 
 interface SupplierTag {
   label: string;
@@ -38,6 +38,9 @@ interface FavoriteSupplierCard {
 
 const imageLoader = ({ src }: { src: string }) => src;
 
+const getSupplierUserId = (user: Supplier["user"]) =>
+  typeof user === "string" ? user : user?._id || "";
+
 export default function FavoriteSuppliersPage() {
   const router = useRouter();
   const { data: response } = useGetFavoritesQuery();
@@ -55,7 +58,7 @@ export default function FavoriteSuppliersPage() {
           cards.push({
             id: favorite.supplier._id,
             favoriteId: favorite._id,
-            userId: favorite.supplier.user,
+            userId: getSupplierUserId(favorite.supplier.user),
             name: favorite.supplier.companyName,
             location: favorite.supplier.location?.formattedAddress || "Global",
             isVerified: Boolean(favorite.supplier.isApproved ?? favorite.supplier.isVerified),

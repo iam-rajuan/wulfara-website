@@ -37,6 +37,19 @@ interface SupplierServiceCard {
 
 const imageLoader = ({ src }: { src: string }) => src;
 
+const isDisplayableImage = (value?: string | null) => {
+  if (!value || typeof value !== "string") {
+    return false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || normalized === "no-logo.jpg" || normalized === "default-avatar.png") {
+    return false;
+  }
+
+  return !normalized.endsWith(".pdf");
+};
+
 const getFavoriteSupplierId = (favorite: Favorite) => {
   if (!favorite.supplier) {
     return null;
@@ -110,8 +123,16 @@ export default function SupplierProfilePage() {
     supplier.contactAddress ||
     supplier.address ||
     "Location not specified";
-  const displayReplyTime = "Replies in 24 hours"; // Could be dynamically calculated if tracked
+  const displayReplyTime = supplier.avgResponseTime || "Replies in 24 hours";
   const displayAbout = supplier.description || "No description provided.";
+  const displayWebsite = supplier.website || supplier.contactInfo?.website || "";
+  const avatarFallback =
+    typeof supplier.user === "object" && supplier.user
+      ? supplier.user.avatar
+      : "";
+  const displayLogo =
+    [supplier.logo, avatarFallback, ...(supplier.gallery || []).map((galleryItem) => galleryItem.url)]
+      .find((candidate) => isDisplayableImage(candidate)) || "";
 
   // Dynamically map core products/services
   const displayServices: SupplierServiceCard[] = supplier.coreProducts && supplier.coreProducts.length > 0
@@ -123,7 +144,9 @@ export default function SupplierProfilePage() {
     : [{ title: "Core Services", desc: "Industrial sourcing and supply.", icon: <Wrench size={16} /> }];
 
   const displayGallery = supplier.gallery && supplier.gallery.length > 0
-    ? supplier.gallery.map((galleryItem) => galleryItem.url)
+    ? supplier.gallery
+      .map((galleryItem) => galleryItem.url)
+      .filter((url) => isDisplayableImage(url) && url !== displayLogo)
     : [];
 
   return (
@@ -140,9 +163,9 @@ export default function SupplierProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full md:w-auto text-center sm:text-left">
             {/* Logo */}
             <div className="w-24 h-24 rounded bg-linear-to-tr from-slate-800 to-[#1b2b3a] shrink-0 flex items-center justify-center relative overflow-hidden shadow-inner">
-              {(supplier.logo && supplier.logo !== 'no-logo.jpg') ? (
+              {displayLogo ? (
                 <Image
-                  src={supplier.logo}
+                  src={displayLogo}
                   alt={`${supplier.companyName} logo`}
                   fill
                   unoptimized
@@ -189,8 +212,8 @@ export default function SupplierProfilePage() {
               <Heart size={16} className={favorites.some((favorite) => getFavoriteSupplierId(favorite) === id) ? "fill-red-500 text-red-500" : ""} />
               {favorites.some((favorite) => getFavoriteSupplierId(favorite) === id) ? "Saved" : "Save"}
             </button>
-            {supplier.contactInfo?.website && (
-              <a href={supplier.contactInfo.website} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2">
+            {displayWebsite && (
+              <a href={displayWebsite} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none px-6 py-2.5 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-2">
                 Visit Website <ExternalLink size={14} />
               </a>
             )}
@@ -333,13 +356,17 @@ export default function SupplierProfilePage() {
             {/* Categories */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
               <h2 className="text-lg font-bold text-[#1b2b3a] mb-6">Categories</h2>
-              <div className="flex flex-wrap gap-2">
-                {supplier.categories?.map((cat) => (
-                  <span key={cat._id} className="px-3 py-1.5 bg-blue-50/50 border border-blue-100 text-blue-800 font-medium text-[12px] rounded-lg">
-                    {cat.name}
-                  </span>
-                ))}
-              </div>
+              {supplier.categories && supplier.categories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {supplier.categories.map((cat) => (
+                    <span key={cat._id} className="px-3 py-1.5 bg-blue-50/50 border border-blue-100 text-blue-800 font-medium text-[12px] rounded-lg">
+                      {cat.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">No categories added yet.</p>
+              )}
             </div>
 
           </div>

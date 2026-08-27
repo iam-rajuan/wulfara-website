@@ -27,6 +27,9 @@ interface SearchSupplierCard {
 
 const imageLoader = ({ src }: { src: string }) => src;
 
+const getSupplierUserId = (user: Supplier["user"]) =>
+  typeof user === "string" ? user : user?._id || "";
+
 const getFavoriteSupplierId = (favorite: Favorite) => {
   if (!favorite.supplier) {
     return null;
@@ -88,7 +91,7 @@ export default function SearchSuppliersPage() {
     () =>
       (response?.data ?? []).map((supplier: Supplier) => ({
         id: supplier._id,
-        userId: supplier.user,
+        userId: getSupplierUserId(supplier.user),
         name: supplier.companyName,
         categories: supplier.categories?.map((category) => category.name) || supplier.coreProducts || ["Supplier"],
         location: supplier.location?.formattedAddress || "Global",
