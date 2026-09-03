@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+build
+dist
+.git
+.env
+.env.*
+!.env.example
+npm-debug.log*
+coverage
+.vscode
+.idea
+.DS_Store
+*.log
+*.tsbuildinfo
+lint-report.json

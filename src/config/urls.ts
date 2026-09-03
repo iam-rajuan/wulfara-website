@@ -9,7 +9,7 @@ const dashboardOrigin = (
 ).replace(/\/+$/, "");
 
 export const API_BASE_URL = backendOrigin ? `${backendOrigin}/api/v1` : "/api/v1";
-export const SOCKET_BASE_URL = backendOrigin;
+export const SOCKET_BASE_URL = backendOrigin || undefined;
 export const DASHBOARD_SIGN_IN_URL = dashboardOrigin ? `${dashboardOrigin}/sign-in` : "/login";
 export const SUPPLIER_ONBOARDING_URL = dashboardOrigin
   ? `${dashboardOrigin}/sign-up?intent=supplier-onboarding`
