@@ -63,6 +63,7 @@ export default function DemoMap(): React.JSX.Element {
         src="/world-map.png"
         alt="Wulfara Global Network Map"
         fill
+        sizes="100vw"
         className="object-cover opacity-85 transition-transform duration-700 group-hover/map:scale-[1.01] filter grayscale brightness-95"
         priority
       />
