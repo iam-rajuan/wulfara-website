@@ -1,5 +1,5 @@
 const defaultBackendOrigin = process.env.NODE_ENV !== "production" ? "http://localhost:5000" : "";
-const defaultDashboardOrigin = process.env.NODE_ENV !== "production" ? "http://localhost:5173" : "";
+const defaultDashboardOrigin = process.env.NODE_ENV !== "production" ? "http://localhost:5174" : "";
 
 const backendOrigin = (
   process.env.NEXT_PUBLIC_BACKEND_URL || defaultBackendOrigin
